@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>田德盛 · Agent 工程作品集</title>
+<meta name="description" content="四个可运行 Agent 产品 + 一个统一评测中心：意图澄清、安全护栏、财报风险、文旅行程，全部在同一契约下跑同一套判据。">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">田德盛 <span>/ Agent 工程</span></div>
+    <div class="links">
+      <a href="#products">产品</a>
+      <a href="projects.html">详情</a>
+      <a href="#eval">评测中心</a>
+      <a href="#arch">架构对照</a>
+      <a href="eval.html">数据看板</a>
+      <a href="#contact">联系</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Portfolio · 2026</div>
+    <h1>不做演示 Demo，做<em>可被证伪</em>的 Agent 工程</h1>
+    <p class="lede">
+      四个业务 Agent（工业品销售、财报核验、文旅行程、科研检索）跑在<strong>同一套契约</strong>与
+      <strong>同一个评测中心</strong>下。每个数字都能回溯到一次可复跑的批处理，
+      每个"不可比"都被显式声明，而不是藏进平均分里。
+    </p>
+    <div class="hero-meta">
+      <span class="chip"><i class="dot"></i> 12 套件 · 7 适配器 · 13 数据集</span>
+      <span class="chip"><i class="dot"></i> Wilson 95% CI</span>
+      <span class="chip"><i class="dot warn"></i> 尾延迟不足样本时拒绝出数</span>
+      <span class="chip">GPA 3.72 / 4.0</span>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </div>
+</header>
+
+<section id="products">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>01 — 产品矩阵</h2>
+      <p>四个不同领域的 Agent，同一套工程约束</p>
+      <p class="sub">
+        它们共享的不是代码，是约束：结构化状态机、可核验证据、显式弃答、失败可归因。
+        下面每个数字都来自最近一次在该评测中心跑出的结果。
+      </p>
+    </div>
+    <div class="cards" id="productCards"></div>
+  </div>
+</section>
+
+<section id="eval">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>02 — 评测中心</h2>
+      <p>先解决"能不能比"，再谈"谁更好"</p>
+      <p class="sub">
+        多数评测的失效点不是算错，而是拿不可比的口径相减。这个中心把判断显式化：
+        套件声明适用域，适配器声明支持范围，分区套件不合并分母，
+        样本不足时直接输出 <code>INSUFFICIENT_SAMPLE_FOR_P95</code> 而不是编一个尾延迟。
+      </p>
+    </div>
+
+    <div class="arch" style="margin-bottom:26px">
+      <svg viewBox="0 0 1000 250" role="img" aria-label="评测中心架构：四个被测 Agent 经适配器层接入统一契约，由套件与判据打分，产物归档为运行记录与报告">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#9aa6b8"/>
+          </marker>
+        </defs>
+        <!-- 被测层 -->
+        <text x="14" y="24" font-size="11" fill="#8b95a3" font-family="monospace" letter-spacing="1">被测系统</text>
+        <g font-family="-apple-system,Microsoft YaHei,sans-serif" font-size="12.5">
+          <rect x="14" y="38" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef"/>
+          <text x="30" y="63" fill="#1f2937">砼智销 · 工业品销售</text>
+          <rect x="14" y="88" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef"/>
+          <text x="30" y="113" fill="#1f2937">衡鉴 · 财报风险</text>
+          <rect x="14" y="138" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef"/>
+          <text x="30" y="163" fill="#1f2937">贺兰有灵 · 文旅</text>
+          <rect x="14" y="188" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef"/>
+          <text x="30" y="213" fill="#1f2937">ResearchOS · 科研</text>
+        </g>
+
+        <!-- 适配器 -->
+        <text x="222" y="24" font-size="11" fill="#8b95a3" font-family="monospace" letter-spacing="1">适配器层</text>
+        <rect x="222" y="38" width="132" height="190" rx="9" fill="#f7f9fc" stroke="#dde4ee" stroke-dasharray="4 3"/>
+        <g font-family="monospace" font-size="10.5" fill="#5b6472">
+          <text x="236" y="66">adapter.py</text>
+          <text x="236" y="88">domains = {…}</text>
+          <text x="236" y="110">supported_suites</text>
+          <text x="236" y="132">normalize()</text>
+          <text x="236" y="154">→ Response</text>
+          <text x="236" y="182" fill="#a5580a">声明拒绝 ≠ 没跑</text>
+        </g>
+
+        <!-- 契约 -->
+        <text x="410" y="24" font-size="11" fill="#8b95a3" font-family="monospace" letter-spacing="1">统一契约</text>
+        <rect x="410" y="38" width="150" height="100" rx="9" fill="#eaeefe" stroke="#c7d2fe"/>
+        <g font-family="monospace" font-size="11.5" fill="#2f4bd8">
+          <text x="426" y="62">Case</text>
+          <text x="426" y="82">Response</text>
+          <text x="426" y="102">Verdict</text>
+          <text x="426" y="122">RunContext</text>
+        </g>
+        <g stroke="#9aa6b8" stroke-width="1.2" marker-end="url(#ar)" fill="none">
+          <path d="M164,58 H218"/>
+          <path d="M164,108 H218"/>
+          <path d="M164,158 H218"/>
+          <path d="M164,208 H218"/>
+          <path d="M354,133 H406"/>
+        </g>
+
+        <!-- 判分 -->
+        <text x="612" y="24" font-size="11" fill="#8b95a3" font-family="monospace" letter-spacing="1">判分</text>
+        <rect x="612" y="38" width="150" height="100" rx="9" fill="#fff" stroke="#e3e8ef"/>
+        <g font-family="-apple-system,Microsoft YaHei,sans-serif" font-size="11.5" fill="#1f2937">
+          <text x="628" y="62">声明式 checks</text>
+          <text x="628" y="82">或 native_verdict</text>
+          <text x="628" y="104" fill="#5b6472">复用项目原金标</text>
+          <text x="628" y="124" fill="#5b6472">不另造标签</text>
+        </g>
+        <path d="M560,88 H608" stroke="#9aa6b8" stroke-width="1.2" marker-end="url(#ar)" fill="none"/>
+
+        <!-- 产物 -->
+        <text x="816" y="24" font-size="11" fill="#8b95a3" font-family="monospace" letter-spacing="1">归档产物</text>
+        <rect x="816" y="38" width="168" height="190" rx="9" fill="#fff" stroke="#e3e8ef"/>
+        <g font-family="-apple-system,Microsoft YaHei,sans-serif" font-size="11.5" fill="#1f2937">
+          <text x="830" y="60">run.json（逐例 verdict）</text>
+          <text x="830" y="82">Wilson 95% CI</text>
+          <text x="830" y="104">bootstrap seed=2027</text>
+          <text x="830" y="126">数据源 SHA-256</text>
+          <text x="830" y="148">P50 / P95 或拒绝出数</text>
+          <text x="830" y="170">compare__*.md</text>
+          <text x="830" y="196" fill="#0f7b46">可复跑 · 可追溯</text>
+        </g>
+        <path d="M762,88 H812" stroke="#9aa6b8" stroke-width="1.2" marker-end="url(#ar)" fill="none"/>
+        <path d="M900,138 V186" stroke="#c7d2fe" stroke-width="1.2" marker-end="url(#ar)" fill="none" opacity="0"/>
+      </svg>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>套件</th><th>被测</th><th class="n">用例</th><th class="n">通过</th>
+            <th class="n">通过率</th><th class="n">均值延迟</th><th>口径</th>
+          </tr>
+        </thead>
+        <tbody id="suiteRows"></tbody>
+      </table>
+    </div>
+
+    <div class="note warn">
+      <b>三处刻意不做的判断。</b>
+      ① 分区套件 <code>intent_clarify</code> 的砼智销（100 例）与衡鉴（12 例）分母不同、题面不同，
+      不做排名、不相减；② 衡鉴在 <code>safety_guard</code> 是<strong>声明拒绝</strong>而非未运行 ——
+      它没有输入侧拦截层，实测应拦 20 条仅 3 条拒答，该套件对它不可比；
+      ③ n&lt;200 的套件一律不出 P95，宁可空着也不给一个会被误读的尾延迟。
+    </div>
+
+    <p><a href="eval.html">→ 打开完整数据看板（含每个套件的判分口径与失败样例）</a></p>
+  </div>
+</section>
+
+<section id="arch">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>03 — 架构对照</h2>
+      <p>同一批用例，四种编排框架各跑一遍</p>
+      <p class="sub">
+        原工程用 LangGraph（<code>StateGraph</code> + <code>SqliteSaver</code>）已上生产约束。
+        这里不改原架构，另建平行实现：LangChain、LlamaIndex、AutoGen，
+        用同一批用例与同一判据对照 <em>工具调用正确率</em> 与 <em>端到端延迟</em>。
+      </p>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>实现</th><th>编排范式</th><th>状态与恢复</th><th class="n">工具调用正确率</th><th class="n">P50 延迟</th><th>状态</th></tr>
+        </thead>
+        <tbody id="archRows"></tbody>
+      </table>
+    </div>
+    <div class="note">
+      <b>为什么值得做这件事。</b>
+      框架选型不该靠偏好。真正的差别在三个地方：<b>状态能不能持久化到可恢复</b>、
+      <b>失败能不能定位到具体节点</b>、<b>并发下状态会不会串</b>。
+      这三项在同一批用例上跑一遍，比任何 benchmark 榜单都更接近生产。
+    </div>
+    <p><a href="arch.html">→ 打开完整架构对照（含容器成本、依赖体积与效度边界）</a></p>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>04 — 关于</h2>
+      <p>田德盛 · 计算机学院 · 智科 251</p>
+    </div>
+    <div class="cols">
+      <div>
+        <ul class="tight">
+          <li><b>方向：</b>Agent 工程化 —— 评测体系、失败归因、状态与恢复、工具调用可靠性。</li>
+          <li><b>方法：</b>先定判据再写实现；每个结论都能回到一次可复跑的批处理。</li>
+          <li><b>边界：</b>不把代理指标写成产品结论；不确定的指标标注 <code>INCOMPLETE</code> 并说明缺什么。</li>
+        </ul>
+      </div>
+      <div>
+        <ul class="tight">
+          <li><b>GitHub：</b><a href="https://github.com/tiandesheng475-OSS" target="_blank" rel="noopener">tiandesheng475-OSS</a></li>
+          <li><b>评测中心：</b><a href="https://github.com/tiandesheng475-OSS/agent-eval-center" target="_blank" rel="noopener">agent-eval-center</a></li>
+          <li><b>数据看板：</b><a href="eval.html">本站 eval.html</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>数据生成时间 <span class="num" id="genAt">—</span> · 全部指标来自评测中心归档产物</div>
+    <div>本站为静态页，无追踪、无外部依赖</div>
+  </div>
+</footer>
+
+<script src="data/metrics.js"></script>
+<script src="data/arch.js"></script>
+<script>
+(function () {
+  var M = window.METRICS || { counts: {}, suites: [], conventions: {} };
+  var C = M.counts || {};
+
+  // ---- KPI ----
+  var kpis = [
+    { v: C.cases_in_latest_runs || 0, k: "最近一轮用例数" },
+    { v: C.suites || 0, k: "评测套件" },
+    { v: C.adapters || 0, k: "适配器（不同被测系统）" },
+    { v: C.datasets || 0, k: "登记数据集" },
+    { v: C.models || 0, k: "登记模型" }
+  ];
+  document.getElementById("kpis").innerHTML = kpis.map(function (x) {
+    return '<div class="kpi"><div class="v">' + x.v + '</div><div class="k">' + x.k + '</div></div>';
+  }).join("");
+
+  // ---- 套件表 ----
+  function pct(x) {
+    if (x === null || x === undefined) return "—";
+    return (x * 100).toFixed(1) + "%";
+  }
+  function ms(x) {
+    if (x === null || x === undefined) return "—";
+    return x >= 1000 ? (x / 1000).toFixed(2) + " s" : x.toFixed(1) + " ms";
+  }
+  function pill(s) {
+    var r = s.pass_rate;
+    var cls = r === null ? "na" : (r >= 0.98 ? "ok" : "part");
+    return '<span class="pill ' + cls + '">' + (s.comparable === false ? "仅并列" : "可比") + "</span>";
+  }
+
+  var rows = (M.suites || []).slice().sort(function (a, b) {
+    return (b.n || 0) - (a.n || 0);
+  });
+  document.getElementById("suiteRows").innerHTML = rows.map(function (s) {
+    return "<tr>" +
+      "<td><code>" + s.suite + "</code></td>" +
+      "<td>" + (s.product || s.adapter) + "<div class='muted'>" + (s.domain || "") + "</div></td>" +
+      '<td class="n">' + (s.n === null ? "—" : s.n) + "</td>" +
+      '<td class="n">' + (s.passed === null ? "—" : s.passed) + "</td>" +
+      '<td class="n">' + pct(s.pass_rate) + "</td>" +
+      '<td class="n">' + ms(s.mean_ms) + "</td>" +
+      "<td>" + pill(s) + "<div class='muted'>" + (s.note || "") + "</div></td>" +
+      "</tr>";
+  }).join("");
+
+  // ---- 产品卡 ----
+  var find = function (id) {
+    return (M.suites || []).filter(function (s) { return s.suite === id; })[0] || {};
+  };
+  var findA = function (id, ad) {
+    return (M.suites || []).filter(function (s) {
+      return s.suite === id && s.adapter === ad;
+    })[0] || {};
+  };
+  var safety_guard_helan = findA("safety_guard", "helan");
+  var cement = find("industrial_sales_core");
+  var safety = find("safety_guard");
+  var helan = find("helan_e2e_40");
+  var hg = find("finrisk_guard_16");
+  var hd = find("finrisk_dialogue_12");
+  var hm = find("finrisk_memory_12");
+  var ic = find("intent_clarify");
+  var ro = find("researchos_governance");
+
+  var products = [
+    {
+      tag: "工业品销售", tagCls: "", name: "砼智销 · 销售 Agent",
+      repo: "cement-sales-agent",
+      desc: "面向建材销售的对话式 Agent：意图澄清、报价边界、安全护栏。价格类合法咨询曾被误判为常识问答而 503，改为商务咨询独立通路后修复。",
+      metrics: [
+        ["业务套件通过率", pct(cement.pass_rate), cement.passed + "/" + cement.n],
+        ["安全套件", pct(safety.pass_rate), "ALLOW 误拦 0/20"],
+        ["意图澄清", pct(ic.pass_rate), "100 例 · 分区"]
+      ]
+    },
+    {
+      tag: "财报核验", tagCls: "", name: "衡鉴 · 风险线索 Agent",
+      repo: "hengjian-finrisk-agent",
+      desc: "从财报原文抽取风险线索并给出可核验引用。判分复用项目原生金标脚本（native_verdict），不另造标签。",
+      metrics: [
+        ["财报风险", pct(hg.pass_rate), hg.passed + "/" + hg.n],
+        ["多轮对话", pct(hd.pass_rate), hd.passed + "/" + hd.n],
+        ["长期记忆", pct(hm.pass_rate), hm.passed + "/" + hm.n]
+      ]
+    },
+    {
+      tag: "文旅行程", tagCls: "", name: "贺兰有灵 · 行程 Agent",
+      repo: "helan-lingyou-agent",
+      desc: "把「贺兰山一日游」这类模糊需求变成可执行行程：地点、动线、预算与讲解内容必须相互一致，端到端判分。",
+      metrics: [
+        ["端到端通过率", pct(helan.pass_rate), helan.passed + "/" + helan.n],
+        ["安全套件", pct(safety_guard_helan.pass_rate), "BLOCK 组 0.35"],
+        ["平均延迟", ms(helan.mean_ms), "含地图与预算核验"]
+      ]
+    },
+    {
+      tag: "科研检索", tagCls: "gray", name: "ResearchOS · 科研 Agent",
+      repo: "researchos-agent",
+      desc: "检索—抽取—核验三段的科研助手，治理套件检查引用是否可核验、结论是否越界。",
+      metrics: [
+        ["治理套件", pct(ro.pass_rate), ro.passed + "/" + ro.n],
+        ["判分方式", "可核验性", "引用回溯语料"],
+        ["状态", "单套件", "未覆盖全链路"]
+      ]
+    }
+  ];
+
+  document.getElementById("productCards").innerHTML = products.map(function (p) {
+    var gh = "https://github.com/tiandesheng475-OSS/" + p.repo;
+    return '<div class="card">' +
+      '<div class="tagrow"><span class="tag ' + p.tagCls + '">' + p.tag + "</span></div>" +
+      "<h3><a href='" + gh + "' target='_blank' rel='noopener'>" + p.name + "</a></h3>" +
+      "<p class='desc'>" + p.desc + "</p>" +
+      "<div class='metrics'>" + p.metrics.map(function (m) {
+        return "<div class='mrow'><span>" + m[0] +
+          (m[2] ? "<em class='msub'>" + m[2] + "</em>" : "") +
+          "</span><b>" + m[1] + "</b></div>";
+      }).join("") + "</div>" +
+      "<a class='go' href='" + gh + "' target='_blank' rel='noopener'>查看仓库 →</a>" +
+      "</div>";
+  }).join("");
+
+  // ---- 架构对照（数据来自 archcompare 实测） ----
+  (function () {
+    var A = window.ARCH || { ok: false };
+    var tb = document.getElementById("archRows");
+    if (!tb) return;
+    if (!A.ok) {
+      tb.innerHTML = "<tr><td colspan='6' style='color:var(--faint)'>尚未运行架构对照</td></tr>";
+      return;
+    }
+    var rows = (A.items || []).map(function (x) {
+      if (!x.available) {
+        return "<tr><td><b>" + x.label + "</b></td><td>—</td><td>—</td>" +
+          "<td class='n'>—</td><td class='n'>—</td>" +
+          "<td><span class='pill na'>" + (x.reason || "未运行") + "</span></td></tr>";
+      }
+      var same = x.business_same
+        ? "<span class='pill' style='background:var(--ok-soft);color:var(--ok)'>业务一致</span>"
+        : "<span class='pill' style='background:var(--stop-soft);color:var(--stop)'>有差异</span>";
+      var ms = (x.paired_overhead_ms === null || x.paired_overhead_ms === undefined)
+        ? "—" : (x.paired_overhead_ms >= 0 ? "+" : "") + x.paired_overhead_ms.toFixed(1) + " ms";
+      return "<tr><td><b>" + x.label + "</b> <small style='color:var(--faint)'>v" +
+        (x.version || "—") + "</small></td>" +
+        "<td>" + (x.container || "—") + "</td>" +
+        "<td>" + (x.state_serializable ? "可序列化" : "无内置状态") +
+        " · " + (x.resume === "verified" ? "续跑已验证" : (x.resume === "unsupported" ? "无续跑" : "续跑未验证")) + "</td>" +
+        "<td class='n'>" + ((x.action_match || 0) * 100).toFixed(1) + "%</td>" +
+        "<td class='n'>" + ms + "</td>" +
+        "<td>" + same + "</td></tr>";
+    }).join("");
+    tb.innerHTML = rows;
+  })();
+
+  var g = document.getElementById("genAt");
+  if (g) g.textContent = (M.generated_at || "—").replace("T", " ").slice(0, 19);
+})();
+</script>
+
+</body>
+</html>

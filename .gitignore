@@ -1,0 +1,17 @@
+# 构建与本地临时产物
+.shot_*.png
+*.log
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+.venv/
+venv/
+node_modules/
+
+# 不发布个人或凭据类文件
+.env
+.env.*
+*.key
+*.pem
+id_rsa*

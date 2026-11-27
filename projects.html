@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>产品详情 · 田德盛 Agent 工程</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .tabs { display:flex; gap:6px; flex-wrap:wrap; border-bottom:1px solid var(--line); margin-bottom:34px; }
+  .tabs button {
+    appearance:none; background:none; border:0; border-bottom:2px solid transparent;
+    padding:12px 14px; font-size:14.5px; font-family:inherit; color:var(--muted);
+    cursor:pointer; font-weight:500;
+  }
+  .tabs button[aria-selected="true"] { color:var(--ink); border-bottom-color:var(--accent); font-weight:600; }
+  .tabs button:hover { color:var(--ink); }
+  .pane[hidden] { display:none; }
+  .kv { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:22px 0 6px; }
+  .kv .box { border:1px solid var(--line); border-radius:10px; padding:14px 16px; background:#fff; }
+  .kv .box .k { font-size:12px; color:var(--faint); letter-spacing:.03em; text-transform:uppercase; }
+  .kv .box .v { font-family:var(--mono); font-size:20px; font-weight:600; margin-top:4px; }
+  .kv .box .s { font-size:12.5px; color:var(--muted); margin-top:4px; }
+  h2.big { font-size:26px; letter-spacing:-.02em; margin:0 0 10px; }
+  h3.sub { font-size:15px; margin:34px 0 12px; letter-spacing:.01em; }
+  .steps { counter-reset:s; list-style:none; padding:0; margin:0; }
+  .steps li { position:relative; padding:0 0 16px 38px; border-left:1px solid var(--line); margin-left:11px; }
+  .steps li:last-child { border-left-color:transparent; }
+  .steps li::before {
+    counter-increment:s; content:counter(s);
+    position:absolute; left:-11px; top:0; width:22px; height:22px; border-radius:50%;
+    background:#fff; border:1px solid var(--line); color:var(--muted);
+    font-family:var(--mono); font-size:11.5px; display:flex; align-items:center; justify-content:center;
+  }
+  .steps b { display:block; font-size:14.5px; margin-bottom:2px; }
+  .steps span { font-size:13.8px; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><a href="index.html" style="color:inherit">田德盛</a> <span>/ 产品详情</span></div>
+    <div class="links">
+      <a href="index.html">作品集</a>
+      <a href="eval.html">数据看板</a>
+      <a href="#contact">联系</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" style="padding:56px 0 34px;border-bottom:0">
+  <div class="wrap">
+    <div class="eyebrow">Products</div>
+    <h1 style="font-size:clamp(26px,3.4vw,36px)">四个产品，一套工程约束</h1>
+    <p class="lede">
+      下面每个产品都标注了三件事：<strong>它解决什么真问题</strong>、
+      <strong>哪个决定是关键的</strong>、<strong>哪里还没做好</strong>。第三项是刻意的——
+      没有边界的项目介绍，读起来都像宣传。
+    </p>
+  </div>
+</header>
+
+<section style="padding-top:0;border-bottom:0">
+  <div class="wrap">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-t="cement">砼智销 · 工业品销售</button>
+      <button role="tab" aria-selected="false" data-t="hengjian">衡鉴 · 财报风险</button>
+      <button role="tab" aria-selected="false" data-t="helan">贺兰有灵 · 文旅行程</button>
+      <button role="tab" aria-selected="false" data-t="researchos">ResearchOS · 科研检索</button>
+    </div>
+
+    <!-- ============ 砼智销 ============ -->
+    <div class="pane" id="p-cement">
+      <h2 class="big">砼智销：把销售对话变成可审计的状态机</h2>
+      <p class="lede" style="font-size:16px">
+        建材销售的咨询高度口语化：「这个标号多少钱」「上次说的那个还能便宜吗」。
+        难点不在答得漂亮，而在<strong>不该答的时候闭嘴</strong>——报价、账期、区域政策都有边界。
+      </p>
+
+      <div class="kv">
+        <div class="box"><div class="k">业务套件</div><div class="v" id="m-cement-biz">—</div><div class="s">industrial_sales_core · 100 例</div></div>
+        <div class="box"><div class="k">安全套件</div><div class="v" id="m-cement-safe">—</div><div class="s">ALLOW 误拦 0/20 · BLOCK 20/20</div></div>
+        <div class="box"><div class="k">意图澄清</div><div class="v" id="m-cement-clar">—</div><div class="s">分区套件，不与财务域相减</div></div>
+        <div class="box"><div class="k">LangGraph 改造</div><div class="v">+11.8%</div><div class="s">单轮延迟劣化（阈值 ≤20%）</div></div>
+      </div>
+
+      <h3 class="sub">关键决定</h3>
+      <ol class="steps">
+        <li><b>先把「该不该答」做成独立门禁，再谈答案质量</b>
+          <span>安全判定与应答生成解耦：门禁拒绝时不进入生成，避免模型用更漂亮的措辞绕过约束。</span></li>
+        <li><b>商务咨询走独立通路，不落进「常识问答」</b>
+          <span>价格类合法咨询曾被判为 general knowledge 而返回 503。根因是商务意图被同时打上
+          <code>asks_general_knowledge=true</code>；修法是让商务意图短路该标志，而不是放宽门禁。</span></li>
+        <li><b>checkpoint 只在有价值的地方落盘</b>
+          <span>StateGraph + SqliteSaver 上改写入策略：WAL + <code>synchronous=NORMAL</code>，
+          只保留崩溃续跑断点、终态与 <code>interrupt</code> 暂停点，跳过无恢复价值的 input 检查点；
+          同时保留 <code>LG_FULL_CHECKPOINT=1</code> 审计开关，随时可回到全量。</span></li>
+      </ol>
+
+      <h3 class="sub">验证</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>项目</th><th class="n">结果</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>语义等价</td><td class="n">row_diffs = 0</td><td>100 例逐字段比对，改造未改变输出</td></tr>
+            <tr><td>单轮延迟劣化</td><td class="n">+11.8% / +14.3%</td><td>两次独立测量，均低于 20% 阈值</td></tr>
+            <tr><td>P95 尾延迟</td><td class="n"><span class="pill part">超阈</span></td><td>+22.5% / +25.3%，如实保留，不写成"达标"</td></tr>
+            <tr><td>正式产品验收</td><td class="n"><span class="pill na">INCOMPLETE</span></td><td>尾延迟未达标，需更优调度或接受权衡</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note warn">
+        <b>没做好的地方。</b>意图澄清套件里 100 例通过 96 例，但其中 33 例是<strong>靠弃答通过的</strong>——
+        该澄清的题不澄清、直接说"不确定"，也能满足"不要瞎答"的判据。
+        我加了一个非必需的诊断项 <code>answerable_not_abstained</code> 把这类情况显式暴露出来，
+        但没把它变成硬性 fail，因为"该不该答"本身需要人判断。这是当前口径最薄弱的一环。
+      </div>
+
+      <p><a href="https://github.com/tiandesheng475-OSS/cement-sales-agent" target="_blank" rel="noopener">→ 源码与复现步骤</a></p>
+    </div>
+
+    <!-- ============ 衡鉴 ============ -->
+    <div class="pane" id="p-hengjian" hidden>
+      <h2 class="big">衡鉴：不重写金标，只复用项目的原生判分</h2>
+      <p class="lede" style="font-size:16px">
+        财报风险线索抽取的难点是<strong>证据</strong>：结论必须能指回原文某一段。
+        接入评测中心时最大的诱惑是"为统一而重造一套标签"，我没有这么做。
+      </p>
+
+      <div class="kv">
+        <div class="box"><div class="k">财报风险</div><div class="v" id="m-hj-guard">—</div><div class="s">finrisk_guard_16</div></div>
+        <div class="box"><div class="k">多轮对话</div><div class="v" id="m-hj-dialog">—</div><div class="s">finrisk_dialogue_12</div></div>
+        <div class="box"><div class="k">长期记忆</div><div class="v" id="m-hj-mem">—</div><div class="s">finrisk_memory_12</div></div>
+        <div class="box"><div class="k">对照组</div><div class="v" id="m-hj-noexp">—</div><div class="s">禁止上下文展开</div></div>
+      </div>
+
+      <h3 class="sub">关键决定</h3>
+      <ol class="steps">
+        <li><b>用 <code>native_verdict</code> 复用项目自己的金标脚本</b>
+          <span>适配器直接调用项目内的 <code>run_case</code>，判分逻辑不进评测中心。
+          好处是零漂移：项目改判据，中心跟着变；代价是中心的判分能力被项目实现绑住。</span></li>
+        <li><b>拒绝接入不适用自己的套件</b>
+          <span><code>safety_guard</code> 测输入侧拦截，而衡鉴没有这一层——实测应拦 20 条只拒答 3 条。
+          适配器显式声明不支持，而不是跑一遍拿 15% 的分数。这是"声明拒绝≠没跑"的由来。</span></li>
+        <li><b>记忆能力拆成两组对照</b>
+          <span>同一批用例跑"允许展开上下文"与"禁止展开"两遍，差值才是记忆本身的贡献，
+          而不是把上下文窗口的能力算成记忆。</span></li>
+      </ol>
+
+      <div class="note warn">
+        <b>没做好的地方。</b>对照组 <span id="m-hj-gap">—</span> 的差距说明一件事：
+        当前记忆实现强依赖上下文字符串拼接，一旦禁止展开就掉分。
+        这不是判分问题，是长期记忆该做成结构化存储而我没做完。
+      </div>
+
+      <p><a href="https://github.com/tiandesheng475-OSS/hengjian-finrisk-agent" target="_blank" rel="noopener">→ 源码与复现步骤</a></p>
+    </div>
+
+    <!-- ============ 贺兰 ============ -->
+    <div class="pane" id="p-helan" hidden>
+      <h2 class="big">贺兰有灵：一次行程必须自洽</h2>
+      <p class="lede" style="font-size:16px">
+        "贺兰山一日游"到可执行行程，中间要同时满足：地点真实、动线可达、预算不超、讲解内容不跑题。
+        任一项崩掉，整份行程就是废纸——所以判分是<strong>端到端一致性</strong>，不是单点问答准确率。
+      </p>
+
+      <div class="kv">
+        <div class="box"><div class="k">端到端</div><div class="v" id="m-hl-e2e">—</div><div class="s">40 例交付物判分</div></div>
+        <div class="box"><div class="k">平均延迟</div><div class="v" id="m-hl-lat">—</div><div class="s">含地图与预算核验</div></div>
+        <div class="box"><div class="k">安全套件</div><div class="v" id="m-hl-safe">—</div><div class="s">BLOCK 组 0.35，最大短板</div></div>
+        <div class="box"><div class="k">意图澄清</div><div class="v">不纳入</div><div class="s">无独立澄清金标，不自造标签</div></div>
+      </div>
+
+      <h3 class="sub">关键决定</h3>
+      <ol class="steps">
+        <li><b>判分对象是交付物，不是回答</b>
+          <span>检查项落在行程 JSON 上：地点是否存在于白名单、相邻两天是否可达、预算求和是否超限、
+          讲解文本是否引用了对应景点。任何一项不满足即整例失败。</span></li>
+        <li><b>宁可声明"不适用"，也不编一套标签</b>
+          <span>贺兰没有独立的意图/澄清金标。为了凑跨项目对比而自造标签，会让所有对比数字失去意义，
+          所以它在这两个套件里是缺席的，且缺席原因写在适配器里。</span></li>
+        <li><b>安全组暴露真实短板而不是藏起来</b>
+          <span>BLOCK 组 0.35、PII 组 0 分——说明拦截层基本没有。我没有把这个套件从页面上删掉，
+          它恰好证明评测中心有用：它测出了我自己没意识到的洞。</span></li>
+      </ol>
+
+      <div class="note warn">
+        <b>没做好的地方。</b>安全拦截是硬缺陷，不是"待优化"。当前只有关键词级兜底，
+        对改写、拼音、分字符注入几乎无抵抗力。正确做法是加一层独立分类器 + 规则复核，
+        这部分我还没做，因此贺兰在安全维度上不该被当作可交付状态。
+      </div>
+
+      <p><a href="https://github.com/tiandesheng475-OSS/helan-lingyou-agent" target="_blank" rel="noopener">→ 源码与复现步骤</a></p>
+    </div>
+
+    <!-- ============ ResearchOS ============ -->
+    <div class="pane" id="p-researchos" hidden>
+      <h2 class="big">ResearchOS：结论必须指得回原文</h2>
+      <p class="lede" style="font-size:16px">
+        科研检索最容易犯的错是"读起来很像真的"。治理套件不测流畅度，只测两件事：
+        <strong>引用是否真实存在</strong>、<strong>结论是否越出材料范围</strong>。
+      </p>
+
+      <div class="kv">
+        <div class="box"><div class="k">治理套件</div><div class="v" id="m-ro-gov">—</div><div class="s">researchos_governance</div></div>
+        <div class="box"><div class="k">判分方式</div><div class="v" style="font-size:15px">可核验性</div><div class="s">引用可回溯，越界即失败</div></div>
+        <div class="box"><div class="k">接入深度</div><div class="v" style="font-size:15px">单套件</div><div class="s">未覆盖全链路</div></div>
+      </div>
+
+      <h3 class="sub">关键决定</h3>
+      <ol class="steps">
+        <li><b>把"引用可核验"做成可执行检查</b>
+          <span>抽取结论中每条引用，回到语料核对是否命中；命中率不足或出现语料外引用即判失败。
+          这比让另一个模型打分更稳，也更便宜。</span></li>
+        <li><b>治理优先于召回</b>
+          <span>召回少一条只是漏，编造一条是错。所以判据对"编造"零容忍，对"漏"留有余量。</span></li>
+      </ol>
+
+      <div class="note">
+        <b>现状。</b>仅接入治理一个套件，通过的用例数不多，因此不出 P95、也不做跨项目比较。
+        这个产品在作品集里的角色是"证明我能把治理类判据写成可执行检查"，不是"已交付的科研平台"。
+      </div>
+
+      <p><a href="https://github.com/tiandesheng475-OSS/researchos-agent" target="_blank" rel="noopener">→ 源码与复现步骤</a></p>
+    </div>
+  </div>
+</section>
+
+<section id="contact" style="border-top:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-head"><h2>联系</h2><p>田德盛 · 计算机学院 · 智科 251 · GPA 3.72 / 4.0</p></div>
+    <ul class="tight">
+      <li><b>GitHub：</b><a href="https://github.com/tiandesheng475-OSS" target="_blank" rel="noopener">tiandesheng475-OSS</a></li>
+      <li><b>评测中心仓库：</b><a href="https://github.com/tiandesheng475-OSS/agent-eval-center" target="_blank" rel="noopener">agent-eval-center</a></li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>指标生成于 <span class="num" id="genAt">—</span></div>
+    <div><a href="index.html">← 返回作品集</a></div>
+  </div>
+</footer>
+
+<script src="data/metrics.js"></script>
+<script>
+(function () {
+  var M = window.METRICS || { suites: [] };
+  function get(suite, adapter) {
+    return (M.suites || []).filter(function (s) {
+      return s.suite === suite && (!adapter || s.adapter === adapter);
+    })[0] || {};
+  }
+  function pct(x) { return x === null || x === undefined ? "—" : (x * 100).toFixed(1) + "%"; }
+  function pair(s) { return s.passed === undefined ? "—" : s.passed + "/" + s.n; }
+  function ms(x) {
+    if (x === null || x === undefined) return "—";
+    return x >= 1000 ? (x / 1000).toFixed(2) + " s" : x.toFixed(1) + " ms";
+  }
+  function set(id, v) { var e = document.getElementById(id); if (e) e.textContent = v; }
+
+  var cementBiz = get("industrial_sales_core", "cement_sales");
+  var cementSafe = get("safety_guard", "cement_sales");
+  var cementClar = get("intent_clarify", "cement_sales");
+  set("m-cement-biz", pct(cementBiz.pass_rate) + " · " + pair(cementBiz));
+  set("m-cement-safe", pct(cementSafe.pass_rate));
+  set("m-cement-clar", pct(cementClar.pass_rate));
+
+  var hjG = get("finrisk_guard_16", "hengjian");
+  var hjD = get("finrisk_dialogue_12", "hengjian");
+  var hjM = get("finrisk_memory_12", "hengjian");
+  var hjN = get("finrisk_memory_12_noexpand", "hengjian");
+  set("m-hj-guard", pct(hjG.pass_rate));
+  set("m-hj-dialog", pct(hjD.pass_rate));
+  set("m-hj-mem", pct(hjM.pass_rate));
+  set("m-hj-noexp", pct(hjN.pass_rate));
+  if (hjM.pass_rate != null && hjN.pass_rate != null) {
+    set("m-hj-gap", (hjM.pass_rate * 100).toFixed(1) + "% → " + (hjN.pass_rate * 100).toFixed(1) + "%");
+  }
+
+  var hl = get("helan_e2e_40", "helan");
+  var hlS = get("safety_guard", "helan");
+  set("m-hl-e2e", pct(hl.pass_rate) + " · " + pair(hl));
+  set("m-hl-lat", ms(hl.mean_ms));
+  set("m-hl-safe", pct(hlS.pass_rate));
+
+  var ro = get("researchos_governance");
+  set("m-ro-gov", pct(ro.pass_rate));
+
+  var g = document.getElementById("genAt");
+  if (g) g.textContent = (M.generated_at || "—").replace("T", " ").slice(0, 19);
+
+  // tabs + hash 深链接
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".tabs button"));
+  function activate(key, push) {
+    tabs.forEach(function (b) {
+      var on = b.getAttribute("data-t") === key;
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    ["cement", "hengjian", "helan", "researchos"].forEach(function (k) {
+      var p = document.getElementById("p-" + k);
+      if (p) p.hidden = (k !== key);
+    });
+    if (push && history.replaceState) history.replaceState(null, "", "#" + key);
+  }
+  tabs.forEach(function (b) {
+    b.addEventListener("click", function () { activate(b.getAttribute("data-t"), true); });
+  });
+  var h = (location.hash || "").replace("#", "");
+  if (h && document.getElementById("p-" + h)) activate(h, false);
+})();
+</script>
+
+</body>
+</html>
