@@ -4,7 +4,7 @@
 
 > **English**: A portfolio of four production-oriented agents (industrial sales, financial-report risk, travel itinerary, research retrieval) evaluated by a single, provenance-tracked evaluation center. Every number on the site is generated from archived run artifacts, not typed by hand.
 
-在线站点：<https://tiandesheng475-OSS.github.io/portfolio/>
+在线站点：<https://tian77-jq.github.io/portfolio/>
 
 ---
 
@@ -107,4 +107,4 @@ python tools/build_site_data.py --center "D:/Agent评测与数据中心" --out .
 ## 联系
 
 田德盛 · 计算机学院 · 智科 251 · GPA 3.72 / 4.0
-GitHub: [@tiandesheng475-OSS](https://github.com/tiandesheng475-OSS)
+GitHub: [@tian77-jq](https://github.com/tian77-jq)
