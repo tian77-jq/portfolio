@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ResearchOS · 科研证据检索 Agent</title>
-<meta name="description" content="把一个问题变成一张可核验的证据网络：检索、定位原文、拒绝越界、输出带口径的治理报告。">
+<meta name="description" content="混合检索 + 证据门禁 + 事实账本：每个结论都能回到原文，模型输出不直接当结论。数学建模竞赛知识库支撑，队长、区级三等奖。">
 <meta name="color-scheme" content="dark">
 <script src="data/metrics.js"></script>
 <style>
 :root{
-  --bg:#06110e;--bg2:#0a1a16;--ink:#e6f3ee;--muted:#93aaa3;--dim:#5f766f;
-  --line:rgba(230,243,238,.12);--line2:rgba(230,243,238,.06);--panel:rgba(255,255,255,.035);
-  --teal:#2fd4b4;--teal2:#9ff0dc;--soft:rgba(47,212,180,.14);
-  --gold:#e8c47a;--gold-soft:rgba(232,196,122,.14);
+  --bg:#06100f;--bg2:#0b1a18;--ink:#e8f1ee;--muted:#a4bcb5;--dim:#5f7a73;
+  --line:rgba(232,241,238,.12);--line2:rgba(232,241,238,.06);--panel:rgba(255,255,255,.035);
+  --teal:#2fbf9f;--teal2:#7fe3cc;--teal-soft:rgba(47,191,159,.14);
+  --lime:#b7e36a;--lime-soft:rgba(183,227,106,.12);
   --bad:#ef7c8a;--bad-soft:rgba(239,124,138,.15);
   --ok:#8fd3b6;--ok-soft:rgba(143,211,182,.14);
   --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
@@ -24,90 +24,88 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;overflow-x:clip;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 button{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:6px}
+img{max-width:100%;display:block}
+:focus-visible{outline:2px solid var(--teal2);outline-offset:3px;border-radius:6px}
 .wrap{width:min(1120px,100% - 48px);margin-inline:auto}
 @media (max-width:600px){.wrap{width:calc(100% - 32px)}}
 
 /* 导航 */
-.nav{position:fixed;inset:0 0 auto 0;z-index:50;height:64px;display:flex;align-items:center;background:rgba(6,17,14,.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line2)}
+.nav{position:fixed;inset:0 0 auto 0;z-index:50;height:64px;display:flex;align-items:center;background:rgba(6,16,15,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line2)}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--teal)}
-.brand-name{font-family:var(--serif);font-size:20px;color:var(--ink);letter-spacing:.06em;line-height:1}
+.brand-name{font-family:var(--serif);font-size:20px;color:var(--ink);letter-spacing:.14em;line-height:1}
 .brand-sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-top:5px}
 .nav nav{display:flex;gap:4px}
 .nav nav a{padding:8px 14px;border-radius:8px;font-size:14px;color:var(--muted);text-decoration:none;transition:color .2s,background .2s;white-space:nowrap}
 .nav nav a:hover{color:var(--ink);background:rgba(255,255,255,.05)}
 
 /* 按钮 */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:8px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s,border-color .2s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s,border-color .2s}
 .btn:active{transform:translateY(1px)}
-.btn-primary{color:#04201a;background:linear-gradient(135deg,#9ff0dc,#2fd4b4 55%,#17a088);box-shadow:0 8px 28px -10px rgba(47,212,180,.6),inset 0 1px 0 rgba(255,255,255,.4)}
-.btn-primary:hover{box-shadow:0 12px 34px -10px rgba(47,212,180,.85)}
+.btn-primary{color:#04140f;background:linear-gradient(135deg,#b9f2e3,#2fbf9f 55%,#1d9a7d);box-shadow:0 8px 28px -10px rgba(47,191,159,.7),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn-primary:hover{box-shadow:0 12px 34px -10px rgba(47,191,159,.9)}
 .btn-ghost{color:var(--ink);border-color:var(--line);background:rgba(255,255,255,.03)}
-.btn-ghost:hover{border-color:rgba(47,212,180,.5);background:rgba(47,212,180,.06)}
-.btn-sm{padding:8px 14px;font-size:13px;border-radius:8px}
+.btn-ghost:hover{border-color:rgba(127,227,204,.6);background:rgba(47,191,159,.08)}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:999px}
 .btn[disabled]{opacity:.55;cursor:default;transform:none}
 
 /* Hero */
-.hero{position:relative;padding:150px 0 90px;min-height:92vh;display:flex;align-items:center;overflow:hidden;
-  background:radial-gradient(900px 520px at 85% -10%,rgba(47,212,180,.16),transparent 60%),radial-gradient(700px 420px at -5% 60%,rgba(232,196,122,.07),transparent 60%)}
+.hero{position:relative;padding:150px 0 150px;min-height:92vh;display:flex;align-items:center;overflow:hidden;
+  background:radial-gradient(900px 500px at 80% -10%,rgba(47,191,159,.2),transparent 60%),radial-gradient(700px 420px at 5% 25%,rgba(183,227,106,.08),transparent 60%),linear-gradient(180deg,#06100f 0%,#0b1a18 60%,#0e1f1c 100%)}
 #bg-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.hero-grid{position:relative;display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
-.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.06em;color:var(--teal2);margin:0 0 18px}
-.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px rgba(47,212,180,.18);animation:pulse 2.8s ease-in-out infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(47,212,180,.18)}50%{box-shadow:0 0 0 10px rgba(47,212,180,.04)}}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--teal),transparent);opacity:.5}
+.hero-grid{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.08em;color:var(--teal2);margin:0 0 18px}
+.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px rgba(47,191,159,.18);animation:pulse 2.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(47,191,159,.18)}50%{box-shadow:0 0 0 10px rgba(47,191,159,.04)}}
 h1{font-family:var(--serif);font-weight:600;font-size:clamp(32px,4.4vw,54px);line-height:1.25;margin:0 0 22px}
-h1 em{font-style:normal;background:linear-gradient(92deg,#d8fff3,#2fd4b4 50%,#e8c47a);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1 em{font-style:normal;background:linear-gradient(92deg,#d8f7ee,#7fe3cc 45%,#b7e36a);-webkit-background-clip:text;background-clip:text;color:transparent}
 .lead{font-size:17px;color:var(--muted);max-width:520px;margin:0 0 32px}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px}
-.hero-tags{list-style:none;display:flex;flex-wrap:wrap;gap:8px 20px;margin:0;padding:0;font-size:13px;color:var(--dim)}
-.hero-tags li::before{content:"";display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:50%;background:var(--teal);vertical-align:middle;box-shadow:0 0 8px rgba(47,212,180,.8)}
+.hero-tags{list-style:none;display:flex;flex-wrap:wrap;gap:8px 20px;margin:0 0 22px;padding:0;font-size:13px;color:var(--dim)}
+.hero-tags li::before{content:"◈";display:inline-block;margin-right:8px;color:var(--teal2);font-size:10px;vertical-align:middle}
+.contest{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 14px;border-radius:12px;border:1px solid rgba(47,191,159,.35);background:var(--teal-soft);font-size:13px;color:#cfeee5;line-height:1.5}
+.contest b{color:var(--teal2);font-weight:700}
+.contest span{color:var(--muted)}
 
-/* Hero 右侧：证据摘要卡 */
-.brief{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));border:1px solid var(--line);border-radius:14px;padding:24px 26px;box-shadow:0 30px 70px -30px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.08);animation:float 8s ease-in-out infinite}
-.brief::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;border-radius:14px 14px 0 0;background:linear-gradient(90deg,var(--teal),var(--gold),transparent)}
-.brief-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:12px;margin-bottom:14px;border-bottom:1px dashed var(--line)}
-.brief-head strong{font-size:15px;letter-spacing:.06em}
-.brief-head span{font-family:var(--mono);font-size:12px;color:var(--dim)}
-.claims{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.claims li{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:9px 12px;border-radius:8px;font-size:14px;animation:row 6s ease-in-out infinite}
-.claims li:nth-child(1){animation-delay:0s}.claims li:nth-child(2){animation-delay:1.3s}.claims li:nth-child(3){animation-delay:2.6s}
-.claims .c{color:#d4e8e1}
-.claims .e{font-family:var(--mono);font-size:12px;color:var(--teal2);white-space:nowrap}
-@keyframes row{0%,12%,100%{background:transparent}18%,70%{background:rgba(47,212,180,.1)}}
-.brief-foot{margin-top:14px;padding:10px 12px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid var(--line2);font-size:12px;color:var(--muted);line-height:1.8}
-.brief-foot b{color:var(--teal2);font-family:var(--mono);font-weight:600}
-.brief-foot .w{color:var(--gold)}
+/* Hero 右侧：事实账本卡 */
+.ledger{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));border:1px solid var(--line);border-radius:18px;padding:22px 24px 20px;box-shadow:0 30px 70px -30px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.08);animation:float 8s ease-in-out infinite}
+.ledger::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;border-radius:18px 18px 0 0;background:linear-gradient(90deg,var(--teal),var(--lime),transparent)}
+.ledger-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:12px;margin-bottom:14px;border-bottom:1px dashed var(--line)}
+.ledger-head strong{font-family:var(--serif);font-size:17px;letter-spacing:.06em}
+.ledger-head span{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.claims{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.claims li{position:relative;padding:12px 14px 12px 40px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);opacity:0;transform:translateY(6px);animation:in .5s ease-out forwards}
+.claims li:nth-child(1){animation-delay:.1s}.claims li:nth-child(2){animation-delay:.8s}.claims li:nth-child(3){animation-delay:1.5s}
+.claims li::before{content:"";position:absolute;left:14px;top:16px;width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(143,211,182,.15)}
+.claims li.warn::before{background:var(--lime);box-shadow:0 0 0 4px rgba(183,227,106,.15)}
+.claims li.bad::before{background:var(--bad);box-shadow:0 0 0 4px rgba(239,124,138,.15)}
+.claims strong{display:block;font-size:14px;margin-bottom:3px}
+.claims p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.7}
+.claims .cite{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:11.5px;color:var(--teal2);padding:2px 8px;border-radius:6px;background:rgba(47,191,159,.1);border:1px solid rgba(47,191,159,.25)}
+.ledger-foot{margin-top:14px;padding:10px 12px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--line2);font-size:12px;color:var(--muted);line-height:1.8}
+.ledger-foot b{color:var(--teal2);font-family:var(--mono);font-weight:600}
+@keyframes in{to{opacity:1;transform:none}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
 /* 区块 */
 .section{padding:96px 0}
 .sec-head{margin-bottom:44px}
 .sec-head h2{font-family:var(--serif);font-size:clamp(26px,3vw,36px);font-weight:600;margin:0 0 12px}
-.sec-head p{color:var(--muted);margin:0;max-width:660px}
-.sec-head code{font-family:var(--mono);font-size:.9em;color:var(--teal2);background:var(--soft);padding:1px 6px;border-radius:4px}
+.sec-head p{color:var(--muted);margin:0;max-width:700px}
+.sec-head code{font-family:var(--mono);font-size:.9em;color:var(--teal2);background:var(--teal-soft);padding:1px 6px;border-radius:4px}
 
 /* 证据网络示意 */
-.net-wrap{position:relative;border:1px solid var(--line);border-radius:16px;background:radial-gradient(600px 300px at 50% 50%,rgba(47,212,180,.08),transparent 70%),var(--panel);overflow:hidden}
-.net{display:block;width:100%;height:auto}
-.net .edge{fill:none;stroke:rgba(47,212,180,.35);stroke-width:1.2;stroke-dasharray:4 6;animation:flow 2.4s linear infinite}
-.net .edge.gold{stroke:rgba(232,196,122,.4);stroke-dasharray:2 7;animation-duration:3s}
-@keyframes flow{to{stroke-dashoffset:-20}}
-.net .node circle{fill:#0a1a16;stroke:var(--teal);stroke-width:1.4}
-.net .node.core circle{fill:var(--soft);stroke:var(--teal2);stroke-width:2}
-.net .node.gold circle{stroke:var(--gold)}
-.net .node text{fill:var(--ink);font-family:var(--sans);font-size:12px}
-.net .node .sub{fill:var(--dim);font-family:var(--mono);font-size:10px}
-.net .pulse{fill:var(--teal2);animation:blink 2s ease-in-out infinite}
-@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
-.net-legend{display:flex;flex-wrap:wrap;gap:10px 22px;padding:12px 18px;border-top:1px solid var(--line2);font-size:12px;color:var(--dim)}
-.net-legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:middle;border:1.5px solid var(--teal)}
-.net-legend .g::before{border-color:var(--gold)}
-.net-legend .c::before{background:var(--soft);border-color:var(--teal2)}
+.net{position:relative;display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.net::before{content:"";position:absolute;left:6%;right:6%;top:34px;height:1px;background:repeating-linear-gradient(90deg,var(--teal) 0 6px,transparent 6px 12px);opacity:.5}
+.net li{padding:20px 22px 18px;position:relative}
+.net .node{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--bg);border:1.5px solid var(--teal);color:var(--teal2);font-family:var(--mono);font-size:12px;margin-bottom:12px;position:relative;z-index:1}
+.net strong{display:block;font-size:15px;margin-bottom:4px}
+.net span{font-size:13px;color:var(--dim);line-height:1.7}
 
 /* 流程 */
 .flow{display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;position:relative}
-.flow::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--teal),var(--gold),transparent)}
+.flow::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--lime),var(--teal),transparent)}
 .flow li{padding:20px 22px;border-right:1px solid var(--line)}
 .flow li:last-child{border-right:0}
 .flow .n{font-family:var(--mono);color:var(--teal2);font-size:13px;letter-spacing:.1em;display:block;margin-bottom:6px}
@@ -117,16 +115,34 @@ h1 em{font-style:normal;background:linear-gradient(92deg,#d8fff3,#2fd4b4 50%,#e8
 /* 功能 */
 .features{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
 .feature{position:relative;display:block;border-radius:16px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));overflow:hidden;text-decoration:none;transition:transform .35s,border-color .35s,box-shadow .35s}
-.feature::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 220px at 100% 0%,rgba(47,212,180,.16),transparent 60%);opacity:0;transition:opacity .35s;pointer-events:none}
-.feature:hover{transform:translateY(-4px);border-color:rgba(47,212,180,.45);box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+.feature::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 220px at 100% 0%,rgba(47,191,159,.2),transparent 60%);opacity:0;transition:opacity .35s;pointer-events:none}
+.feature:hover{transform:translateY(-4px);border-color:rgba(127,227,204,.45);box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
 .feature:hover::before{opacity:1}
 .feature-in{display:block;padding:28px}
-.feature-icon{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;color:var(--teal2);background:var(--soft);border:1px solid rgba(47,212,180,.3);margin-bottom:18px}
+.feature-icon{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;color:var(--teal2);background:var(--teal-soft);border:1px solid rgba(47,191,159,.3);margin-bottom:18px}
 .feature h3{margin:0 0 8px;font-size:19px;font-weight:600}
 .feature p{margin:0 0 18px;color:var(--muted);font-size:14.5px}
 .feature .try{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--teal2)}
 .feature .try::after{content:"→";transition:transform .3s}
 .feature:hover .try::after{transform:translateX(4px)}
+
+/* 技术难点 */
+.tech{display:grid;gap:16px}
+.tech-item{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:22px 24px}
+.tech-item h3{margin:0 0 10px;font-size:17px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tech-item h3 .tag{font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:999px;border:1px solid rgba(47,191,159,.4);color:var(--teal2);background:var(--teal-soft);font-weight:600}
+.tech-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tech-col{padding:12px 14px;border-radius:10px;font-size:13.5px;line-height:1.75}
+.tech-col.done{background:rgba(143,211,182,.06);border:1px solid rgba(143,211,182,.22)}
+.tech-col.todo{background:rgba(239,124,138,.06);border:1px solid rgba(239,124,138,.22)}
+.tech-col .h{display:block;font-size:12px;letter-spacing:.08em;margin-bottom:6px;font-weight:700}
+.tech-col.done .h{color:var(--ok)}
+.tech-col.todo .h{color:var(--bad)}
+.tech-col ul{margin:0;padding-left:16px}
+.tech-col li{margin-bottom:4px}
+.tech-col li::marker{color:var(--dim)}
+.tech-col code{font-family:var(--mono);font-size:.9em;color:var(--teal2)}
+.tech-src{margin-top:10px;font-size:12px;color:var(--dim);font-family:var(--mono)}
 
 /* 指标 */
 .metric-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
@@ -135,34 +151,37 @@ h1 em{font-style:normal;background:linear-gradient(92deg,#d8fff3,#2fd4b4 50%,#e8
 .metric .k{font-size:13px;color:var(--dim);margin:0 0 8px}
 .metric .v{font-family:var(--serif);font-size:clamp(26px,3vw,36px);color:var(--ink);margin:0;line-height:1.1;font-variant-numeric:tabular-nums}
 .metric .v small{font-size:14px;color:var(--muted);font-family:var(--sans);margin-left:4px}
+.metric .v.low{color:var(--bad)}
 .table-wrap{border:1px solid var(--line);border-radius:14px;overflow-x:auto;background:var(--panel)}
-table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
-th,td{padding:14px 18px;text-align:left;border-bottom:1px solid var(--line2);white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:680px}
+th,td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line2);white-space:nowrap;vertical-align:top}
 th{font-size:12px;letter-spacing:.06em;color:var(--dim);font-weight:600;background:rgba(255,255,255,.02)}
 tr:last-child td{border-bottom:0}
 td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .dash{color:var(--dim)}
+.lowv{color:var(--bad);font-weight:700}
+.sub{display:block;margin-top:4px;font-size:11.5px;color:var(--dim);font-family:var(--mono);white-space:normal;line-height:1.6}
 .note{font-size:13px;color:var(--dim);margin:14px 0 0}
 
 /* 页脚 */
 footer{border-top:1px solid var(--line);padding:40px 0 48px;background:rgba(0,0,0,.2)}
 .foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px}
 .foot-links{display:flex;gap:10px;flex-wrap:wrap}
-.foot-links a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:8px;border:1px solid var(--line);font-size:14px;text-decoration:none;color:var(--muted);transition:.2s}
-.foot-links a:hover{color:var(--ink);border-color:rgba(47,212,180,.5)}
+.foot-links a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1px solid var(--line);font-size:14px;text-decoration:none;color:var(--muted);transition:.2s}
+.foot-links a:hover{color:var(--ink);border-color:rgba(127,227,204,.5)}
 .foot p{margin:0;font-size:13px;color:var(--dim)}
 
 /* 弹窗 */
 dialog{border:0;padding:0;background:transparent;color:var(--ink);width:min(960px,calc(100% - 32px));max-height:calc(100vh - 48px);margin:auto}
-dialog::backdrop{background:rgba(2,8,6,.74);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+dialog::backdrop{background:rgba(2,8,7,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
 @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
-.modal-box{background:#0a1a16;border:1px solid var(--line);border-radius:16px;box-shadow:0 40px 100px -40px rgba(0,0,0,.9),0 0 0 1px rgba(47,212,180,.08);display:flex;flex-direction:column;max-height:calc(100vh - 48px);overflow:hidden}
+.modal-box{background:#0b1a18;border:1px solid var(--line);border-radius:18px;box-shadow:0 40px 100px -40px rgba(0,0,0,.9),0 0 0 1px rgba(47,191,159,.1);display:flex;flex-direction:column;max-height:calc(100vh - 48px);overflow:hidden}
 .modal-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 24px;border-bottom:1px solid var(--line)}
 .modal-head h3{margin:0;font-family:var(--serif);font-size:20px;font-weight:600}
 .modal-head .sub{font-size:13px;color:var(--dim);margin-top:2px}
-.modal-close{flex:none;width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer;display:grid;place-items:center;font-size:18px;line-height:1;transition:.2s}
-.modal-close:hover{border-color:rgba(47,212,180,.5);color:var(--teal2)}
+.modal-close{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer;display:grid;place-items:center;font-size:18px;line-height:1;transition:.2s}
+.modal-close:hover{border-color:rgba(127,227,204,.5);color:var(--teal2)}
 .modal-body{padding:24px;overflow:auto}
 .modal-foot{padding:12px 24px;border-top:1px solid var(--line2);font-size:12px;color:var(--dim)}
 
@@ -173,77 +192,54 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
 .status{font-size:13px;color:var(--muted)}
 .demo-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13px;color:var(--muted);cursor:pointer;transition:.2s}
-.chip:hover{border-color:rgba(47,212,180,.5);color:var(--ink)}
-.chip[aria-pressed="true"]{background:var(--soft);border-color:rgba(47,212,180,.6);color:var(--teal2)}
-@keyframes in{to{opacity:1;transform:none}}
+.chip{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13px;color:var(--muted);cursor:pointer;transition:.2s}
+.chip:hover{border-color:rgba(127,227,204,.5);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--teal-soft);border-color:rgba(127,227,204,.6);color:var(--teal2)}
+.doc{font-family:var(--serif);font-size:14.5px;line-height:2;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.25);color:#dfeee9}
+.doc mark{background:rgba(47,191,159,.3);color:#eafff8;padding:0 2px;border-radius:2px}
+.doc mark.bad{background:rgba(239,124,138,.3);color:#ffe0e4}
+@keyframes appear{to{opacity:1;transform:none}}
+.hit{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.hit li{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);padding:12px 14px;opacity:0;transform:translateY(8px);animation:appear .45s ease-out forwards}
+.hit .src{display:inline-block;font-family:var(--mono);font-size:11px;padding:1px 8px;border-radius:999px;margin-bottom:4px}
+.src-b{color:#d8f7ee;background:rgba(79,143,214,.18);border:1px solid rgba(79,143,214,.4)}
+.src-v{color:#e6f8c8;background:var(--lime-soft);border:1px solid rgba(183,227,106,.35)}
+.src-m{color:#c9f3e8;background:var(--teal-soft);border:1px solid rgba(47,191,159,.4)}
+.hit strong{display:block;font-size:14px;margin-bottom:3px}
+.hit p{margin:0;font-size:13px;color:var(--muted);line-height:1.7}
+.hit .term{font-family:var(--mono);font-size:12px;color:var(--teal2)}
+.hit .miss{font-family:var(--mono);font-size:12px;color:var(--bad)}
 .placeholder{color:var(--dim);font-size:13px;padding:14px;border:1px dashed var(--line);border-radius:10px;text-align:center;list-style:none}
 
-/* 演示 1：证据网络 */
-.graph{position:relative;min-height:300px}
-.graph svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
-.graph .edge{fill:none;stroke:rgba(47,212,180,.4);stroke-width:1.3;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1s ease-out forwards}
-.graph .edge.gold{stroke:rgba(232,196,122,.55)}
-@keyframes draw{to{stroke-dashoffset:0}}
-.gnode{position:absolute;width:46%;padding:9px 11px;border-radius:9px;border:1px solid var(--line);background:#0a1a16;font-size:12.5px;line-height:1.4;opacity:0;transform:scale(.9);animation:in .4s ease-out forwards;cursor:pointer;text-align:left}
-.gnode.core{left:27%;top:40%;width:46%;border-color:var(--teal2);background:var(--soft);color:var(--ink);font-weight:600;font-size:13px}
-.gnode.left{left:0}.gnode.right{left:54%}
-.gnode.gold{border-color:rgba(232,196,122,.55)}
-.gnode small{display:block;color:var(--dim);font-family:var(--mono);font-size:10.5px;margin-top:2px}
-.gnode.is-active{box-shadow:0 0 0 2px rgba(47,212,180,.4)}
-.gnode .tag{display:inline-block;margin-top:4px;font-size:10.5px;color:var(--gold)}
-.papers{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.papers li{padding:10px 12px;border-radius:8px;border:1px solid var(--line2);background:rgba(255,255,255,.03);font-size:13px;line-height:1.5}
-.papers strong{display:block;margin-bottom:2px}
-.papers span{color:var(--dim);font-size:12px;font-family:var(--mono)}
-.papers .rel{color:var(--teal2);font-family:var(--sans)}
-
-/* 演示 2：引用核验 */
-.claims-list{display:grid;gap:10px}
-.claim{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);transition:.2s}
-.claim.is-active{border-color:rgba(47,212,180,.5);background:rgba(47,212,180,.06)}
-.claim .t{font-size:14px;line-height:1.55}
-.claim .m{font-size:12px;color:var(--dim);margin-top:3px}
-.claim .btn{flex:none}
-.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
-.badge-ok{color:#c6efdd;background:var(--ok-soft);border-color:rgba(143,211,182,.35)}
-.badge-bad{color:#ffc4cc;background:var(--bad-soft);border-color:rgba(239,124,138,.4)}
-.src-pane{margin-top:16px;border:1px solid var(--line);border-radius:12px;background:#071511;overflow:hidden;animation:in .35s ease-out}
-.src-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 16px;font-size:12px;color:var(--dim);border-bottom:1px solid var(--line2);background:rgba(255,255,255,.02)}
-.src-body{padding:16px 18px;font-size:14.5px;line-height:1.9;color:#cfe3dc}
-.src-body mark{padding:1px 3px;border-radius:3px;color:#dffff5;background:rgba(47,212,180,.22);box-shadow:inset 0 -1.5px 0 var(--teal)}
-.src-body mark.bad{color:#ffd6db;background:rgba(239,124,138,.25);box-shadow:inset 0 -1.5px 0 var(--bad)}
-.src-result{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line2);font-size:13px;color:var(--muted)}
+/* 演示 2：引用核对 */
+.check{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.check li{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);padding:12px 14px;opacity:0;animation:appear .4s ease-out forwards}
+.check .claim{font-size:14px;margin-bottom:6px}
+.check .quote{font-family:var(--serif);font-size:13px;color:#dfeee9;background:rgba(0,0,0,.25);border-left:3px solid var(--teal);padding:8px 10px;border-radius:0 8px 8px 0;line-height:1.8}
+.check .verdict{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-family:var(--mono);font-size:12px;padding:2px 10px;border-radius:999px}
+.v-ok{color:#c6efdd;background:var(--ok-soft);border:1px solid rgba(143,211,182,.35)}
+.v-bad{color:#ffc4cc;background:var(--bad-soft);border:1px solid rgba(239,124,138,.4)}
+.check li.mismatch{border-color:rgba(239,124,138,.45)}
 
 /* 演示 3：越界拒绝 */
-.questions{display:grid;gap:8px}
-.question{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer;font-size:14px;line-height:1.5;transition:.2s}
-.question:hover{border-color:rgba(47,212,180,.5)}
-.question[aria-pressed="true"]{border-color:rgba(47,212,180,.6);background:var(--soft)}
-.refuse{margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;animation:in .35s ease-out}
-.refuse-head{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:14px;font-weight:700;border-bottom:1px solid var(--line2)}
-.refuse.out .refuse-head{color:#ffc4cc;background:var(--bad-soft)}
-.refuse.in .refuse-head{color:#c6efdd;background:var(--ok-soft)}
-.refuse-body{padding:14px 16px;font-size:13.5px;color:#d2e6e0;line-height:1.8}
-.refuse-body .q{display:block;padding:8px 12px;margin-bottom:10px;border-left:2px solid var(--gold);background:rgba(232,196,122,.06);border-radius:0 6px 6px 0;color:var(--ink)}
-.refuse-body .scope{display:block;margin-top:8px;padding:8px 12px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid var(--line2);color:var(--muted)}
-.refuse-body .ok-msg{display:block;margin-top:10px;padding:10px 12px;border-radius:6px;background:rgba(143,211,182,.08);border:1px solid rgba(143,211,182,.25);color:#d7efdf}
+.reject{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.reject li{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13.5px;opacity:0;animation:appear .4s ease-out forwards}
+.reject .why{display:block;color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.6}
+.tag-ok{color:#c6efdd;background:var(--ok-soft);border:1px solid rgba(143,211,182,.35)}
+.tag-bad{color:#ffc4cc;background:var(--bad-soft);border:1px solid rgba(239,124,138,.4)}
+.reject .tag{font-family:var(--mono);font-size:11.5px;padding:2px 9px;border-radius:999px;white-space:nowrap;align-self:start}
+.reject li.hit{border-color:rgba(239,124,138,.45)}
 
 /* 演示 4：治理报告 */
-.steps{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:10px}
-.steps li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--dim);opacity:.5;transition:.3s}
-.steps li .box{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--teal2);flex:none}
-.steps li.done{opacity:1;color:var(--ink)}
-.steps li.done .box{border-color:var(--teal);background:var(--soft)}
-.steps li.run{opacity:1;color:var(--teal2)}
-.steps li.run .box{border-color:var(--teal);animation:pulse 1s ease-in-out infinite}
-.rep-out{animation:in .35s ease-out}
-.rep-summary{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 12px;font-size:13px;color:var(--muted)}
-.rep-summary b{color:var(--teal2);font-family:var(--mono)}
-pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--line);background:#05110d;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#cfe3dc;white-space:pre-wrap;word-break:break-word;max-height:320px;overflow:auto}
+.paper{font-size:13.5px;line-height:1.9}
+.paper .row{display:grid;grid-template-columns:120px 1fr;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line2);opacity:0;animation:appear .35s ease-out forwards}
+.paper .k{color:var(--dim);font-size:12px}
+.paper .v{color:#dfeee9}
+.paper .v code{font-family:var(--mono);font-size:.9em;color:var(--teal2)}
+.seal{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:8px 14px;border-radius:10px;border:1px dashed rgba(47,191,159,.5);color:var(--teal2);font-family:var(--mono);font-size:12px}
 
 /* 响应式 */
-@media (max-width:960px){.hero{min-height:0;padding-top:124px}.hero-grid{grid-template-columns:1fr;gap:44px}.metric-cards{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:960px){.hero{min-height:0;padding-top:124px;padding-bottom:130px}.hero-grid{grid-template-columns:1fr;gap:44px}.metric-cards{grid-template-columns:repeat(2,1fr)}.net{grid-template-columns:repeat(2,1fr)}.net::before{display:none}.tech-grid{grid-template-columns:1fr}}
 @media (max-width:720px){
   .features{grid-template-columns:1fr}
   .flow{grid-template-columns:repeat(2,1fr)}
@@ -254,17 +250,13 @@ pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--lin
   .section{padding:64px 0}
   .nav nav a{padding:8px 10px}
   .brand-sub{display:none}
-  .claim{flex-direction:column;align-items:flex-start}
-  .gnode{font-size:11.5px}
+  .paper .row{grid-template-columns:1fr}
 }
 @media (max-width:480px){.hero-cta .btn{flex:1}}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-  .net .edge{animation:none}
-  .graph .edge{stroke-dashoffset:0;animation:none}
-  .gnode,.papers li{opacity:1;transform:none;animation:none}
-  .claims li{animation:none;background:transparent}
+  .claims li,.hit li,.check li,.reject li,.paper .row{opacity:1;transform:none;animation:none}
 }
 </style>
 </head>
@@ -273,14 +265,16 @@ pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--lin
 <header class="nav">
   <div class="wrap">
     <a class="brand" href="#top" aria-label="ResearchOS · 回到顶部">
-      <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true"><rect x="2" y="2" width="32" height="32" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="11" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="25" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="26" cy="25" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 13.5l-4.5 8.5M20 13.5l4.5 8.5M13 25h10" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+      <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="18" r="3" fill="currentColor"/><circle cx="27" cy="10" r="2" fill="currentColor"/><circle cx="8" cy="24" r="2" fill="currentColor"/><path d="M18 18L27 10M18 18L8 24M18 18l9 9" stroke="currentColor" stroke-width="1.3"/></svg>
       <span class="brand-name">ResearchOS</span>
       <span class="brand-sub">Evidence Agent</span>
     </a>
     <nav aria-label="页面导航">
+      <a href="#net">证据网络</a>
       <a href="#features">功能</a>
+      <a href="#tech">技术难点</a>
       <a href="#metrics">指标</a>
-      <a href="https://github.com/tian77-jq/researchos-agent" target="_blank" rel="noopener">源码</a>
+      <a href="https://github.com/tian77-jq/researchos" target="_blank" rel="noopener">源码</a>
     </nav>
   </div>
 </header>
@@ -290,75 +284,57 @@ pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--lin
     <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="dot"></span>科研证据检索 Agent · 文献 / 报告 / 政策文本</p>
-        <h1>每一个结论，<br><em>都挂在一张可核验的证据网络上。</em></h1>
-        <p class="lead">ResearchOS 把一个问题展开成证据网络：检索关联文献、把结论定位到原文片段、对超出资料范围的问题明确拒绝，最后输出带口径说明的治理报告。</p>
+        <p class="eyebrow"><span class="dot"></span>科研证据检索 Agent · 混合检索 + 证据门禁</p>
+        <h1>每个结论都要回到原文，<br><em>模型说的不算。</em></h1>
+        <p class="lead">ResearchOS 用 BM25 与向量双路召回证据，过证据门禁后写入事实账本；引用可复算核对，越界问题直接拒绝，最后交出一份带口径说明的治理报告。模型输出只是候选，裁决由可复算的检查给出。</p>
         <div class="hero-cta">
           <a class="btn btn-primary" href="#features">试用功能演示</a>
           <a class="btn btn-ghost" href="#metrics">查看核验指标</a>
         </div>
         <ul class="hero-tags">
-          <li>结论逐条绑定原文片段</li>
-          <li>超出资料范围直接拒绝</li>
-          <li>报告附口径与覆盖说明</li>
+          <li>术语级精确匹配必须命中原文</li>
+          <li>引用可复算核对</li>
+          <li>越界即拒绝</li>
         </ul>
+        <div class="contest"><b>2026 全国大学生数学建模竞赛</b><span>队长 · 区级三等奖 · 知识库支撑</span><span>其他奖项 —</span></div>
       </div>
 
       <div class="hero-visual">
-        <div class="brief" aria-label="证据摘要示意（演示数据）">
-          <div class="brief-head"><strong>证据摘要 · 检索任务 #042</strong><span>12 docs · 7 claims</span></div>
-          <ul class="claims">
-            <li><span class="c">RAG 引用忠实度随检索片段数增加先升后降</span><span class="e">3 篇支持 · 1 篇部分</span></li>
-            <li><span class="c">自检式校验可降低无依据生成比例</span><span class="e">2 篇支持</span></li>
-            <li><span class="c">证据覆盖不足时应输出「无法判定」</span><span class="e">治理口径 · 已标注</span></li>
-          </ul>
-          <div class="brief-foot">已核验引用 <b>7 / 7</b> · 口径冲突 <b class="w">1</b> 处已标注 · 越界问题拒绝 <b>2</b> 条 · 拒绝理由均可追溯</div>
+        <div class="ledger" aria-label="事实账本示意（演示数据）">
+          <div class="ledger-head"><strong>事实账本 · 证据摘要</strong><span>LEDGER · 3 条</span></div>
+          <ol class="claims">
+            <li><strong>灰色预测 GM(1,1) 适用于小样本、指数趋势</strong><p>原文：GM(1,1) 对单调指数序列拟合较好，样本量 n ≥ 4 即可建模。</p><span class="cite">来源 [3] §2.1 · 第 3 页 · 核对一致</span></li>
+            <li class="warn"><strong>熵权法对指标离散度敏感</strong><p>原文：熵权法依据指标离散程度赋权，离散度越大权重越高。</p><span class="cite">来源 [7] §4.2 · 第 11 页 · 一致；适用条件未在原文给出</span></li>
+            <li class="bad"><strong>「熵权法比 CRITIC 更客观」— 已拒绝</strong><p>理由：属方法优劣评价，证据库中没有对照实验，无法引用。</p><span class="cite">拒绝记录 · 越界类型：评价/排名</span></li>
+          </ol>
+          <div class="ledger-foot">已入库 <b>2</b> 条 · 核对一致 <b>2</b> · 不一致 <b>0</b> · 拒绝越界 <b>1</b> 条（演示数据）</div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section" style="padding-top:0">
+  <section class="section" id="net" style="padding-top:0">
     <div class="wrap">
-      <header class="sec-head"><h2>证据网络示意</h2><p>核心问题向外连接文献与结论节点；金色的边表示口径冲突或证据不足，需要人工复核。</p></header>
-      <div class="net-wrap">
-        <svg class="net" viewBox="0 0 1000 380" role="img" aria-labelledby="net-title net-desc">
-          <title id="net-title">证据网络示意图</title>
-          <desc id="net-desc">中心问题节点连接若干文献节点，再连接到三条结论节点，其中一条为金色边表示证据不足。</desc>
-          <path class="edge" d="M500 190 C 420 120, 320 90, 240 80"/>
-          <path class="edge" d="M500 190 C 400 190, 300 190, 200 190"/>
-          <path class="edge" d="M500 190 C 420 260, 320 290, 240 300"/>
-          <path class="edge" d="M500 190 C 580 120, 680 90, 760 80"/>
-          <path class="edge" d="M500 190 C 600 190, 700 190, 800 190"/>
-          <path class="edge gold" d="M500 190 C 580 260, 680 290, 760 300"/>
-          <path class="edge" d="M200 190 C 260 150, 340 120, 420 100"/>
-          <path class="edge gold" d="M200 190 C 260 230, 340 260, 420 280"/>
-          <path class="edge" d="M800 190 C 740 150, 660 120, 580 100"/>
-          <path class="edge" d="M800 190 C 740 230, 660 260, 580 280"/>
-          <g class="node core" transform="translate(500 190)"><circle r="26"/><circle class="pulse" r="4"/><text text-anchor="middle" y="-34">核心问题</text><text text-anchor="middle" class="sub" y="-20">RAG 引用忠实度</text></g>
-          <g class="node" transform="translate(240 80)"><circle r="11"/><text y="4" x="20">Lewis et al. 2020</text><text class="sub" x="20" y="18">NeurIPS · 被引 18k</text></g>
-          <g class="node" transform="translate(200 190)"><circle r="11"/><text y="4" x="20">Gao et al. 2023</text><text class="sub" x="20" y="18">Retrieval surveys</text></g>
-          <g class="node" transform="translate(240 300)"><circle r="11"/><text y="4" x="20">Liu et al. 2023</text><text class="sub" x="20" y="18">Lost in the middle</text></g>
-          <g class="node" transform="translate(760 80)"><circle r="11"/><text y="4" x="-20" text-anchor="end">Self-RAG 2023</text><text class="sub" x="-20" y="18" text-anchor="end">反思片段</text></g>
-          <g class="node" transform="translate(800 190)"><circle r="11"/><text y="4" x="-20" text-anchor="end">CRAG 2024</text><text class="sub" x="-20" y="18" text-anchor="end">校正检索</text></g>
-          <g class="node gold" transform="translate(760 300)"><circle r="11"/><text y="4" x="-20" text-anchor="end">内部评估报告</text><text class="sub" x="-20" y="18" text-anchor="end">样本量不足</text></g>
-          <g class="node" transform="translate(420 100)"><circle r="9"/><text y="4" x="16">结论 A · 支持</text></g>
-          <g class="node gold" transform="translate(420 280)"><circle r="9"/><text y="4" x="16">结论 B · 待复核</text></g>
-          <g class="node" transform="translate(580 100)"><circle r="9"/><text y="4" x="-16" text-anchor="end">结论 C · 支持</text></g>
-          <g class="node" transform="translate(580 280)"><circle r="9"/><text y="4" x="-16" text-anchor="end">结论 D · 拒绝作答</text></g>
-        </svg>
-        <div class="net-legend"><span>文献 / 评估节点</span><span class="g">口径冲突或证据不足</span><span class="c">核心检索问题</span></div>
-      </div>
+      <header class="sec-head">
+        <h2>一条结论的证据路径</h2>
+        <p>双路召回 → 门禁 → 账本 → 报告。任何一环不通过，结论不进账本。</p>
+      </header>
+      <ol class="net" aria-label="证据路径四步">
+        <li><span class="node">01</span><strong>双路召回</strong><span>BM25 词面 + 向量语义，各自出候选</span></li>
+        <li><span class="node">02</span><strong>证据门禁</strong><span>术语必须命中原文；无来源即丢弃</span></li>
+        <li><span class="node">03</span><strong>事实账本</strong><span>结论与引用绑定，可复算核对</span></li>
+        <li><span class="node">04</span><strong>治理报告</strong><span>摘要、口径、拒绝项与未决事项</span></li>
+      </ol>
     </div>
   </section>
 
   <section class="section" style="padding-top:24px">
     <div class="wrap">
-      <ol class="flow" aria-label="证据检索流程">
-        <li><span class="n">01</span><strong>展开问题</strong><span>拆成可检索的子问题与口径</span></li>
-        <li><span class="n">02</span><strong>检索建网</strong><span>文献、报告、政策文本连成证据网络</span></li>
-        <li><span class="n">03</span><strong>定位核验</strong><span>结论回到原文片段，逐字比对</span></li>
-        <li><span class="n">04</span><strong>拒绝与报告</strong><span>越界即拒，输出带口径的治理报告</span></li>
+      <ol class="flow" aria-label="工作流程">
+        <li><span class="n">STEP 1</span><strong>提问</strong><span>研究问题或方法选型</span></li>
+        <li><span class="n">STEP 2</span><strong>检索</strong><span>词面召回 + 向量召回，合并去重</span></li>
+        <li><span class="n">STEP 3</span><strong>裁决</strong><span>可复算检查给出一致 / 不一致 / 越界</span></li>
+        <li><span class="n">STEP 4</span><strong>交付</strong><span>证据摘要 + 口径说明 + 拒绝记录</span></li>
       </ol>
     </div>
   </section>
@@ -367,22 +343,22 @@ pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--lin
     <div class="wrap">
       <header class="sec-head">
         <h2>功能直达</h2>
-        <p>点开卡片即可上手，不用配置。演示数据为模拟语境，文献与结论仅用于展示交互方式。</p>
+        <p>点开卡片即可上手，不用配置。演示文本为模拟知识库语境，来源与页码为示意。</p>
       </header>
       <div class="features">
-        <a class="feature" href="#features" data-demo="graph" aria-haspopup="dialog">
+        <a class="feature" href="#features" data-demo="search" aria-haspopup="dialog">
           <span class="feature-in">
-            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M10.8 6.8L6.2 16M13.2 6.8l4.6 9.2M7.2 18h9.6"/></svg></span>
+            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/><path d="M8 11h6M11 8v6"/></svg></span>
             <h3>证据网络检索</h3>
-            <p>点一个主题，看它如何展开成节点，并把关联文献挂到对应结论上。</p>
+            <p>点一个主题，看词面与向量两路各召回什么，合并后哪些被门禁拦下。</p>
             <span class="try">点击体验</span>
           </span>
         </a>
         <a class="feature" href="#features" data-demo="cite" aria-haspopup="dialog">
           <span class="feature-in">
-            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg></span>
+            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/><path d="M9 8h6M9 12h4"/></svg></span>
             <h3>引用可核验</h3>
-            <p>每条结论点「定位原文」，直接看片段、页码与逐字比对结果。</p>
+            <p>点一条结论，定位到原文片段，标出一致或不一致。</p>
             <span class="try">点击体验</span>
           </span>
         </a>
@@ -390,18 +366,75 @@ pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--lin
           <span class="feature-in">
             <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M5.5 5.5l13 13"/></svg></span>
             <h3>越界拒绝</h3>
-            <p>点一个超出资料范围的问题，看它为什么拒绝、以及会把问题引导到哪里。</p>
+            <p>点几个超出资料范围的问题，看拒绝理由怎么写。</p>
             <span class="try">点击体验</span>
           </span>
         </a>
         <a class="feature" href="#features" data-demo="report" aria-haspopup="dialog">
           <span class="feature-in">
-            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>
+            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13H6z"/><path d="M15 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></span>
             <h3>治理报告</h3>
-            <p>一键生成证据摘要与口径说明，Markdown 复制即可交付。</p>
+            <p>点「生成报告」，输出可交付的证据摘要、口径说明与拒绝项。</p>
             <span class="try">点击体验</span>
           </span>
         </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="tech" style="padding-top:32px">
+    <div class="wrap">
+      <header class="sec-head">
+        <h2>技术难点：平台研发，不靠模型「说对」</h2>
+        <p>本区写机制与边界；没有归档实测的数字一律标 —。</p>
+      </header>
+      <div class="tech">
+        <article class="tech-item">
+          <h3>混合检索：词面保术语，向量保语义 <span class="tag">双路召回</span></h3>
+          <div class="tech-grid">
+            <div class="tech-col done"><span class="h">已做到</span><ul>
+              <li>BM25 / 词面召回与向量召回并行，各自出候选后合并去重</li>
+              <li>术语级精确匹配作为硬条件：模型名称、指标全称、经典方法代号必须命中原文，否则候选不进账本</li>
+              <li>词面路负责「名字不能错」，向量路负责「换一种说法也找得到」</li>
+            </ul></div>
+            <div class="tech-col todo"><span class="h">边界</span><ul>
+              <li>两路召回率 / MRR 等检索指标：—（未在 D 盘归档，不在本页给数）</li>
+              <li>向量路对缩写与别名的覆盖依赖词表维护；词表外的新术语只能靠词面路兜底</li>
+            </ul></div>
+          </div>
+          <div class="tech-src">来源：项目设计口径（实测数字 —）</div>
+        </article>
+
+        <article class="tech-item">
+          <h3>证据门禁 + 事实账本：模型输出不直接当结论 <span class="tag">门禁</span></h3>
+          <div class="tech-grid">
+            <div class="tech-col done"><span class="h">已做到</span><ul>
+              <li>模型产出只是候选；进入账本前必须带来源定位（文档、章节、页码）</li>
+              <li>一致性由可复算检查裁决：结论中的数值、术语与原文比对，不一致即标红</li>
+              <li>越界问题（评价、预测、资料外事实）直接拒绝，拒绝理由写入记录</li>
+            </ul></div>
+            <div class="tech-col todo"><span class="h">边界</span><ul>
+              <li>检查覆盖「可复算」的部分：数字、名称、方向词；语义改写程度仍需人工复核</li>
+              <li>researchos_governance 套件 n=12，全绿只说明这 12 条通过，不构成泛化结论；P95：样本不足，<code>INSUFFICIENT_SAMPLE_FOR_P95</code></li>
+            </ul></div>
+          </div>
+          <div class="tech-src">来源：data/metrics.js · researchos_governance（12/12，mean 273.243 ms）· conventions.p95_gate</div>
+        </article>
+
+        <article class="tech-item">
+          <h3>数学建模竞赛知识库支撑 <span class="tag">背书</span></h3>
+          <div class="tech-grid">
+            <div class="tech-col done"><span class="h">有据</span><ul>
+              <li>2026 全国大学生数学建模竞赛：<b>队长，区级三等奖</b>（简历 v3.2 附录：竞赛知识库 — 数学建模选题与证据溯源）</li>
+              <li>知识库在选题阶段支撑「方法是否适用、依据在哪一页」的核验，而非替写论文</li>
+            </ul></div>
+            <div class="tech-col todo"><span class="h">边界</span><ul>
+              <li>竞赛成绩来自简历附录自述，无证书扫描件归档：—</li>
+              <li>奖项等级按简历原文写「区级三等奖」，不扩展为其他级别或名称</li>
+            </ul></div>
+          </div>
+          <div class="tech-src">来源：D:/简历/versions/田德盛-个人简历-v3.2_20261127.docx · 附录</div>
+        </article>
       </div>
     </div>
   </section>
@@ -410,12 +443,12 @@ pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--lin
     <div class="wrap">
       <header class="sec-head">
         <h2>核验指标</h2>
-        <p>读取 <code>window.METRICS.suites</code>（<code>data/metrics.js</code>），仅统计 <code>adapter === "researchos"</code> 的套件；字段缺失时显示 —，不编造。</p>
+        <p>读取 <code>window.METRICS.suites</code>（<code>data/metrics.js</code>），仅统计 <code>adapter === "researchos"</code> 的套件。缺失显示 —。</p>
       </header>
       <div class="metric-cards" id="metric-cards" aria-live="polite"></div>
       <div class="table-wrap">
         <table id="metric-table">
-          <thead><tr><th scope="col">套件</th><th scope="col">产品</th><th scope="col">通过率</th><th scope="col">通过 ÷ 用例</th><th scope="col">平均耗时</th></tr></thead>
+          <thead><tr><th scope="col">套件</th><th scope="col">产品</th><th scope="col">领域</th><th scope="col">通过率</th><th scope="col">通过 ÷ 用例</th><th scope="col">平均耗时</th><th scope="col">P95</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -426,9 +459,9 @@ pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--lin
 
 <footer>
   <div class="wrap foot">
-    <p>ResearchOS · 科研证据检索 Agent · 纯静态单文件展示页</p>
+    <p>ResearchOS · 科研证据检索 Agent · 每个结论都能回到原文 · 纯静态单文件展示页</p>
     <div class="foot-links">
-      <a href="https://github.com/tian77-jq/researchos-agent" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg>源码入口</a>
+      <a href="https://github.com/tian77-jq/researchos" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg>源码入口</a>
       <a href="https://tian77-jq.github.io/portfolio/" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg>返回作品站</a>
     </div>
   </div>
@@ -438,10 +471,10 @@ pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--lin
   <div class="modal-box">
     <div class="modal-head">
       <div><h3 id="demo-title"></h3><div class="sub" id="demo-sub"></div></div>
-      <button type="button" class="modal-close" id="demo-close" aria-label="关闭演示">✕</button>
+      <button type="button" class="modal-close" id="demo-close" aria-label="关闭">✕</button>
     </div>
     <div class="modal-body" id="demo-body"></div>
-    <div class="modal-foot">演示数据为模拟语境，仅用于展示交互方式；文献、结论与片段均为示意，不构成研究结论。</div>
+    <div class="modal-foot" id="demo-foot">演示文本为模拟知识库语境，来源、页码与数值为示意；不构成学术引用。</div>
   </div>
 </dialog>
 
@@ -452,58 +485,77 @@ pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--lin
   function $(s, r) { return (r || document).querySelector(s); }
   function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
 
-  /* ---------- Hero 背景：细密网格 + 证据网络节点 + 流动光点 ---------- */
+  /* ---------- Hero 背景：青绿星空 + 引用连线 ---------- */
   (function () {
     var c = document.getElementById('bg-canvas'); if (!c) { return; }
     var ctx = c.getContext('2d'); if (!ctx) { return; }
     var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    var w = 0, h = 0, t = 0, raf = 0, visible = true, nodes = [], edges = [];
+    var w = 0, h = 0, t = 0, raf = 0, visible = true, stars = [], nodes = [], pulses = [];
     function resize() {
       var r = c.parentElement.getBoundingClientRect();
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = r.width; h = r.height;
       c.width = Math.max(1, Math.round(w * dpr)); c.height = Math.max(1, Math.round(h * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      nodes = []; edges = [];
-      var n = Math.min(26, Math.round(w / 55));
-      for (var i = 0; i < n; i++) {
-        nodes.push({ x: w * (0.55 + Math.random() * 0.45), y: h * Math.random(), r: 1.6 + Math.random() * 2.2, p: Math.random() * Math.PI * 2, s: 0.5 + Math.random() });
+      stars = []; nodes = []; pulses = [];
+      var i;
+      var n = Math.min(220, Math.round(w * h / 7000));
+      for (i = 0; i < n; i++) { stars.push({ x: Math.random() * w, y: Math.random() * h * 0.85, r: 0.4 + Math.random() * 1.2, p: Math.random() * Math.PI * 2, s: 0.4 + Math.random() * 1.1, lime: Math.random() < 0.3 }); }
+      var cols = w < 720 ? 4 : 6, per = 3;
+      for (i = 0; i < cols * per; i++) {
+        var col = Math.floor(i / per), row = i % per;
+        nodes.push({ x: w * (0.08 + 0.84 * col / (cols - 1)) + (Math.random() - 0.5) * 30, y: h * (0.2 + 0.6 * row / (per - 1)) + (Math.random() - 0.5) * 40, r: 1.6 + Math.random() * 1.6, ph: Math.random() * Math.PI * 2, col: col });
       }
-      for (var a = 0; a < nodes.length; a++) {
-        for (var b = a + 1; b < nodes.length; b++) {
-          var dx = nodes[a].x - nodes[b].x, dy = nodes[a].y - nodes[b].y;
-          if (Math.sqrt(dx * dx + dy * dy) < 190) { edges.push({ a: a, b: b, ph: Math.random() }); }
-        }
-      }
+      for (i = 0; i < 4; i++) { pulses.push({ a: Math.floor(Math.random() * nodes.length), p: 0, sp: 0.0025 + Math.random() * 0.003 }); }
       draw();
+    }
+    function edge(a, b) {
+      var d = Math.hypot(a.x - b.x, a.y - b.y);
+      return d < w * 0.22 && Math.abs(a.col - b.col) <= 1 && a !== b;
     }
     function draw() {
       ctx.clearRect(0, 0, w, h);
-      ctx.lineWidth = 1;
-      for (var gx = 0; gx < w; gx += 32) { ctx.strokeStyle = 'rgba(230,243,238,0.028)'; ctx.beginPath(); ctx.moveTo(gx + 0.5, 0); ctx.lineTo(gx + 0.5, h); ctx.stroke(); }
-      for (var gy = 0; gy < h; gy += 32) { ctx.strokeStyle = 'rgba(230,243,238,0.028)'; ctx.beginPath(); ctx.moveTo(0, gy + 0.5); ctx.lineTo(w, gy + 0.5); ctx.stroke(); }
-      var i, e, A, B;
-      for (i = 0; i < edges.length; i++) {
-        e = edges[i]; A = nodes[e.a]; B = nodes[e.b];
-        ctx.strokeStyle = 'rgba(47,212,180,0.14)';
-        ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
-        var k = (t * 0.25 + e.ph) % 1;
-        var x = A.x + (B.x - A.x) * k, y = A.y + (B.y - A.y) * k;
-        ctx.fillStyle = 'rgba(159,240,220,0.85)';
-        ctx.beginPath(); ctx.arc(x, y, 1.6, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = 'rgba(47,212,180,0.18)';
-        ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+      var i, j, s;
+      for (i = 0; i < stars.length; i++) {
+        s = stars[i];
+        var a = 0.2 + 0.5 * (0.5 + 0.5 * Math.sin(t * s.s + s.p));
+        ctx.fillStyle = s.lime ? ('rgba(183,227,106,' + a.toFixed(3) + ')') : ('rgba(160,240,220,' + a.toFixed(3) + ')');
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.lineWidth = 0.8;
+      for (i = 0; i < nodes.length; i++) {
+        for (j = i + 1; j < nodes.length; j++) {
+          if (!edge(nodes[i], nodes[j])) { continue; }
+          ctx.strokeStyle = 'rgba(47,191,159,0.12)';
+          ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
+        }
       }
       for (i = 0; i < nodes.length; i++) {
-        A = nodes[i];
-        var al = 0.35 + 0.4 * (0.5 + 0.5 * Math.sin(t * A.s + A.p));
-        ctx.fillStyle = 'rgba(6,17,14,0.95)';
-        ctx.beginPath(); ctx.arc(A.x, A.y, A.r + 2, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(47,212,180,' + al.toFixed(3) + ')';
-        ctx.lineWidth = 1.2; ctx.stroke();
+        var nd = nodes[i];
+        var glow = 0.5 + 0.5 * Math.sin(t * 0.8 + nd.ph);
+        var g = ctx.createRadialGradient(nd.x, nd.y, 0, nd.x, nd.y, nd.r * 5);
+        g.addColorStop(0, 'rgba(127,227,204,' + (0.35 + 0.3 * glow).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(127,227,204,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(nd.x, nd.y, nd.r * 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#7fe3cc'; ctx.beginPath(); ctx.arc(nd.x, nd.y, nd.r, 0, Math.PI * 2); ctx.fill();
+      }
+      for (i = pulses.length - 1; i >= 0; i--) {
+        var pu = pulses[i];
+        var from = nodes[pu.a];
+        var to = null, best = 1e9;
+        for (j = 0; j < nodes.length; j++) { if (edge(from, nodes[j])) { var d2 = Math.hypot(from.x - nodes[j].x, from.y - nodes[j].y); if (d2 < best) { best = d2; to = nodes[j]; } } }
+        pu.p += pu.sp;
+        if (!to || pu.p >= 1) { pulses[i] = { a: Math.floor(Math.random() * nodes.length), p: 0, sp: 0.0025 + Math.random() * 0.003 }; continue; }
+        var px = from.x + (to.x - from.x) * pu.p, py = from.y + (to.y - from.y) * pu.p;
+        var pg = ctx.createRadialGradient(px, py, 0, px, py, 10);
+        pg.addColorStop(0, 'rgba(183,227,106,.9)'); pg.addColorStop(1, 'rgba(183,227,106,0)');
+        ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(px, py, 10, 0, Math.PI * 2); ctx.fill();
       }
     }
-    function loop() { if (!visible) { raf = 0; return; } t += 1 / 60; draw(); raf = requestAnimationFrame(loop); }
+    function loop() {
+      if (!visible) { raf = 0; return; }
+      t += 1 / 60; draw(); raf = requestAnimationFrame(loop);
+    }
     function start() { if (mq.matches || raf) { return; } raf = requestAnimationFrame(loop); }
     function stop() { if (raf) { cancelAnimationFrame(raf); raf = 0; } }
     resize();
@@ -514,6 +566,28 @@ pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--lin
     if (mq.addEventListener) { mq.addEventListener('change', function () { if (mq.matches) { stop(); draw(); } else { start(); } }); }
     start();
   })();
+
+  /* ---------- 弹窗 ---------- */
+  var modal = document.getElementById('demo-modal');
+  var modalTitle = document.getElementById('demo-title');
+  var modalSub = document.getElementById('demo-sub');
+  var modalBody = document.getElementById('demo-body');
+  var lastFocus = null, cleanup = null;
+  var FOOT = '演示文本为模拟知识库语境，来源、页码与数值为示意；不构成学术引用。';
+  function onClose() { if (cleanup) { cleanup(); cleanup = null; } modalBody.innerHTML = ''; $('#demo-foot').textContent = FOOT; if (lastFocus && lastFocus.focus) { lastFocus.focus(); } }
+  function closeModal() { if (typeof modal.close === 'function') { if (modal.open) { modal.close(); } } else { modal.removeAttribute('open'); onClose(); } }
+  function openModal(title, sub, html, init, opener) {
+    if (modal.open && cleanup) { cleanup(); cleanup = null; }
+    lastFocus = opener || document.activeElement;
+    modalTitle.textContent = title; modalSub.textContent = sub || '';
+    modalBody.innerHTML = html; modalBody.scrollTop = 0;
+    if (typeof modal.showModal === 'function') { if (!modal.open) { modal.showModal(); } } else { modal.setAttribute('open', ''); }
+    cleanup = init ? init(modalBody) : null;
+  }
+  modal.addEventListener('close', onClose);
+  document.getElementById('demo-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) { closeModal(); } });
+  $$('.feature[data-demo]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); var d = DEMOS[a.dataset.demo]; if (d) { openModal(d.title, d.sub, d.html, d.init, a); } }); });
 
   /* ---------- 指标 ---------- */
   (function () {
@@ -528,246 +602,224 @@ pre.rep{margin:0;padding:16px 18px;border-radius:12px;border:1px solid var(--lin
       if (typeof v === 'number' && isFinite(v)) { return v <= 1 ? (v * 100).toFixed(1) + '%' : v + '%'; }
       return (v === undefined || v === null || v === '') ? DASH : String(v);
     }
-    function ms(v) { return (typeof v === 'number' && isFinite(v)) ? v.toFixed(2) + ' ms' : DASH; }
-    function card(k, v, small) { return '<div class="metric"><p class="k">' + k + '</p><p class="v">' + v + (small ? '<small>' + small + '</small>' : '') + '</p></div>'; }
+    function ms(v) { return (typeof v === 'number' && isFinite(v)) ? (v >= 100 ? Math.round(v) + ' ms' : v.toFixed(3) + ' ms') : DASH; }
+    function p95(r) { return (typeof r.p95_ms === 'number' && isFinite(r.p95_ms)) ? Math.round(r.p95_ms) + ' ms' : DASH; }
+    function failTags(r) {
+      if (!r || !r.by_tag) { return ''; }
+      var t = Object.keys(r.by_tag).filter(function (k) { return r.by_tag[k].success < r.by_tag[k].n; });
+      if (!t.length) { return ''; }
+      return '<span class="sub">未全过标签：' + t.map(function (k) { return k + ' ' + r.by_tag[k].success + '/' + r.by_tag[k].n; }).join(' · ') + '</span>';
+    }
+    function card(k, v, small, low) { return '<div class="metric"><p class="k">' + k + '</p><p class="v' + (low ? ' low' : '') + '">' + v + (small ? '<small>' + small + '</small>' : '') + '</p></div>'; }
     function render() {
       if (!rows.length) {
         cards.innerHTML = card('套件数', DASH) + card('用例总数', DASH) + card('通过用例', DASH) + card('汇总通过率', DASH);
-        tbody.innerHTML = '<tr><td colspan="5" class="dash">' + (SUITES.length ? '没有 adapter 为 researchos 的套件' : '未找到 window.METRICS.suites，请确认 data/metrics.js 已加载') + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="dash">' + (SUITES.length ? '没有 adapter 为 researchos 的套件' : '未找到 window.METRICS.suites，请确认 data/metrics.js 已加载') + '</td></tr>';
         note.textContent = '当前未读取到 researchos 指标，所有数值显示为 —。';
         return;
       }
-      var n = 0, p = 0;
-      rows.forEach(function (m) { if (typeof m.n === 'number') { n += m.n; } if (typeof m.passed === 'number') { p += m.passed; } });
-      cards.innerHTML = card('套件数', num(rows.length), '个') + card('用例总数', num(n), '条') + card('通过用例', num(p), '条') + card('汇总通过率', n ? pct(p / n) : DASH, 'passed ÷ n');
+      var n = 0, p = 0, notes = [];
+      rows.forEach(function (m) {
+        if (typeof m.n === 'number') { n += m.n; } if (typeof m.passed === 'number') { p += m.passed; }
+        if (m.p95_note && notes.indexOf(m.p95_note) < 0) { notes.push(m.p95_note); }
+      });
+      cards.innerHTML = card('套件运行数', num(rows.length), '次') + card('用例总数', num(n), '条') + card('通过用例', num(p), '条') + card('汇总通过率', n ? pct(p / n) : DASH, 'passed ÷ n', n && p / n < 0.9);
       tbody.innerHTML = rows.map(function (m) {
-        return '<tr><td>' + num(m.suite) + '</td><td>' + num(m.product) + '</td><td class="num">' + pct(m.pass_rate) + '</td><td class="num">' + num(m.passed) + ' ÷ ' + num(m.n) + '</td><td class="num">' + ms(m.mean_ms) + '</td></tr>';
+        var low = (typeof m.pass_rate === 'number' && m.pass_rate < 0.9);
+        return '<tr><td>' + num(m.suite) + failTags(m) + '</td><td>' + num(m.product) + '</td><td>' + num(m.domain) + '</td><td class="num' + (low ? ' lowv' : '') + '">' + pct(m.pass_rate) + '</td><td class="num">' + num(m.passed) + ' ÷ ' + num(m.n) + '</td><td class="num">' + ms(m.mean_ms) + '</td><td class="num dash" title="' + (m.p95_note || '') + '">' + p95(m) + '</td></tr>';
       }).join('');
-      note.textContent = '仅展示 adapter = researchos 的套件；通过率为原始 pass_rate 换算为百分比，平均耗时为 mean_ms 原值。';
+      note.innerHTML = '全绿只代表这 ' + n + ' 条用例通过，不构成泛化结论；P95 为 null 时显示 —（n&lt;200 不出 P95）。' + (notes.length ? ' 中心标记：' + notes.join('；') + '。' : '');
     }
     render();
     window.addEventListener('load', render);
   })();
 
-  /* ---------- 弹窗 ---------- */
-  var modal = document.getElementById('demo-modal');
-  var modalTitle = document.getElementById('demo-title');
-  var modalSub = document.getElementById('demo-sub');
-  var modalBody = document.getElementById('demo-body');
-  var lastFocus = null, cleanup = null;
-  function onClose() { if (cleanup) { cleanup(); cleanup = null; } modalBody.innerHTML = ''; if (lastFocus && lastFocus.focus) { lastFocus.focus(); } }
-  function closeModal() { if (typeof modal.close === 'function') { if (modal.open) { modal.close(); } } else { modal.removeAttribute('open'); onClose(); } }
-  function openDemo(id, opener) {
-    var d = DEMOS[id]; if (!d) { return; }
-    if (modal.open && cleanup) { cleanup(); cleanup = null; }
-    if (opener) { lastFocus = opener; } else if (!modal.open) { lastFocus = document.activeElement; }
-    modalTitle.textContent = d.title; modalSub.textContent = d.sub || '';
-    modalBody.innerHTML = d.html; modalBody.scrollTop = 0;
-    if (typeof modal.showModal === 'function') { if (!modal.open) { modal.showModal(); } } else { modal.setAttribute('open', ''); }
-    cleanup = d.init ? d.init(modalBody) : null;
-  }
-  modal.addEventListener('close', onClose);
-  document.getElementById('demo-close').addEventListener('click', closeModal);
-  modal.addEventListener('click', function (e) { if (e.target === modal) { closeModal(); } });
-  $$('.feature[data-demo]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); openDemo(a.dataset.demo, a); }); });
-
   /* ---------- 演示 1：证据网络检索 ---------- */
-  var demoGraph = {
-    title: '证据网络检索', sub: '点一个主题，节点展开；点节点查看关联文献',
+  var demoSearch = {
+    title: '证据网络检索', sub: '点一个主题，看词面与向量两路各召回什么，门禁拦下哪些',
     html:
-      '<div class="panel" style="margin-bottom:16px"><div class="panel-head"><span>检索主题</span><span>演示数据</span></div><div class="chips" id="gr-topics"></div></div>' +
-      '<div class="demo-grid" style="grid-template-columns:1.2fr 1fr">' +
-        '<div class="panel"><div class="panel-head"><span>证据网络</span><span id="gr-count">未展开</span></div><div class="graph" id="gr-graph" aria-live="polite"></div></div>' +
-        '<div class="panel"><div class="panel-head"><span>关联文献</span><span id="gr-node-l">点左侧节点</span></div><ul class="papers" id="gr-papers"><li class="placeholder">展开主题后，点击任意节点查看文献</li></ul></div>' +
+      '<div class="demo-grid">' +
+        '<div class="panel"><div class="panel-head"><span>研究主题</span><span>点选</span></div><div class="chips" id="se-chips"></div>' +
+          '<div class="status" id="se-query" style="margin-top:14px;padding:12px 14px;border-left:3px solid var(--teal);background:rgba(47,191,159,.06);border-radius:0 8px 8px 0">—</div>' +
+          '<div class="demo-actions"><button type="button" class="btn btn-primary btn-sm" id="se-run" data-state="idle">双路检索</button><span class="status" id="se-status" aria-live="polite"></span></div>' +
+        '</div>' +
+        '<div class="panel"><div class="panel-head"><span>候选与门禁</span><span id="se-count">未检索</span></div><ul class="hit" id="se-out"></ul></div>' +
       '</div>',
     init: function (root) {
-      var TOPICS = {
-        'RAG 引用忠实度': {
-          nodes: [
-            { id: 'a', side: 'left', top: 2, t: '检索片段数与忠实度', s: '子问题 · 3 篇', papers: [['Gao et al. 2023', 'Retrieval surveys', '支持：片段过多引入噪声'], ['Liu et al. 2023', 'Lost in the middle', '支持：中间位置片段利用率低']] },
-            { id: 'b', side: 'left', top: 36, t: '自检 / 反思式校验', s: '子问题 · 2 篇', papers: [['Self-RAG 2023', '反思片段', '支持：按需检索降低无依据生成'], ['CRAG 2024', '校正检索', '部分：依赖评估器质量']] },
-            { id: 'c', side: 'left', top: 70, t: '评估器自身偏差', s: '子问题 · 证据不足', gold: true, papers: [['内部评估报告', '样本量 42', '不足：口径未对齐，需人工复核']] }
-          ]
-        },
-        '大模型幻觉缓解': {
-          nodes: [
-            { id: 'a', side: 'left', top: 2, t: '解码层约束', s: '子问题 · 2 篇', papers: [['Contrastive Decoding 2023', '解码策略', '支持：降低事实错误率'], ['DoLa 2023', '层间对比', '部分：仅开放域问答有效']] },
-            { id: 'b', side: 'left', top: 36, t: '工具调用校验', s: '子问题 · 2 篇', papers: [['Toolformer 2023', '工具调用', '支持：外部计算器降低算术错误'], ['ReAct 2022', '推理轨迹', '支持：可追溯中间步骤']] },
-            { id: 'c', side: 'left', top: 70, t: '长文本一致性', s: '子问题 · 证据不足', gold: true, papers: [['内部评估报告', '样本量 18', '不足：长文本评测集未公开']] }
-          ]
-        },
-        'AI 治理框架': {
-          nodes: [
-            { id: 'a', side: 'left', top: 2, t: '风险分级口径', s: '子问题 · 3 篇', papers: [['EU AI Act 2024', '政策文本', '支持：按用途分四级'], ['NIST RMF 2023', '框架文件', '支持：治理—映射—度量—管理'], ['内部政策梳理', '演示材料', '部分：仅覆盖通用模型']] },
-            { id: 'b', side: 'left', top: 36, t: '供应链责任分配', s: '子问题 · 1 篇', papers: [['OECD 2024', '政策文本', '部分：未涉及开源权重']] },
-            { id: 'c', side: 'left', top: 70, t: '中小企业合规成本', s: '子问题 · 证据不足', gold: true, papers: [['内部评估报告', '无数据', '不足：无可引用的实证研究']] }
-          ]
-        }
-      };
-      var topic = Object.keys(TOPICS)[0];
-      var chips = $('#gr-topics', root), graph = $('#gr-graph', root), papers = $('#gr-papers', root), count = $('#gr-count', root), nodeL = $('#gr-node-l', root);
+      var TOPICS = [
+        { q: 'GM(1,1) 灰色预测的适用条件', terms: ['GM(1,1)', '灰色预测'], hits: [
+          ['b', '词面', 'GM(1,1) 建模条件', '原文：GM(1,1) 适用于单调指数序列，样本量 n ≥ 4 即可建模。', '术语命中：GM(1,1)', ''],
+          ['v', '向量', '小样本预测方法比较', '原文：在样本量较少时，灰色模型与回归模型的拟合差异需结合残差检验判断。', '术语命中：灰色模型（别名）', ''],
+          ['v', '向量', '时间序列预测综述', '原文：指数平滑适用于短期预测，对趋势突变敏感。', '', '术语未命中：GM(1,1) → 门禁丢弃']
+        ] },
+        { q: '熵权法与 CRITIC 的赋权差异', terms: ['熵权法', 'CRITIC'], hits: [
+          ['b', '词面', '熵权法赋权原理', '原文：熵权法依据指标离散程度赋权，离散度越大权重越高。', '术语命中：熵权法', ''],
+          ['b', '词面', 'CRITIC 法赋权原理', '原文：CRITIC 法同时考虑对比强度与冲突性，依赖相关系数矩阵。', '术语命中：CRITIC', ''],
+          ['v', '向量', '客观赋权方法对比', '原文：两类方法在不同数据分布下表现不一，需结合具体数据比较。', '', '术语未命中：熵权法 / CRITIC → 门禁丢弃']
+        ] },
+        { q: 'AHP 判断矩阵的一致性检验', terms: ['AHP', '一致性检验'], hits: [
+          ['b', '词面', 'AHP 一致性比率 CR', '原文：CR = CI / RI，CR < 0.1 时认为判断矩阵一致性可接受。', '术语命中：AHP · 一致性检验', ''],
+          ['v', '向量', '层次分析法的应用', '原文：层次分析法适用于多准则决策，需专家打分构造判断矩阵。', '术语命中：AHP（别名：层次分析法）', ''],
+          ['b', '词面', '一致性检验在其他方法中的使用', '原文：聚类分析中亦有一致性指标，含义不同。', '', '术语命中但语境不符 → 降权']
+        ] }
+      ];
+      var pick = 0;
+      var chips = $('#se-chips', root), query = $('#se-query', root), out = $('#se-out', root), count = $('#se-count', root), status = $('#se-status', root), btn = $('#se-run', root);
       var timers = [];
       function clearT() { timers.forEach(clearTimeout); timers = []; }
       function renderChips() {
-        chips.innerHTML = Object.keys(TOPICS).map(function (k) { return '<button type="button" class="chip" data-v="' + k + '" aria-pressed="' + (k === topic) + '">' + k + '</button>'; }).join('');
+        chips.innerHTML = TOPICS.map(function (o, i) { return '<button type="button" class="chip" data-i="' + i + '" aria-pressed="' + (i === pick) + '">主题 ' + (i + 1) + '</button>'; }).join('');
+        query.textContent = '「' + TOPICS[pick].q + '」 · 必须命中：' + TOPICS[pick].terms.join('、');
       }
-      function drawEdges() {
-        var svg = $('svg', graph); if (!svg) { return; }
-        var gr = graph.getBoundingClientRect();
-        svg.setAttribute('viewBox', '0 0 ' + gr.width + ' ' + gr.height);
-        var core = $('.gnode.core', graph); if (!core) { return; }
-        var cr = core.getBoundingClientRect();
-        var cx = cr.left - gr.left, cy = cr.top - gr.top + cr.height / 2;
-        $$('.gnode:not(.core)', graph).forEach(function (n, i) {
-          var r = n.getBoundingClientRect();
-          var x = r.left - gr.left, y = r.top - gr.top + r.height / 2;
-          var mx = (cx + x) / 2;
-          var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          p.setAttribute('d', 'M' + cx + ',' + cy + ' C' + mx + ',' + cy + ' ' + mx + ',' + y + ' ' + x + ',' + y);
-          p.setAttribute('class', 'edge' + (n.classList.contains('gold') ? ' gold' : ''));
-          p.setAttribute('pathLength', '1');
-          p.style.animationDelay = (RM ? 0 : 0.3 + i * 0.15) + 's';
-          svg.appendChild(p);
-        });
-      }
-      function render() {
-        clearT(); graph.innerHTML = '<svg aria-hidden="true"></svg>'; papers.innerHTML = '<li class="placeholder">点左侧任意节点查看文献</li>'; nodeL.textContent = '点左侧节点'; count.textContent = '展开中…';
-        var data = TOPICS[topic];
-        var core = document.createElement('button'); core.type = 'button'; core.className = 'gnode core'; core.textContent = topic; core.style.animationDelay = RM ? '0s' : '0.05s'; core.disabled = true; core.style.cursor = 'default';
-        graph.appendChild(core);
-        data.nodes.forEach(function (n, i) {
+      function run() {
+        if (btn.dataset.state === 'running') { return; }
+        clearT(); out.innerHTML = ''; count.textContent = '检索中…'; status.textContent = ''; btn.dataset.state = 'running'; btn.disabled = true;
+        var hits = TOPICS[pick].hits, kept = 0;
+        hits.forEach(function (h, i) {
           timers.push(setTimeout(function () {
-            var b = document.createElement('button');
-            b.type = 'button'; b.className = 'gnode ' + n.side + (n.gold ? ' gold' : ''); b.style.top = n.top + '%'; b.dataset.id = n.id;
-            b.innerHTML = n.t + '<small>' + n.s + '</small>' + (n.gold ? '<span class="tag">证据不足 · 需复核</span>' : '');
-            graph.appendChild(b);
-            if (i === data.nodes.length - 1) { count.textContent = data.nodes.length + ' 个子问题 · ' + data.nodes.reduce(function (s, x) { return s + x.papers.length; }, 0) + ' 篇文献'; drawEdges(); }
-          }, RM ? 0 : 150 + i * 300));
+            var li = document.createElement('li');
+            var cls = h[0] === 'b' ? 'src-b' : 'src-v';
+            var gate = h[5] ? '<span class="miss">' + h[5] + '</span>' : '<span class="term">' + h[4] + '</span>';
+            li.innerHTML = '<span class="src ' + cls + '">' + h[1] + '路</span>' + (h[5].indexOf('丢弃') >= 0 ? '<span class="src src-m" style="margin-left:6px">门禁</span>' : '') + '<strong>' + h[2] + '</strong><p>' + h[3] + '</p>' + gate;
+            out.appendChild(li);
+            if (h[5].indexOf('丢弃') < 0) { kept++; }
+            if (i === hits.length - 1) { count.textContent = '候选 ' + hits.length + ' · 入账 ' + kept; status.textContent = kept + ' 条通过门禁进入账本，' + (hits.length - kept) + ' 条被丢弃或降权'; btn.disabled = false; btn.textContent = '重新检索'; btn.dataset.state = 'done'; }
+          }, RM ? 0 : 200 + i * 420));
         });
       }
-      function showPapers(id) {
-        var n = TOPICS[topic].nodes.find(function (x) { return x.id === id; }); if (!n) { return; }
-        $$('.gnode', graph).forEach(function (g) { g.classList.toggle('is-active', g.dataset.id === id); });
-        nodeL.textContent = n.t;
-        papers.innerHTML = n.papers.map(function (p) { return '<li><strong>' + p[0] + '</strong><span>' + p[1] + '</span><div class="rel">' + p[2] + '</div></li>'; }).join('');
-      }
-      chips.addEventListener('click', function (e) { var chip = e.target.closest('.chip'); if (!chip) { return; } topic = chip.dataset.v; renderChips(); render(); });
-      graph.addEventListener('click', function (e) { var n = e.target.closest('.gnode[data-id]'); if (n) { showPapers(n.dataset.id); } });
-      renderChips(); render();
+      chips.addEventListener('click', function (e) { var c = e.target.closest('.chip'); if (!c) { return; } pick = +c.dataset.i; renderChips(); out.innerHTML = ''; count.textContent = '未检索'; status.textContent = ''; btn.textContent = '双路检索'; btn.disabled = false; btn.dataset.state = 'idle'; });
+      btn.addEventListener('click', function () { if (btn.dataset.state === 'done') { btn.textContent = '双路检索'; btn.dataset.state = 'idle'; } run(); });
+      out.innerHTML = '<li class="placeholder">点「双路检索」，候选会逐条出现</li>';
+      renderChips();
       return clearT;
     }
   };
 
-  /* ---------- 演示 2：引用可核验 ---------- */
+  /* ---------- 演示 2：引用核对 ---------- */
   var demoCite = {
-    title: '引用可核验', sub: '每条结论点「定位原文」，逐字比对结果直接标出',
+    title: '引用可核验', sub: '点一条结论，定位到原文片段，标出一致或不一致',
     html:
-      '<div class="claims-list" id="ci-list"></div><div class="src-pane" id="ci-pane" hidden></div>' +
-      '<div class="status" id="ci-status" aria-live="polite" style="margin-top:14px">尚未核对</div>',
+      '<div class="demo-grid">' +
+        '<div class="panel"><div class="panel-head"><span>待核结论</span><span>点选</span></div><div class="chips" id="ci-chips"></div>' +
+          '<div class="doc" id="ci-doc" style="margin-top:14px">GM(1,1) 适用于单调指数序列，样本量 n ≥ 4 即可建模；模型精度需通过后验差比值 C 与小误差概率 P 检验，C < 0.35、P > 0.95 为好。</div>' +
+        '</div>' +
+        '<div class="panel"><div class="panel-head"><span>核对结果</span><span id="ci-count">未核对</span></div><ul class="check" id="ci-out"></ul></div>' +
+      '</div>',
     init: function (root) {
       var CLAIMS = [
-        { id: 'k1', claim: '检索片段由 3 增至 10 时，忠实度先升后降', src: 'Liu et al. 2023 · 第 3 节', page: 'p.4', full: '当检索片段由 3 个增至 10 个时，回答忠实度先上升后下降；片段位于上下文中部时利用率最低。', mark: '忠实度先上升后下降', match: 'ok' },
-        { id: 'k2', claim: '自检式校验可降低无依据生成的比例', src: 'Self-RAG 2023 · 第 4 节', page: 'p.6', full: '引入反思片段后，模型在无外部支持时更倾向于拒绝作答，无依据生成的比例随之下降。', mark: '无依据生成的比例随之下降', match: 'ok' },
-        { id: 'k3', claim: '校正检索可将事实错误率降低 38%', src: 'CRAG 2024 · 第 5 节', page: 'p.8', full: '在公开域问答集上，校正检索将事实错误率降低 23%；38% 为另一配置下的端到端准确率提升。', mark: '事实错误率降低 23%', match: 'bad', why: '结论写 38%，原文为 23%（38% 是准确率提升，指标口径不同）' }
+        { c: 'GM(1,1) 在样本量 n ≥ 4 时即可建模。', ok: true, q: '样本量 n ≥ 4 即可建模', hl: ['n ≥ 4'] },
+        { c: '后验差比值 C > 0.35 说明模型精度好。', ok: false, q: 'C < 0.35、P > 0.95 为好', hl: ['C < 0.35', 'P > 0.95'], why: '方向错误：原文为 C < 0.35 为好，结论写成 C > 0.35' },
+        { c: '小误差概率 P > 0.95 为好。', ok: true, q: 'P > 0.95 为好', hl: ['P > 0.95'] }
       ];
-      var list = $('#ci-list', root), pane = $('#ci-pane', root), status = $('#ci-status', root);
-      var checked = {};
-      list.innerHTML = CLAIMS.map(function (c) { return '<div class="claim" data-id="' + c.id + '"><div><div class="t">' + c.claim + '</div><div class="m">' + c.src + ' · ' + c.page + '</div></div><button type="button" class="btn btn-ghost btn-sm" data-claim="' + c.id + '">定位原文</button></div>'; }).join('');
-      function update() { var ids = Object.keys(checked); var ok = ids.filter(function (i) { return checked[i] === 'ok'; }).length; status.textContent = ids.length ? ('已核对 ' + ids.length + ' / ' + CLAIMS.length + ' · 一致 ' + ok + ' · 不一致 ' + (ids.length - ok)) : '尚未核对'; }
-      list.addEventListener('click', function (e) {
-        var btn = e.target.closest('[data-claim]'); if (!btn) { return; }
-        var c = CLAIMS.find(function (x) { return x.id === btn.dataset.claim; }); if (!c) { return; }
-        $$('.claim', list).forEach(function (el) { el.classList.toggle('is-active', el.dataset.id === c.id); });
-        pane.hidden = false;
-        pane.innerHTML = '<div class="src-head"><span>原文 · ' + c.src + ' · ' + c.page + '</span><span>逐字比对</span></div><div class="src-body">' + c.full.replace(c.mark, '<mark class="' + (c.match === 'ok' ? '' : 'bad') + '">' + c.mark + '</mark>') + '</div>' +
-          '<div class="src-result">' + (c.match === 'ok' ? '<span class="badge badge-ok">✓ 逐字一致</span><span>结论数字与原文一致，引用有效。</span>' : '<span class="badge badge-bad">✕ 不一致</span><span>' + c.why + '。</span>') + '</div>';
-        checked[c.id] = c.match; btn.textContent = '重新核对'; update();
-        pane.scrollIntoView({ block: 'nearest', behavior: RM ? 'auto' : 'smooth' });
-      });
+      var pick = 0;
+      var chips = $('#ci-chips', root), doc = $('#ci-doc', root), out = $('#ci-out', root), count = $('#ci-count', root);
+      var RAW = doc.textContent;
+      function render() {
+        chips.innerHTML = CLAIMS.map(function (o, i) { return '<button type="button" class="chip" data-i="' + i + '" aria-pressed="' + (i === pick) + '">结论 ' + (i + 1) + '</button>'; }).join('');
+        var o = CLAIMS[pick];
+        var html = RAW;
+        o.hl.forEach(function (k) { html = html.split(k).join('§§' + k + '§§'); });
+        html = html.split('§§').map(function (seg, i) { return (i % 2) ? '<mark class="' + (o.ok ? '' : 'bad') + '">' + seg + '</mark>' : seg; }).join('');
+        doc.innerHTML = html;
+        out.innerHTML = '';
+        var li = document.createElement('li');
+        li.className = o.ok ? '' : 'mismatch';
+        li.innerHTML = '<div class="claim">' + o.c + '</div><div class="quote">「' + o.q + '」</div><span class="verdict ' + (o.ok ? 'v-ok' : 'v-bad') + '">' + (o.ok ? '✓ 一致 · 可复算：数值与比较符匹配' : '✕ 不一致 · ' + o.why) + '</span>';
+        out.appendChild(li);
+        count.textContent = o.ok ? '一致' : '不一致';
+      }
+      chips.addEventListener('click', function (e) { var c = e.target.closest('.chip'); if (!c) { return; } pick = +c.dataset.i; render(); });
+      render();
       return null;
     }
   };
 
   /* ---------- 演示 3：越界拒绝 ---------- */
   var demoRefuse = {
-    title: '越界拒绝', sub: '点一个问题，看它是否在资料范围内；越界会说明理由并给出可回答的替代问法',
+    title: '越界拒绝', sub: '点「测试拒绝」，看哪些问题被拒、理由怎么写',
     html:
-      '<div class="demo-grid">' +
-        '<div class="panel"><div class="panel-head"><span>资料范围</span><span>演示语料</span></div>' +
-          '<ul style="margin:0;padding-left:18px;font-size:13px;color:var(--muted);line-height:1.9"><li>RAG 引用忠实度相关论文 12 篇</li><li>内部评估报告 3 份（2024）</li><li>EU AI Act、NIST RMF 政策文本</li></ul>' +
-          '<div class="questions" id="rf-list" style="margin-top:14px"></div>' +
-        '</div>' +
-        '<div class="panel"><div class="panel-head"><span>应答结果</span><span id="rf-count">已测 0 / 4 · 拒绝 0</span></div><div id="rf-out"><p class="status" style="margin:0;padding:14px;border:1px dashed var(--line);border-radius:10px;text-align:center">选择左侧任意一个问题</p></div></div>' +
+      '<div class="panel"><div class="panel-head"><span>问题测试 · 4 条</span><span id="rf-count">未测试</span></div>' +
+        '<ul class="reject" id="rf-out"></ul>' +
+        '<div class="demo-actions"><button type="button" class="btn btn-primary btn-sm" id="rf-run" data-state="idle">测试拒绝</button><span class="status" id="rf-status" aria-live="polite"></span></div>' +
       '</div>',
     init: function (root) {
       var QS = [
-        { q: 'RAG 中检索片段越多，回答一定越准吗？', out: false, ans: '不一定。证据网络中 3 篇支持「先升后降」：片段增多引入噪声，且位于上下文中部的片段利用率更低（Liu et al. 2023, p.4）。' },
-        { q: 'GPT-5 明年发布后幻觉问题会被彻底解决吗？', out: true, why: '问题涉及未来产品的表现预测，资料范围中没有任何关于该模型的事实材料；预测性陈述无法绑定原文引用。', alt: '可改为：现有文献中有哪些被验证有效的幻觉缓解方法？' },
-        { q: '我们公司内部模型上线后投诉率会降多少？', out: true, why: '缺少贵司模型的评估数据与投诉口径，内部报告仅覆盖 2024 年公共评测集，无法外推到具体业务。', alt: '可改为：2024 年内部评估报告中，自检式校验对无依据生成比例的影响是多少？' },
-        { q: 'AI 治理框架里风险分几级，依据是什么？', out: false, ans: 'EU AI Act 按用途分为不可接受、高、有限、最小风险四级；NIST RMF 则以「治理—映射—度量—管理」四 function 组织流程。两份文本均在资料范围内，可定位到条款。' }
+        { q: '熵权法和 CRITIC 哪个更客观？', hit: true, why: '评价 / 排名：证据库中无对照实验，无法引用支持任一方' },
+        { q: '明年国赛 A 题会不会考预测模型？', hit: true, why: '预测：属未来事件，不在证据范围' },
+        { q: 'GM(1,1) 的检验指标有哪两个？', hit: false, why: '在库：后验差比值 C 与小误差概率 P（来源 [3]）' },
+        { q: '帮我写一段能直接交的论文方法章。', hit: true, why: '代写：超出证据检索范围，只能提供可引用的来源与口径' }
       ];
-      var list = $('#rf-list', root), out = $('#rf-out', root), count = $('#rf-count', root);
-      var tested = 0, refused = 0;
-      list.innerHTML = QS.map(function (q, i) { return '<button type="button" class="question" data-i="' + i + '" aria-pressed="false">' + q.q + '</button>'; }).join('');
-      list.addEventListener('click', function (e) {
-        var btn = e.target.closest('.question'); if (!btn) { return; }
-        var q = QS[+btn.dataset.i];
-        $$('.question', list).forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
-        if (!btn.dataset.tested) { btn.dataset.tested = '1'; tested++; if (q.out) { refused++; } }
-        count.textContent = '已测 ' + tested + ' / ' + QS.length + ' · 拒绝 ' + refused;
-        out.innerHTML = q.out
-          ? '<div class="refuse out" aria-live="polite"><div class="refuse-head">⛔ 拒绝作答 · 超出资料范围</div><div class="refuse-body"><span class="q">' + q.q + '</span>' + q.why + '<span class="scope"><b style="color:var(--teal2)">可回答的替代问法：</b>' + q.alt + '</span></div></div>'
-          : '<div class="refuse in" aria-live="polite"><div class="refuse-head">✓ 范围内 · 已绑定引用</div><div class="refuse-body"><span class="q">' + q.q + '</span>' + q.ans + '<span class="ok-msg">引用 2 条已定位到原文片段，可进入「引用可核验」逐字比对。</span></div></div>';
-      });
-      return null;
+      var out = $('#rf-out', root), btn = $('#rf-run', root), status = $('#rf-status', root), count = $('#rf-count', root);
+      var timers = [];
+      function clearT() { timers.forEach(clearTimeout); timers = []; }
+      out.innerHTML = QS.map(function (q) { return '<li><span>' + q.q + '<span class="why">待测试</span></span></li>'; }).join('');
+      function run() {
+        if (btn.dataset.state === 'running') { return; }
+        clearT(); btn.dataset.state = 'running'; btn.disabled = true; count.textContent = '测试中…'; status.textContent = '';
+        var hits = 0;
+        QS.forEach(function (q, i) {
+          timers.push(setTimeout(function () {
+            var li = out.children[i];
+            li.className = q.hit ? 'hit' : '';
+            li.innerHTML = '<span>' + q.q + '<span class="why">' + (q.hit ? '拒绝理由：' + q.why : q.why) + '</span></span><span class="tag ' + (q.hit ? 'tag-bad' : 'tag-ok') + '">' + (q.hit ? '✕ 拒绝' : '✓ 可答') + '</span>';
+            if (q.hit) { hits++; }
+            if (i === QS.length - 1) { count.textContent = '已测试 ' + QS.length + ' 条 · 拒绝 ' + hits + ' 条'; status.textContent = '拒绝记录写入账本，可回放（演示数据）'; btn.disabled = false; btn.textContent = '重新测试'; btn.dataset.state = 'done'; }
+          }, RM ? 0 : 200 + i * 380));
+        });
+      }
+      btn.addEventListener('click', function () { if (btn.dataset.state === 'done') { btn.textContent = '测试拒绝'; btn.dataset.state = 'idle'; } run(); });
+      return clearT;
     }
   };
 
   /* ---------- 演示 4：治理报告 ---------- */
   var demoReport = {
-    title: '治理报告', sub: '一键生成证据摘要与口径说明，Markdown 可复制',
+    title: '治理报告', sub: '点「生成报告」，输出证据摘要、口径说明与拒绝项',
     html:
-      '<div class="demo-grid" style="grid-template-columns:.8fr 1.2fr">' +
-        '<div><button type="button" class="btn btn-primary btn-sm" id="rp-run" data-state="idle">生成治理报告</button>' +
-          '<ol class="steps" id="rp-steps"><li><span class="box"></span>汇总证据网络（12 篇 / 7 条结论）</li><li><span class="box"></span>逐字核验引用并标注冲突</li><li><span class="box"></span>记录越界拒绝与理由</li><li><span class="box"></span>输出口径说明与覆盖缺口</li></ol></div>' +
-        '<div class="rep-out" id="rp-out" hidden><div class="rep-summary" id="rp-sum"></div><pre class="rep" id="rp-md" tabindex="0" aria-label="治理报告 Markdown 预览"></pre>' +
-          '<div class="demo-actions"><button type="button" class="btn btn-ghost btn-sm" id="rp-copy">复制 Markdown</button><span class="status" id="rp-status" aria-live="polite"></span></div></div>' +
+      '<div class="panel"><div class="panel-head"><span>治理报告 · 主题：小样本预测方法</span><span id="rp-count">未生成</span></div>' +
+        '<div class="paper" id="rp-out"></div>' +
+        '<div class="demo-actions"><button type="button" class="btn btn-primary btn-sm" id="rp-run" data-state="idle">生成报告</button><span class="status" id="rp-status" aria-live="polite"></span></div>' +
       '</div>',
     init: function (root) {
-      var btn = $('#rp-run', root), steps = $$('#rp-steps li', root), out = $('#rp-out', root), pre = $('#rp-md', root), sum = $('#rp-sum', root), copy = $('#rp-copy', root), status = $('#rp-status', root);
-      var timers = [], md = '';
+      var ROWS = [
+        ['主题', '小样本预测方法的适用条件与检验（演示）'],
+        ['检索口径', 'BM25 词面 + 向量双路；术语 GM(1,1) / 后验差比值 必须命中原文'],
+        ['证据 1', 'GM(1,1) 适用于单调指数序列，<code>n ≥ 4</code> — 来源 [3] §2.1 · 核对一致'],
+        ['证据 2', '精度检验用后验差比值 <code>C &lt; 0.35</code> 与小误差概率 <code>P &gt; 0.95</code> — 来源 [3] §2.3 · 核对一致'],
+        ['证据 3', '熵权法依据离散度赋权 — 来源 [7] §4.2 · 一致；适用条件原文未给出，<b>不补写</b>'],
+        ['拒绝项', '「熵权法 vs CRITIC 哪个更客观」— 评价类，无对照实验；「代写方法章」— 超出范围'],
+        ['未决事项', '① 小样本下 GM(1,1) 与回归的残差对比 ② 熵权法适用条件的来源'],
+        ['留痕', '2 条一致 · 0 条不一致 · 1 条部分缺失 · 2 条拒绝；全部可回放']
+      ];
+      var out = $('#rp-out', root), btn = $('#rp-run', root), status = $('#rp-status', root), count = $('#rp-count', root);
+      var timers = [];
       function clearT() { timers.forEach(clearTimeout); timers = []; }
-      var MD = '# 证据摘要与口径说明（演示）\n\n检索任务：#042 · RAG 引用忠实度\n\n## 证据覆盖\n- 文献：12 篇（其中 3 篇为 2024 年内部评估报告）\n- 结论：7 条，6 条已绑定原文片段，1 条待人工复核\n- 越界拒绝：2 条，理由见「拒绝记录」\n\n## 结论与引用\n1. 检索片段由 3 增至 10 时，忠实度先升后降 — Liu et al. 2023, p.4（逐字一致）\n2. 自检式校验可降低无依据生成比例 — Self-RAG 2023, p.6（逐字一致）\n3. 校正检索可将事实错误率降低 23%（非 38%）— CRAG 2024, p.8（口径已修正）\n\n## 口径说明\n- 「忠实度」按引用片段与回答的支持关系判定，未覆盖语义等价改写。\n- 内部评估报告样本量 42，不足以支撑统计显著性结论。\n\n## 覆盖缺口\n- 长文本场景的一致性评测缺失。\n- 中小企业合规成本无可引用实证研究。\n\n## 拒绝记录\n- 「未来模型发布后幻觉是否彻底解决」：预测性问题，无事实材料。\n- 「上线后投诉率下降多少」：缺少业务侧数据与口径。\n';
-      function reset() { clearT(); steps.forEach(function (li) { li.classList.remove('done', 'run'); li.querySelector('.box').textContent = ''; }); out.hidden = true; pre.textContent = ''; status.textContent = ''; btn.disabled = false; btn.textContent = '生成治理报告'; btn.dataset.state = 'idle'; }
+      out.innerHTML = '<div class="placeholder">点「生成报告」，条目会逐行出现</div>';
       function run() {
         if (btn.dataset.state === 'running') { return; }
-        if (btn.dataset.state === 'done') { reset(); }
-        btn.dataset.state = 'running'; btn.disabled = true;
-        var gap = RM ? 0 : 520;
-        steps.forEach(function (li, i) {
-          timers.push(setTimeout(function () { li.classList.add('run'); }, i * gap));
-          timers.push(setTimeout(function () { li.classList.remove('run'); li.classList.add('done'); li.querySelector('.box').textContent = '✓'; }, i * gap + (RM ? 0 : 420)));
+        clearT(); out.innerHTML = ''; count.textContent = '生成中…'; status.textContent = ''; btn.dataset.state = 'running'; btn.disabled = true;
+        ROWS.forEach(function (r, i) {
+          timers.push(setTimeout(function () {
+            var div = document.createElement('div');
+            div.className = 'row';
+            div.innerHTML = '<span class="k">' + r[0] + '</span><span class="v">' + r[1] + '</span>';
+            out.appendChild(div);
+            if (i === ROWS.length - 1) {
+              var seal = document.createElement('div');
+              seal.className = 'seal';
+              seal.textContent = '✓ 口径：只收录可回溯的证据 · 拒绝项单列 · 演示';
+              out.appendChild(seal);
+              count.textContent = '已生成 8 项'; status.textContent = '可交付；拒绝项与未决事项已单列'; btn.disabled = false; btn.textContent = '重新生成'; btn.dataset.state = 'done';
+            }
+          }, RM ? 0 : 150 + i * 180));
         });
-        timers.push(setTimeout(function () {
-          md = MD; pre.textContent = md;
-          sum.innerHTML = '<span>文献 <b>12</b></span><span>结论 <b>7</b></span><span>逐字一致 <b>6</b></span><span>口径冲突 <b style="color:var(--gold)">1</b></span><span>拒绝 <b>2</b></span>';
-          out.hidden = false; btn.disabled = false; btn.textContent = '重新生成'; btn.dataset.state = 'done'; status.textContent = '报告已生成（演示数据）';
-        }, steps.length * gap + (RM ? 0 : 200)));
       }
-      copy.addEventListener('click', function () {
-        function fallback() {
-          var ta = document.createElement('textarea'); ta.value = md; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
-          var ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-          ta.remove(); status.textContent = ok ? '已复制到剪贴板' : '复制失败，请在文本框内手动选择复制';
-        }
-        if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(md).then(function () { status.textContent = '已复制到剪贴板'; }, fallback); } else { fallback(); }
-      });
-      btn.addEventListener('click', run);
+      btn.addEventListener('click', function () { if (btn.dataset.state === 'done') { btn.textContent = '生成报告'; btn.dataset.state = 'idle'; } run(); });
       return clearT;
     }
   };
 
-  var DEMOS = { graph: demoGraph, cite: demoCite, refuse: demoRefuse, report: demoReport };
+  var DEMOS = { search: demoSearch, cite: demoCite, refuse: demoRefuse, report: demoReport };
 })();
 </script>
 </body>
