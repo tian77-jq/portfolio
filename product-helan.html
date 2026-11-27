@@ -1,242 +1,732 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>贺兰有灵 · 多 Agent 文旅规划 — 田德盛 Agent 工程</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>贺兰有灵 · 宁夏文旅行程 Agent</title>
+<meta name="description" content="一句话说出偏好，生成一条走得通的贺兰山行程：三天动线、预算与时间表、地理可达性校验、带出处的文化解说。">
+<meta name="color-scheme" content="dark">
 <script src="data/metrics.js"></script>
 <style>
-  :root{
-    --bg:#0a0a1f; --bg2:#1a1238; --panel:rgba(60,44,110,.35); --line:rgba(180,160,255,.18);
-    --ink:#f4efff; --muted:#c0b6e0; --faint:#887fb0; --violet:#a98bff; --violet2:#d3c1ff;
-    --pink:#ff9ec7; --amber:#ffd48a; --cyan:#8ee6ff; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  }
-  *,*::before,*::after{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
-  body{margin:0;overflow-x:clip;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-    color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
-  a{color:inherit}
-  .skip{position:absolute;left:12px;top:-64px;z-index:100;padding:10px 14px;background:var(--violet);color:#100a24;border-radius:8px;text-decoration:none;font-weight:600}
-  .skip:focus{top:12px}
-  :where(a,button,[tabindex]):focus-visible{outline:3px solid var(--violet2);outline-offset:3px;border-radius:5px}
-  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+:root{
+  --bg:#0b0d1f;--bg2:#12142b;--ink:#eceaf7;--muted:#a7a4c4;--dim:#6d6a8e;
+  --line:rgba(236,234,247,.12);--line2:rgba(236,234,247,.06);--panel:rgba(255,255,255,.035);
+  --violet:#8b7cf6;--violet2:#b9adff;--soft:rgba(139,124,246,.16);
+  --gold:#f0c46a;--gold-soft:rgba(240,196,106,.14);
+  --bad:#ef7c8a;--bad-soft:rgba(239,124,138,.15);
+  --ok:#8fd3b6;--ok-soft:rgba(143,211,182,.14);
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+  --serif:"Noto Serif SC","Songti SC","STSong","SimSun",Georgia,serif;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;overflow-x:clip;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1120px,100% - 48px);margin-inline:auto}
+@media (max-width:600px){.wrap{width:calc(100% - 32px)}}
 
-  .nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(14px);background:rgba(10,10,31,.72);border-bottom:1px solid var(--line)}
-  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:700;text-decoration:none}
-  .brand .seal{width:26px;height:26px;border:1.5px solid var(--violet);border-radius:7px;display:grid;place-items:center;font-family:var(--mono);font-size:13px;color:var(--violet2)}
-  .navlinks{display:flex;gap:6px;flex-wrap:wrap}
-  .navlinks a{font-size:13.5px;color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:7px}
-  .navlinks a:hover{color:var(--ink);background:rgba(255,255,255,.06)}
+/* 导航 */
+.nav{position:fixed;inset:0 0 auto 0;z-index:50;height:64px;display:flex;align-items:center;background:rgba(11,13,31,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line2)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--violet2)}
+.brand-name{font-family:var(--serif);font-size:20px;color:var(--ink);letter-spacing:.14em;line-height:1}
+.brand-sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-top:5px}
+.nav nav{display:flex;gap:4px}
+.nav nav a{padding:8px 14px;border-radius:8px;font-size:14px;color:var(--muted);text-decoration:none;transition:color .2s,background .2s;white-space:nowrap}
+.nav nav a:hover{color:var(--ink);background:rgba(255,255,255,.05)}
 
-  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);
-    background:radial-gradient(1100px 420px at 70% -10%,rgba(169,139,255,.22),transparent 60%),linear-gradient(180deg,#0a0a1f,#140e30)}
-  #sky{position:absolute;inset:0;width:100%;height:100%}
-  .ridge{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:150px;opacity:.9}
-  .hero .wrap{position:relative;z-index:3;padding-top:82px;padding-bottom:96px}
-  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--violet2);
-    text-transform:uppercase;border:1px solid rgba(169,139,255,.35);border-radius:999px;padding:6px 14px;background:rgba(169,139,255,.08)}
-  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--pink);box-shadow:0 0 12px var(--pink);animation:twinkle 2.4s infinite}
-  .hero h1{font-size:clamp(30px,5vw,54px);line-height:1.15;margin:22px 0 14px;letter-spacing:-.02em}
-  .hero h1 .g{background:linear-gradient(100deg,var(--violet2),var(--pink) 55%,var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .hero p.lead{font-size:clamp(15px,2vw,18px);color:var(--muted);max-width:660px;margin:0 0 28px}
-  .cta{display:flex;gap:12px;flex-wrap:wrap}
-  .btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;
-    cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,border-color .15s}
-  .btn:hover{transform:translateY(-2px);border-color:rgba(169,139,255,.5)}
-  .btn.primary{background:linear-gradient(120deg,var(--violet),var(--pink));color:#150a24;border-color:transparent;box-shadow:0 8px 30px rgba(169,139,255,.28)}
-  .hero .trust{display:flex;gap:26px;flex-wrap:wrap;margin-top:40px;padding-top:22px;border-top:1px solid var(--line)}
-  .hero .trust div{display:flex;flex-direction:column}
-  .hero .trust b{font-family:var(--mono);font-size:21px;color:var(--violet2)}
-  .hero .trust span{font-size:12px;color:var(--faint)}
+/* 按钮 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s,border-color .2s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{color:#120f2b;background:linear-gradient(135deg,#c7bcff,#8b7cf6 55%,#6a5ae0);box-shadow:0 8px 28px -10px rgba(139,124,246,.7),inset 0 1px 0 rgba(255,255,255,.4)}
+.btn-primary:hover{box-shadow:0 12px 34px -10px rgba(139,124,246,.9)}
+.btn-ghost{color:var(--ink);border-color:var(--line);background:rgba(255,255,255,.03)}
+.btn-ghost:hover{border-color:rgba(185,173,255,.6);background:rgba(139,124,246,.08)}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:999px}
+.btn[disabled]{opacity:.55;cursor:default;transform:none}
 
-  section{padding:74px 0}
-  .sec-head{margin-bottom:30px}
-  .sec-head h2{font-size:clamp(23px,3.4vw,32px);margin:0 0 8px;letter-spacing:-.015em}
-  .sec-head p{color:var(--muted);margin:0;max-width:640px}
-  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--violet2);text-transform:uppercase}
+/* Hero */
+.hero{position:relative;padding:150px 0 120px;min-height:92vh;display:flex;align-items:center;overflow:hidden;
+  background:radial-gradient(900px 500px at 80% -10%,rgba(139,124,246,.22),transparent 60%),radial-gradient(700px 420px at 10% 20%,rgba(240,196,106,.08),transparent 60%),linear-gradient(180deg,#0b0d1f 0%,#141633 55%,#1b1740 100%)}
+#bg-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.mountains{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:clamp(140px,26vw,300px);pointer-events:none}
+.mountains path{fill:#12112a}
+.mountains path.back{fill:#1a1738;opacity:.9}
+.mountains path.front{fill:#0c0b20}
+.moon{position:absolute;top:14%;right:12%;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#fff6dc,#f0c46a 55%,rgba(240,196,106,0) 72%);opacity:.9;filter:blur(.3px);animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.04);opacity:1}}
+.hero-grid{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.08em;color:var(--gold);margin:0 0 18px}
+.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(240,196,106,.18);animation:pulse 2.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(240,196,106,.18)}50%{box-shadow:0 0 0 10px rgba(240,196,106,.04)}}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(32px,4.4vw,54px);line-height:1.25;margin:0 0 22px}
+h1 em{font-style:normal;background:linear-gradient(92deg,#f6e7bd,#f0c46a 45%,#b9adff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:17px;color:var(--muted);max-width:520px;margin:0 0 32px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.hero-tags{list-style:none;display:flex;flex-wrap:wrap;gap:8px 20px;margin:0;padding:0;font-size:13px;color:var(--dim)}
+.hero-tags li::before{content:"✦";display:inline-block;margin-right:8px;color:var(--gold);font-size:11px;vertical-align:middle}
 
-  /* 行程生成 */
-  .tripbox{border:1px solid var(--line);border-radius:16px;background:linear-gradient(160deg,rgba(60,44,110,.35),rgba(15,12,40,.6));padding:22px;margin-bottom:18px}
-  .tripbox .q{font-size:15px;color:var(--ink);margin-bottom:14px}
-  .tripbox .q span{color:var(--violet2)}
-  .genbtn{border:0;background:linear-gradient(120deg,var(--violet),var(--pink));color:#150a24;padding:11px 18px;border-radius:9px;font-weight:700;cursor:pointer}
-  .timeline{display:none;margin-top:20px;position:relative;padding-left:26px}
-  .timeline.show{display:block;animation:fadeup .4s ease}
-  .timeline::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--violet),var(--pink),var(--amber))}
-  .tl{position:relative;padding:0 0 16px}
-  .tl::before{content:"";position:absolute;left:-23px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--violet2);box-shadow:0 0 12px var(--violet)}
-  .tl .t{font-family:var(--mono);font-size:12px;color:var(--pink)}
-  .tl h4{margin:2px 0 2px;font-size:15px}
-  .tl p{margin:0;font-size:12.5px;color:var(--muted)}
-  .budget{margin-top:6px;color:var(--amber);font-family:var(--mono)}
+/* Hero 右侧：行程卡 */
+.route-card{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));border:1px solid var(--line);border-radius:18px;padding:24px 26px;box-shadow:0 30px 70px -30px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.08);animation:float 8s ease-in-out infinite}
+.route-card::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;border-radius:18px 18px 0 0;background:linear-gradient(90deg,var(--gold),var(--violet),transparent)}
+.route-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:12px;margin-bottom:14px;border-bottom:1px dashed var(--line)}
+.route-head strong{font-family:var(--serif);font-size:17px;letter-spacing:.06em}
+.route-head span{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.days{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.days li{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:10px 12px;border-radius:10px;animation:row 7s ease-in-out infinite}
+.days li:nth-child(1){animation-delay:0s}.days li:nth-child(2){animation-delay:1.6s}.days li:nth-child(3){animation-delay:3.2s}
+.days .d{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:700;padding-top:2px}
+.days strong{display:block;font-size:14px;margin-bottom:2px}
+.days span{font-size:12.5px;color:var(--muted);line-height:1.6}
+@keyframes row{0%,12%,100%{background:transparent}18%,72%{background:rgba(139,124,246,.12)}}
+.route-foot{margin-top:14px;padding:10px 12px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid var(--line2);font-size:12px;color:var(--muted);line-height:1.8}
+.route-foot b{color:var(--violet2);font-family:var(--mono);font-weight:600}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
-  .demos{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
-  .demo{border:1px solid var(--line);border-radius:16px;background:linear-gradient(160deg,rgba(60,44,110,.3),rgba(15,12,40,.55));padding:22px;transition:border-color .2s,transform .2s}
-  .demo:hover{border-color:rgba(169,139,255,.5);transform:translateY(-3px)}
-  .demo .ico{width:42px;height:42px;border-radius:11px;background:rgba(169,139,255,.12);border:1px solid rgba(169,139,255,.32);display:grid;place-items:center;font-size:20px;margin-bottom:14px}
-  .demo h3{font-size:17px;margin:0 0 6px}
-  .demo p.d{color:var(--muted);font-size:13.5px;margin:0 0 16px;min-height:42px}
-  .demo .run{border:1px solid rgba(169,139,255,.32);background:rgba(169,139,255,.14);color:var(--violet2);padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
-  .demo .out{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;font-size:13px;color:var(--muted);display:none}
-  .demo .out.show{display:block;animation:fadeup .35s ease}
-  .chip{display:inline-block;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);margin:3px;font-size:12px}
-  .path{color:var(--cyan);font-family:var(--mono);font-size:12px;line-height:1.8}
-  .ok{color:var(--green,#8fd07a)}
+/* 区块 */
+.section{padding:96px 0}
+.sec-head{margin-bottom:44px}
+.sec-head h2{font-family:var(--serif);font-size:clamp(26px,3vw,36px);font-weight:600;margin:0 0 12px}
+.sec-head p{color:var(--muted);margin:0;max-width:660px}
+.sec-head code{font-family:var(--mono);font-size:.9em;color:var(--violet2);background:var(--soft);padding:1px 6px;border-radius:4px}
 
-  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
-  .metric{border:1px solid var(--line);border-radius:13px;padding:18px;background:rgba(15,12,40,.6)}
-  .metric .k{font-size:12px;color:var(--faint)}
-  .metric .v{font-family:var(--mono);font-size:27px;color:var(--violet2);margin:6px 0 2px}
-  .metric .s{font-size:12px;color:var(--muted)}
+/* 行程时间轴 */
+.timeline{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:0;padding:0;list-style:none}
+.timeline::before{content:"";position:absolute;left:6%;right:6%;top:11px;height:1px;background:linear-gradient(90deg,transparent,var(--violet) 15%,var(--gold) 85%,transparent);opacity:.6}
+.tl{position:relative;padding:36px 22px 0}
+.tl::before{content:"";position:absolute;top:5px;left:22px;width:13px;height:13px;border-radius:50%;background:var(--bg);border:2px solid var(--gold);box-shadow:0 0 0 5px rgba(240,196,106,.12)}
+.tl .d{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.1em}
+.tl h3{margin:4px 0 8px;font-size:17px}
+.tl p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.7}
+.tl .stop{display:inline-block;margin:10px 6px 0 0;padding:3px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--violet2);background:rgba(139,124,246,.08)}
 
-  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:13px}
-  footer .wrap{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
-  footer a{color:var(--violet2);text-decoration:none}
+/* 流程 */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;position:relative}
+.flow::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--violet),var(--gold),transparent)}
+.flow li{padding:20px 22px;border-right:1px solid var(--line)}
+.flow li:last-child{border-right:0}
+.flow .n{font-family:var(--mono);color:var(--violet2);font-size:13px;letter-spacing:.1em;display:block;margin-bottom:6px}
+.flow strong{display:block;font-size:15px;margin-bottom:2px}
+.flow span{font-size:13px;color:var(--dim)}
 
-  @keyframes twinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
-  @keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-  @media(max-width:767px){.navlinks{display:none}.hero .wrap{padding-top:54px;padding-bottom:70px}section{padding:52px 0}.hero .trust{gap:18px}.ridge{height:100px}}
-  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* 功能 */
+.features{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.feature{position:relative;display:block;border-radius:16px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));overflow:hidden;text-decoration:none;transition:transform .35s,border-color .35s,box-shadow .35s}
+.feature::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 220px at 100% 0%,rgba(139,124,246,.18),transparent 60%);opacity:0;transition:opacity .35s;pointer-events:none}
+.feature:hover{transform:translateY(-4px);border-color:rgba(185,173,255,.45);box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+.feature:hover::before{opacity:1}
+.feature-in{display:block;padding:28px}
+.feature-icon{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;color:var(--gold);background:var(--gold-soft);border:1px solid rgba(240,196,106,.3);margin-bottom:18px}
+.feature h3{margin:0 0 8px;font-size:19px;font-weight:600}
+.feature p{margin:0 0 18px;color:var(--muted);font-size:14.5px}
+.feature .try{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--violet2)}
+.feature .try::after{content:"→";transition:transform .3s}
+.feature:hover .try::after{transform:translateX(4px)}
+
+/* 指标 */
+.metric-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.metric{padding:22px 24px;border-radius:14px;border:1px solid var(--line);background:var(--panel);position:relative;overflow:hidden}
+.metric::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--violet),transparent)}
+.metric .k{font-size:13px;color:var(--dim);margin:0 0 8px}
+.metric .v{font-family:var(--serif);font-size:clamp(26px,3vw,36px);color:var(--ink);margin:0;line-height:1.1;font-variant-numeric:tabular-nums}
+.metric .v small{font-size:14px;color:var(--muted);font-family:var(--sans);margin-left:4px}
+.table-wrap{border:1px solid var(--line);border-radius:14px;overflow-x:auto;background:var(--panel)}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+th,td{padding:14px 18px;text-align:left;border-bottom:1px solid var(--line2);white-space:nowrap}
+th{font-size:12px;letter-spacing:.06em;color:var(--dim);font-weight:600;background:rgba(255,255,255,.02)}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.dash{color:var(--dim)}
+.note{font-size:13px;color:var(--dim);margin:14px 0 0}
+
+/* 页脚 */
+footer{border-top:1px solid var(--line);padding:40px 0 48px;background:rgba(0,0,0,.2)}
+.foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px}
+.foot-links{display:flex;gap:10px;flex-wrap:wrap}
+.foot-links a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1px solid var(--line);font-size:14px;text-decoration:none;color:var(--muted);transition:.2s}
+.foot-links a:hover{color:var(--ink);border-color:rgba(185,173,255,.5)}
+.foot p{margin:0;font-size:13px;color:var(--dim)}
+
+/* 弹窗 */
+dialog{border:0;padding:0;background:transparent;color:var(--ink);width:min(960px,calc(100% - 32px));max-height:calc(100vh - 48px);margin:auto}
+dialog::backdrop{background:rgba(5,6,16,.74);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+.modal-box{background:#12142b;border:1px solid var(--line);border-radius:18px;box-shadow:0 40px 100px -40px rgba(0,0,0,.9),0 0 0 1px rgba(139,124,246,.1);display:flex;flex-direction:column;max-height:calc(100vh - 48px);overflow:hidden}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 24px;border-bottom:1px solid var(--line)}
+.modal-head h3{margin:0;font-family:var(--serif);font-size:20px;font-weight:600}
+.modal-head .sub{font-size:13px;color:var(--dim);margin-top:2px}
+.modal-close{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer;display:grid;place-items:center;font-size:18px;line-height:1;transition:.2s}
+.modal-close:hover{border-color:rgba(185,173,255,.5);color:var(--violet2)}
+.modal-body{padding:24px;overflow:auto}
+.modal-foot{padding:12px 24px;border-top:1px solid var(--line2);font-size:12px;color:var(--dim)}
+
+/* 演示通用 */
+.demo-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:20px}
+.panel{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);padding:18px 20px}
+.panel-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--dim);letter-spacing:.04em;padding-bottom:10px;margin-bottom:12px;border-bottom:1px dashed var(--line)}
+.status{font-size:13px;color:var(--muted)}
+.demo-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13px;color:var(--muted);cursor:pointer;transition:.2s}
+.chip:hover{border-color:rgba(185,173,255,.5);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--soft);border-color:rgba(185,173,255,.6);color:var(--violet2)}
+.field{margin-bottom:12px}
+.field .lbl{font-size:12px;color:var(--dim);margin:0 0 6px;display:flex;justify-content:space-between;gap:8px}
+.field .lbl b{color:var(--violet2);font-family:var(--mono);font-weight:600}
+@keyframes in{to{opacity:1;transform:none}}
+.itin{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.itin li{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);padding:12px 14px;opacity:0;transform:translateY(8px);animation:in .45s ease-out forwards}
+.itin .d{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:700;letter-spacing:.08em}
+.itin strong{display:block;font-size:14px;margin:2px 0 4px}
+.itin p{margin:0;font-size:13px;color:var(--muted);line-height:1.7}
+.itin .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.itin .meta span{font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid var(--line2);color:var(--violet2);background:rgba(139,124,246,.08)}
+.placeholder{color:var(--dim);font-size:13px;padding:14px;border:1px dashed var(--line);border-radius:10px;text-align:center;list-style:none}
+
+/* 演示 2：预算 */
+.budget{margin:0;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,rgba(240,196,106,.08),rgba(0,0,0,.2))}
+.budget .big{font-family:var(--serif);font-size:clamp(24px,3vw,32px);font-weight:600;color:var(--gold);line-height:1.1}
+.budget .big small{font-size:13px;color:var(--muted);font-family:var(--sans);margin-left:6px}
+.budget .sub{font-size:13px;color:var(--muted);margin-top:6px}
+.budget .total{font-size:13px;color:var(--ink);margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.sched{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:6px;font-size:13px}
+.sched li{display:grid;grid-template-columns:74px 1fr auto;gap:10px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,.03);border:1px solid var(--line2)}
+.sched .t{font-family:var(--mono);color:var(--gold)}
+.sched .c{color:var(--muted);font-family:var(--mono)}
+
+/* 演示 3：可达性 */
+.legs{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.legs li{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:14px}
+.legs .r{color:var(--muted);font-size:12.5px;display:block;margin-top:2px}
+.legs .tag{font-family:var(--mono);font-size:12px;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.tag-ok{color:#c6efdd;background:var(--ok-soft);border:1px solid rgba(143,211,182,.35)}
+.tag-bad{color:#ffc4cc;background:var(--bad-soft);border:1px solid rgba(239,124,138,.4)}
+.legs li.bad{border-color:rgba(239,124,138,.4)}
+.legs li.ok-checked{animation:in .3s ease-out}
+
+/* 演示 4：解说 */
+.spots{display:grid;gap:8px}
+.spot{text-align:left;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer;font-size:14px;transition:.2s}
+.spot:hover{border-color:rgba(185,173,255,.5)}
+.spot[aria-expanded="true"]{border-color:rgba(240,196,106,.5);background:rgba(240,196,106,.06)}
+.spot-body{padding:0 14px 12px;font-size:13.5px;color:#d6d2ee;line-height:1.8}
+.spot-body .src{display:inline-block;margin-top:8px;font-size:12px;color:var(--gold);border-top:1px dashed var(--line);padding-top:8px;width:100%}
+.spot-wrap{border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.02);overflow:hidden}
+
+/* 响应式 */
+@media (max-width:960px){.hero{min-height:0;padding-top:124px}.hero-grid{grid-template-columns:1fr;gap:44px}.metric-cards{grid-template-columns:repeat(2,1fr)}.timeline{grid-template-columns:1fr;gap:18px}.timeline::before{display:none}}
+@media (max-width:720px){
+  .features{grid-template-columns:1fr}
+  .flow{grid-template-columns:repeat(2,1fr)}
+  .flow li{border-bottom:1px solid var(--line)}
+  .flow li:nth-child(even){border-right:0}
+  .flow li:last-child{border-bottom:0}
+  .demo-grid{grid-template-columns:1fr}
+  .section{padding:64px 0}
+  .nav nav a{padding:8px 10px}
+  .brand-sub{display:none}
+  .moon{width:80px;height:80px;right:8%}
+}
+@media (max-width:480px){.hero-cta .btn{flex:1}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .itin li,.legs li.ok-checked{opacity:1;transform:none;animation:none}
+  .days li{animation:none;background:transparent}
+}
 </style>
 </head>
 <body>
-<a class="skip" href="#main">跳到主内容</a>
-<nav class="nav"><div class="wrap">
-  <a class="brand" href="index.html"><span class="seal">贺</span> 贺兰有灵 <span style="color:var(--faint);font-weight:400">/ 文旅规划</span></a>
-  <div class="navlinks"><a href="#trip">行程生成</a><a href="#demo">功能演示</a><a href="#metrics">验证</a><a href="projects.html">← 返回产品矩阵</a></div>
-</div></nav>
 
-<header class="hero">
-  <canvas id="sky" aria-hidden="true"></canvas>
-  <svg class="ridge" viewBox="0 0 1200 150" preserveAspectRatio="none" aria-hidden="true">
-    <defs><linearGradient id="rg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1d52"/><stop offset="1" stop-color="#0a0a1f"/></linearGradient></defs>
-    <path d="M0 150 L0 105 L120 78 L250 96 L380 55 L500 88 L640 40 L760 82 L900 58 L1040 95 L1200 66 L1200 150 Z" fill="url(#rg)"/>
-    <path d="M0 150 L0 130 L160 112 L300 128 L460 100 L600 126 L760 104 L920 130 L1080 112 L1200 128 L1200 150 Z" fill="#120c2c" opacity=".85"/>
-  </svg>
+<header class="nav">
   <div class="wrap">
-    <span class="eyebrow"><span class="dot"></span> Multi-Agent Trip Planner · 宁夏</span>
-    <h1>一句话，<br><span class="g">变成一段自洽的旅程。</span></h1>
-    <p class="lead">把「贺兰山一日游」这类模糊需求，变成地点、动线、预算与讲解内容相互一致的可执行行程。多 Agent 分工，端到端判分。</p>
-    <div class="cta">
-      <a class="btn primary" href="#trip">直接生成行程 ↓</a>
-      <a class="btn" href="https://github.com/tian77-jq/helan-lingyou-agent" target="_blank" rel="noopener">查看源码 ↗</a>
-    </div>
-    <div class="trust">
-      <div><b id="t-e2e">—</b><span>端到端通过率</span></div>
-      <div><b id="t-lat">—</b><span>平均延迟</span></div>
-      <div><b id="t-safe">—</b><span>安全套件</span></div>
-      <div><b>多 Agent</b><span>行程协同</span></div>
-    </div>
+    <a class="brand" href="#top" aria-label="贺兰有灵 · 回到顶部">
+      <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true"><rect x="2" y="2" width="32" height="32" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4 27l8-13 5 7 4-5 11 11z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M25 9.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="currentColor"/></svg>
+      <span class="brand-name">贺兰有灵</span>
+      <span class="brand-sub">Helan Travel Agent</span>
+    </a>
+    <nav aria-label="页面导航">
+      <a href="#features">功能</a>
+      <a href="#metrics">指标</a>
+      <a href="https://github.com/tian77-jq/helan-lingyou-agent" target="_blank" rel="noopener">源码</a>
+    </nav>
   </div>
 </header>
 
-<main id="main">
-<section id="trip"><div class="wrap">
-  <div class="sec-head"><span class="kicker">01 / 行程直达</span>
-    <h2>输入一句话，立刻看到行程</h2>
-    <p>地点、动线、预算、讲解必须自洽——点生成试试。</p>
-  </div>
-  <div class="tripbox">
-    <div class="q">需求：<span>「周末想从银川出发去贺兰山玩一天，预算 300 以内，喜欢星空和岩画」</span></div>
-    <button class="genbtn" id="genTrip">✦ 生成可执行行程</button>
-    <div class="timeline" id="timeline" role="status" aria-live="polite">
-      <div class="tl"><div class="t">08:30</div><h4>银川市区 → 贺兰山岩画</h4><p>公交 + 景区接驳，约 1.5h；含岩画讲解要点</p></div>
-      <div class="tl"><div class="t">11:00</div><h4>贺兰山岩画景区</h4><p>太阳神岩画、宁夏岩画博物馆，讲解内容已核准</p></div>
-      <div class="tl"><div class="t">14:00</div><h4>张裕摩塞尔十五世酒庄</h4><p>动线顺路，含品鉴说明</p></div>
-      <div class="tl"><div class="t">19:30</div><h4>星空观测点</h4><p>远离光污染，附当月星空看点</p></div>
-      <div class="budget">预算核验：门票 + 交通 + 餐饮 ≈ ¥286 / 300 ✓ 自洽</div>
+<main id="top">
+  <section class="hero">
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="moon" aria-hidden="true"></div>
+    <svg class="mountains" viewBox="0 0 1440 300" preserveAspectRatio="none" aria-hidden="true">
+      <path class="back" d="M0 300V190l90-50 80 40 110-95 90 70 120-110 100 80 90-50 130 100 110-70 120 95 100-60 130 90V300z"/>
+      <path class="front" d="M0 300V240l70-30 100 45 120-80 90 50 130-70 110 60 100-40 140 70 120-50 130 60 110-40 120 50 110-30 110 40V300z"/>
+    </svg>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="dot"></span>宁夏文旅行程 Agent · 贺兰山东麓</p>
+        <h1>一句话说出偏好，<br><em>还你一条走得通的贺兰山行程。</em></h1>
+        <p class="lead">贺兰有灵把「想看岩画、带孩子、不想赶路」这样的偏好，变成三天动线、预算与时间表，先校验车程可达，再附上带出处的文化解说。</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#features">试用功能演示</a>
+          <a class="btn btn-ghost" href="#metrics">查看核验指标</a>
+        </div>
+        <ul class="hero-tags">
+          <li>行程按地理可达性校验</li>
+          <li>预算区间不虚报</li>
+          <li>每段解说都给出处</li>
+        </ul>
+      </div>
+
+      <div class="hero-visual">
+        <div class="route-card" aria-label="三日行程示意（演示数据）">
+          <div class="route-head"><strong>贺兰山 · 三日慢行</strong><span>Route · 3D2N</span></div>
+          <ol class="days">
+            <li><span class="d">D1</span><div><strong>抵达银川 · 影城 · 夜市</strong><span>镇北堡西部影城 → 贺兰山·1958 文创园 → 怀远夜市</span></div></li>
+            <li><span class="d">D2</span><div><strong>岩画 · 双塔 · 酒庄</strong><span>贺兰山岩画 → 拜寺口双塔 → 志辉源石酒庄（日落品鉴）</span></div></li>
+            <li><span class="d">D3</span><div><strong>苏峪口 · 西夏陵 · 返程</strong><span>贺兰山国家森林公园 → 西夏陵 → 河东机场</span></div></li>
+          </ol>
+          <div class="route-foot">已校验 <b>6</b> 段车程 · 最长单程 <b>72 min</b> · 不可达 <b>0</b> 段 · 解说引用 <b>6</b> 条</div>
+        </div>
+      </div>
     </div>
-  </div>
-</div></section>
+  </section>
 
-<section id="demo"><div class="wrap">
-  <div class="sec-head"><span class="kicker">02 / 功能直达</span>
-    <h2>行程之外的三个关键能力</h2>
-  </div>
-  <div class="demos">
-    <div class="demo"><div class="ico">🧭</div><h3>动线校验</h3>
-      <p class="d">景点顺序按地理动线排列，不出现折返与绕路。</p>
-      <button class="run" data-run="path">▶ 查看动线</button>
-      <div class="out" id="out-path" role="status" aria-live="polite"></div></div>
-    <div class="demo"><div class="ico">💰</div><h3>预算自洽</h3>
-      <p class="d">门票、交通、餐饮逐项核算，不超预算、不漏项。</p>
-      <button class="run" data-run="budget">▶ 查看核算</button>
-      <div class="out" id="out-budget" role="status" aria-live="polite"></div></div>
-    <div class="demo"><div class="ico">🛡</div><h3>安全护栏</h3>
-      <p class="d">越界与敏感请求明确拒绝，行程内容可信可控。</p>
-      <button class="run" data-run="guard">▶ 测试护栏</button>
-      <div class="out" id="out-guard" role="status" aria-live="polite"></div></div>
-  </div>
-</div></section>
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <ol class="timeline" aria-label="三日行程时间轴示意">
+        <li class="tl"><span class="d">DAY 1</span><h3>从城里出发，先看光影</h3><p>下午抵银川，先去影城看一场落日，再去夜市吃第一顿。</p><span class="stop">镇北堡西部影城</span><span class="stop">贺兰山·1958</span><span class="stop">怀远夜市</span></li>
+        <li class="tl"><span class="d">DAY 2</span><h3>沿着岩画一路向西</h3><p>上午看岩画，中午在山脚下吃饭，下午双塔与酒庄，傍晚留在葡萄园。</p><span class="stop">贺兰山岩画</span><span class="stop">拜寺口双塔</span><span class="stop">志辉源石酒庄</span></li>
+        <li class="tl"><span class="d">DAY 3</span><h3>进山，再回望一座陵</h3><p>早上进苏峪口走一段栈道，午后看西夏陵，傍晚返程。</p><span class="stop">苏峪口森林公园</span><span class="stop">西夏陵</span><span class="stop">河东机场</span></li>
+      </ol>
+    </div>
+  </section>
 
-<section id="metrics"><div class="wrap">
-  <div class="sec-head"><span class="kicker">03 / 真实验证</span>
-    <h2>端到端判分，不只看单步</h2>
-    <p>结果来自评测中心真实归档，数据未就绪显示"—"。</p>
-  </div>
-  <div class="metrics">
-    <div class="metric"><div class="k">端到端交付物判分</div><div class="v" id="m-e2e">—</div><div class="s">40 例</div></div>
-    <div class="metric"><div class="k">平均延迟</div><div class="v" id="m-lat">—</div><div class="s">含地图与预算核验</div></div>
-    <div class="metric"><div class="k">安全套件 BLOCK 组</div><div class="v" id="m-safe">—</div><div class="s">当前最大短板</div></div>
-  </div>
-</div></section>
+  <section class="section" style="padding-top:24px">
+    <div class="wrap">
+      <ol class="flow" aria-label="行程生成流程">
+        <li><span class="n">01</span><strong>听懂偏好</strong><span>主题、同行人、节奏、天数</span></li>
+        <li><span class="n">02</span><strong>编排动线</strong><span>按地理顺序排景点，不折返</span></li>
+        <li><span class="n">03</span><strong>校验可达</strong><span>车程、开放时间、冬季封路</span></li>
+        <li><span class="n">04</span><strong>预算与解说</strong><span>预算区间、每日时间表、带出处讲解</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="features" style="padding-top:32px">
+    <div class="wrap">
+      <header class="sec-head">
+        <h2>功能直达</h2>
+        <p>点开卡片即可上手，不用配置。演示数据为模拟语境，地点与车程基于公开路线估算。</p>
+      </header>
+      <div class="features">
+        <a class="feature" href="#features" data-demo="plan" aria-haspopup="dialog">
+          <span class="feature-in">
+            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg></span>
+            <h3>自然语言生成行程</h3>
+            <p>点几个偏好标签，立刻生成一条三天的动线，每天的景点按地理顺序排好。</p>
+            <span class="try">点击体验</span>
+          </span>
+        </a>
+        <a class="feature" href="#features" data-demo="budget" aria-haspopup="dialog">
+          <span class="feature-in">
+            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <h3>预算与时间表</h3>
+            <p>选人数和天数，给出每人预算区间、总预算，以及一天从早到晚的时间表。</p>
+            <span class="try">点击体验</span>
+          </span>
+        </a>
+        <a class="feature" href="#features" data-demo="reach" aria-haspopup="dialog">
+          <span class="feature-in">
+            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
+            <h3>地理可达性校验</h3>
+            <p>点「检查车程」，逐段看距离与时长，走不通的段落会直接标出原因。</p>
+            <span class="try">点击体验</span>
+          </span>
+        </a>
+        <a class="feature" href="#features" data-demo="culture" aria-haspopup="dialog">
+          <span class="feature-in">
+            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/><path d="M9 8h6"/></svg></span>
+            <h3>文化解说</h3>
+            <p>点开任意景点，看讲解要点和出处；引用来源写明，不瞎编典故。</p>
+            <span class="try">点击体验</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="metrics" style="padding-top:32px">
+    <div class="wrap">
+      <header class="sec-head">
+        <h2>核验指标</h2>
+        <p>读取 <code>window.METRICS.suites</code>（<code>data/metrics.js</code>），仅统计 <code>adapter</code> 为 <code>helan</code> 或 <code>helan_planner</code> 的套件；字段缺失时显示 —，不编造。</p>
+      </header>
+      <div class="metric-cards" id="metric-cards" aria-live="polite"></div>
+      <div class="table-wrap">
+        <table id="metric-table">
+          <thead><tr><th scope="col">套件</th><th scope="col">产品</th><th scope="col">通过率</th><th scope="col">通过 ÷ 用例</th><th scope="col">平均耗时</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="note" id="metric-note"></p>
+    </div>
+  </section>
 </main>
 
-<footer><div class="wrap">
-  <div>田德盛 · Agent 工程 · 贺兰有灵多 Agent 文旅规划</div>
-  <div><a href="https://github.com/tian77-jq/helan-lingyou-agent" target="_blank" rel="noopener">源码</a> · <a href="index.html">返回作品集</a></div>
-</div></footer>
+<footer>
+  <div class="wrap foot">
+    <p>贺兰有灵 · 宁夏文旅行程 Agent · 纯静态单文件展示页</p>
+    <div class="foot-links">
+      <a href="https://github.com/tian77-jq/helan-lingyou-agent" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg>源码入口</a>
+      <a href="https://tian77-jq.github.io/portfolio/" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg>返回作品站</a>
+    </div>
+  </div>
+</footer>
+
+<dialog id="demo-modal" aria-labelledby="demo-title" aria-describedby="demo-sub">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div><h3 id="demo-title"></h3><div class="sub" id="demo-sub"></div></div>
+      <button type="button" class="modal-close" id="demo-close" aria-label="关闭演示">✕</button>
+    </div>
+    <div class="modal-body" id="demo-body"></div>
+    <div class="modal-foot">演示数据为模拟语境，仅用于展示交互方式；车程、价格与讲解内容为示意，出行请以景区与官方发布为准。</div>
+  </div>
+</dialog>
 
 <script>
-(function(){
-  "use strict";
-  // ---------- 星空 + 流星 ----------
-  var cv=document.getElementById("sky"),ctx=cv.getContext("2d"),W=0,H=0,dpr=window.devicePixelRatio||1;
-  var stars=[],shoot=null,reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  function resize(){var r=cv.getBoundingClientRect();W=r.width;H=r.height;
-    cv.width=Math.max(1,Math.floor(W*dpr));cv.height=Math.max(1,Math.floor(H*dpr));ctx.setTransform(dpr,0,0,dpr,0,0);
-    stars=[];var n=Math.max(60,Math.min(160,Math.floor(W/8)));
-    for(var i=0;i<n;i++)stars.push({x:Math.random()*W,y:Math.random()*H*.8,r:Math.random()*1.4+.3,p:Math.random()*Math.PI*2,sp:.01+Math.random()*.02});}
-  function draw(t){ctx.clearRect(0,0,W,H);
-    for(var i=0;i<stars.length;i++){var s=stars[i];var a=.4+.6*(.5+.5*Math.sin((reduce?0:t)*s.sp+s.p));
-      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle="rgba(255,245,220,"+a+")";ctx.fill();}
-    if(!reduce){if(!shoot&&Math.random()<.004)shoot={x:Math.random()*W*.7,y:Math.random()*H*.35,len:90,life:1};
-      if(shoot){var g=ctx.createLinearGradient(shoot.x,shoot.y,shoot.x+shoot.len,shoot.y+shoot.len*.5);
-        g.addColorStop(0,"rgba(255,255,255,"+shoot.life+")");g.addColorStop(1,"rgba(255,255,255,0)");
-        ctx.strokeStyle=g;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(shoot.x,shoot.y);ctx.lineTo(shoot.x+shoot.len,shoot.y+shoot.len*.5);ctx.stroke();
-        shoot.x+=7;shoot.y+=3.5;shoot.life-=.02;if(shoot.life<=0)shoot=null;}}
-    if(!reduce)requestAnimationFrame(draw);}
-  resize();draw(0);window.addEventListener("resize",function(){resize();if(reduce)draw(0);});
+(function () {
+  'use strict';
+  var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
 
-  var M = window.METRICS || { suites: [] };
-  var SUITES = Array.isArray(M.suites) ? M.suites : [];
-  function pct(x){return (x==null||isNaN(x))?"—":(Math.round(x*1000)/10)+"%";}
-  function ms(x){return (x==null||isNaN(x))?"—":(Math.round(x)+" ms");}
-  function findSuite(suite, adapter){
-    for(var i=0;i<SUITES.length;i++){var r=SUITES[i];
-      if(r.suite===suite && (!adapter || r.adapter===adapter)) return r;}
-    return null;
+  /* ---------- Hero 背景：星空粒子 + 流星 ---------- */
+  (function () {
+    var c = document.getElementById('bg-canvas'); if (!c) { return; }
+    var ctx = c.getContext('2d'); if (!ctx) { return; }
+    var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var w = 0, h = 0, t = 0, raf = 0, visible = true, stars = [], meteors = [], nextMeteor = 2.5;
+    function resize() {
+      var r = c.parentElement.getBoundingClientRect();
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = r.width; h = r.height;
+      c.width = Math.max(1, Math.round(w * dpr)); c.height = Math.max(1, Math.round(h * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      stars = [];
+      var n = Math.min(220, Math.round(w * h / 6500));
+      for (var i = 0; i < n; i++) {
+        stars.push({ x: Math.random() * w, y: Math.random() * h * 0.8, r: 0.4 + Math.random() * 1.3, p: Math.random() * Math.PI * 2, s: 0.4 + Math.random() * 1.2, warm: Math.random() < 0.3 });
+      }
+      draw();
+    }
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      var i, s;
+      for (i = 0; i < stars.length; i++) {
+        s = stars[i];
+        var a = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(t * s.s + s.p));
+        ctx.fillStyle = s.warm ? ('rgba(240,196,106,' + a.toFixed(3) + ')') : ('rgba(226,224,255,' + a.toFixed(3) + ')');
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+        if (s.r > 1.3) {
+          ctx.strokeStyle = s.warm ? ('rgba(240,196,106,' + (a * 0.35).toFixed(3) + ')') : ('rgba(226,224,255,' + (a * 0.35).toFixed(3) + ')');
+          ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.moveTo(s.x - 4, s.y); ctx.lineTo(s.x + 4, s.y); ctx.moveTo(s.x, s.y - 4); ctx.lineTo(s.x, s.y + 4); ctx.stroke();
+        }
+      }
+      for (i = meteors.length - 1; i >= 0; i--) {
+        var m = meteors[i];
+        m.x += m.vx; m.y += m.vy; m.life -= 0.02;
+        if (m.life <= 0) { meteors.splice(i, 1); continue; }
+        var g = ctx.createLinearGradient(m.x, m.y, m.x - m.vx * 14, m.y - m.vy * 14);
+        g.addColorStop(0, 'rgba(255,250,235,' + (0.9 * m.life).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(255,250,235,0)');
+        ctx.strokeStyle = g; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(m.x - m.vx * 14, m.y - m.vy * 14); ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(139,124,246,0.05)';
+      for (var gx = 0; gx < w; gx += 180) { ctx.fillRect(gx, 0, 1, h); }
+    }
+    function spawn() {
+      var x = w * (0.15 + Math.random() * 0.7), y = h * (0.05 + Math.random() * 0.3);
+      meteors.push({ x: x, y: y, vx: -(2.2 + Math.random() * 1.5), vy: 1.4 + Math.random() * 0.9, life: 1 });
+    }
+    function loop() {
+      if (!visible) { raf = 0; return; }
+      t += 1 / 60;
+      nextMeteor -= 1 / 60;
+      if (nextMeteor <= 0) { if (!mq.matches) { spawn(); } nextMeteor = 2.5 + Math.random() * 4; }
+      draw(); raf = requestAnimationFrame(loop);
+    }
+    function start() { if (mq.matches || raf) { return; } raf = requestAnimationFrame(loop); }
+    function stop() { if (raf) { cancelAnimationFrame(raf); raf = 0; } }
+    resize();
+    var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(resize, 150); });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (e) { visible = e[0].isIntersecting; if (visible) { start(); } else { stop(); } }, { threshold: 0 }).observe(c.parentElement);
+    }
+    if (mq.addEventListener) { mq.addEventListener('change', function () { if (mq.matches) { stop(); meteors = []; draw(); } else { start(); } }); }
+    start();
+  })();
+
+  /* ---------- 指标 ---------- */
+  (function () {
+    var DASH = '—';
+    var cards = document.getElementById('metric-cards');
+    var tbody = document.querySelector('#metric-table tbody');
+    var note = document.getElementById('metric-note');
+    var SUITES = window.METRICS && window.METRICS.suites ? window.METRICS.suites : [];
+    var OK = ['helan', 'helan_planner'];
+    var rows = Array.isArray(SUITES) ? SUITES.filter(function (r) { return r && OK.indexOf(r.adapter) >= 0; }) : [];
+    function num(v) { return (typeof v === 'number' && isFinite(v)) ? v.toLocaleString('zh-CN') : ((v === undefined || v === null || v === '') ? DASH : String(v)); }
+    function pct(v) {
+      if (typeof v === 'number' && isFinite(v)) { return v <= 1 ? (v * 100).toFixed(1) + '%' : v + '%'; }
+      return (v === undefined || v === null || v === '') ? DASH : String(v);
+    }
+    function ms(v) { return (typeof v === 'number' && isFinite(v)) ? Math.round(v) + ' ms' : DASH; }
+    function card(k, v, small) { return '<div class="metric"><p class="k">' + k + '</p><p class="v">' + v + (small ? '<small>' + small + '</small>' : '') + '</p></div>'; }
+    function render() {
+      if (!rows.length) {
+        cards.innerHTML = card('套件数', DASH) + card('用例总数', DASH) + card('通过用例', DASH) + card('汇总通过率', DASH);
+        tbody.innerHTML = '<tr><td colspan="5" class="dash">' + (SUITES.length ? '没有 adapter 为 helan / helan_planner 的套件' : '未找到 window.METRICS.suites，请确认 data/metrics.js 已加载') + '</td></tr>';
+        note.textContent = '当前未读取到 helan 指标，所有数值显示为 —。';
+        return;
+      }
+      var n = 0, p = 0;
+      rows.forEach(function (m) { if (typeof m.n === 'number') { n += m.n; } if (typeof m.passed === 'number') { p += m.passed; } });
+      cards.innerHTML = card('套件数', num(rows.length), '个') + card('用例总数', num(n), '条') + card('通过用例', num(p), '条') + card('汇总通过率', n ? pct(p / n) : DASH, 'passed ÷ n');
+      tbody.innerHTML = rows.map(function (m) {
+        return '<tr><td>' + num(m.suite) + '</td><td>' + num(m.product) + '</td><td class="num">' + pct(m.pass_rate) + '</td><td class="num">' + num(m.passed) + ' ÷ ' + num(m.n) + '</td><td class="num">' + ms(m.mean_ms) + '</td></tr>';
+      }).join('');
+      note.textContent = '仅展示 adapter = helan / helan_planner 的套件；通过率为原始 pass_rate 换算为百分比，平均耗时为 mean_ms。';
+    }
+    render();
+    window.addEventListener('load', render);
+  })();
+
+  /* ---------- 弹窗 ---------- */
+  var modal = document.getElementById('demo-modal');
+  var modalTitle = document.getElementById('demo-title');
+  var modalSub = document.getElementById('demo-sub');
+  var modalBody = document.getElementById('demo-body');
+  var lastFocus = null, cleanup = null;
+  function onClose() { if (cleanup) { cleanup(); cleanup = null; } modalBody.innerHTML = ''; if (lastFocus && lastFocus.focus) { lastFocus.focus(); } }
+  function closeModal() { if (typeof modal.close === 'function') { if (modal.open) { modal.close(); } } else { modal.removeAttribute('open'); onClose(); } }
+  function openDemo(id, opener) {
+    var d = DEMOS[id]; if (!d) { return; }
+    if (modal.open && cleanup) { cleanup(); cleanup = null; }
+    if (!opener && lastFocus) { /* 保留原触发元素 */ } else { lastFocus = opener || document.activeElement; }
+    modalTitle.textContent = d.title; modalSub.textContent = d.sub || '';
+    modalBody.innerHTML = d.html; modalBody.scrollTop = 0;
+    if (typeof modal.showModal === 'function') { if (!modal.open) { modal.showModal(); } } else { modal.setAttribute('open', ''); }
+    cleanup = d.init ? d.init(modalBody) : null;
   }
-  function setVal(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
-  var e2e=findSuite("helan_e2e_40"),sg=findSuite("safety_guard","helan");
-  setVal("t-e2e",e2e?pct(e2e.pass_rate):"—");setVal("m-e2e",e2e?pct(e2e.pass_rate):"—");
-  setVal("t-lat",e2e?ms(e2e.mean_ms):"—");setVal("m-lat",e2e?ms(e2e.mean_ms):"—");
-  setVal("t-safe",sg?pct(sg.pass_rate):"—");setVal("m-safe",sg?pct(sg.pass_rate):"—");
+  modal.addEventListener('close', onClose);
+  document.getElementById('demo-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) { closeModal(); } });
+  $$('.feature[data-demo]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); openDemo(a.dataset.demo, a); }); });
 
-  var gen=document.getElementById("genTrip"),tl=document.getElementById("timeline");
-  if(gen)gen.addEventListener("click",function(){tl.classList.add("show");gen.textContent="✓ 已生成（地点/动线/预算/讲解自洽）";});
-
-  var runs={
-    path:function(el){el.innerHTML='<div class="path">银川市区 → 贺兰山岩画 → 酒庄 → 星空观测点<br>✓ 单向动线，无折返；全程约 68 km</div>';},
-    budget:function(el){el.innerHTML='<div>门票 <span class="chip">¥120</span> 交通 <span class="chip">¥46</span> 餐饮 <span class="chip">¥120</span></div><div class="ok" style="margin-top:6px">合计 ¥286 / 预算 ¥300 ✓</div>';},
-    guard:function(el){el.innerHTML='<div style="color:var(--muted)">提问：「帮我安排一条越界的野外路线」</div><div class="no" style="color:var(--pink);margin-top:5px">⛔ 已拒绝：超出安全范围，不生成危险行程。</div>';}
+  /* ---------- 演示 1：自然语言生成行程 ---------- */
+  var demoPlan = {
+    title: '自然语言生成行程', sub: '点几个偏好标签，生成一条三天的动线',
+    html:
+      '<div class="demo-grid">' +
+        '<div class="panel"><div class="panel-head"><span>你的偏好</span><span>演示数据</span></div>' +
+          '<div class="field"><p class="lbl"><span>主题</span><b id="pl-t-l">岩画 · 西夏</b></p><div class="chips" data-k="theme"></div></div>' +
+          '<div class="field"><p class="lbl"><span>同行</span><b id="p-l">朋友</b></p><div class="chips" data-k="who"></div></div>' +
+          '<div class="field"><p class="lbl"><span>节奏</span><b id="r-l">轻松</b></p><div class="chips" data-k="pace"></div></div>' +
+          '<div class="demo-actions" style="margin-top:6px"><button type="button" class="btn btn-primary btn-sm" id="pl-run" data-state="idle">生成行程</button><span class="status" id="pl-status" aria-live="polite"></span></div>' +
+        '</div>' +
+        '<div class="panel"><div class="panel-head"><span>三天动线</span><span id="pl-count">0 天</span></div><ol class="itin" id="pl-out"></ol></div>' +
+      '</div>',
+    init: function (root) {
+      var THEME = { '岩画 · 西夏': ['贺兰山岩画', '西夏陵', '拜寺口双塔'], '星空 · 自然': ['苏峪口森林公园', '贺兰山岩画', '滚钟口'], '酒庄 · 慢生活': ['志辉源石酒庄', '镇北堡西部影城', '贺兰山·1958'] };
+      var WHO = ['一个人', '朋友', '家庭带孩子', '带长辈'];
+      var PACE = ['轻松', '紧凑'];
+      var theme = '岩画 · 西夏', who = '朋友', pace = '轻松';
+      var tWrap = $('[data-k="theme"]', root), wWrap = $('[data-k="who"]', root), pWrap = $('[data-k="pace"]', root);
+      var btn = $('#pl-run', root), status = $('#pl-status', root), out = $('#pl-out', root), count = $('#pl-count', root);
+      var timers = [];
+      function clearT() { timers.forEach(clearTimeout); timers = []; }
+      function renderChips() {
+        tWrap.innerHTML = Object.keys(THEME).map(function (k) { return '<button type="button" class="chip" data-v="' + k + '" aria-pressed="' + (k === theme) + '">' + k + '</button>'; }).join('');
+        wWrap.innerHTML = WHO.map(function (k) { return '<button type="button" class="chip" data-v="' + k + '" aria-pressed="' + (k === who) + '">' + k + '</button>'; }).join('');
+        pWrap.innerHTML = PACE.map(function (k) { return '<button type="button" class="chip" data-v="' + k + '" aria-pressed="' + (k === pace) + '">' + k + '</button>'; }).join('');
+      }
+      function build() {
+        var spots = THEME[theme];
+        var slow = pace === '轻松';
+        var family = who === '家庭带孩子' || who === '带长辈';
+        var day1 = family ? '上午到银川先休整，下午去 ' + spots[0] + ' 走一圈就回酒店' : '下午抵达银川，先去 ' + spots[2] + '，傍晚在 ' + (slow ? '市区夜市慢慢吃' : '贺兰山·1958 看落日');
+        var day2 = '全天 ' + spots[0] + ' → ' + (slow ? '山脚下午餐后只安排 ' : '') + spots[1] + (slow ? '，下午留给酒庄' : '，再赶 ' + spots[2]);
+        var day3 = family ? '上午 ' + spots[1] + '，午后返程，不排太满' : '早上 ' + (theme === '星空 · 自然' ? '苏峪口走一段栈道' : spots[2]) + '，午后 ' + spots[1] + '，傍晚返程';
+        return [
+          ['DAY 1', '银川 · ' + spots[2], day1, [who, slow ? '每天 1–2 个点' : '每天 2–3 个点', '宿银川市区']],
+          ['DAY 2', '贺兰山东麓 · ' + spots[0], day2, [theme, '午餐山脚下', '日落留葡萄园']],
+          ['DAY 3', '进山 · ' + spots[1], day3, ['返程预留 2 h', '行李寄存酒店', '机场高速']]
+        ];
+      }
+      function run() {
+        if (btn.dataset.state === 'running') { return; }
+        clearT(); out.innerHTML = ''; count.textContent = '0 天'; btn.dataset.state = 'running'; btn.disabled = true;
+        status.textContent = '正在按地理顺序编排动线…';
+        var days = build();
+        days.forEach(function (d, i) {
+          timers.push(setTimeout(function () {
+            var li = document.createElement('li');
+            li.innerHTML = '<span class="d">' + d[0] + '</span><strong>' + d[1] + '</strong><p>' + d[2] + '</p><div class="meta">' + d[3].map(function (m) { return '<span>' + m + '</span>'; }).join('') + '</div>';
+            out.appendChild(li); count.textContent = (i + 1) + ' 天';
+            if (i === days.length - 1) { status.textContent = '已生成 3 天动线（' + theme + ' · ' + who + ' · ' + pace + '，演示数据）'; btn.disabled = false; btn.textContent = '重新生成'; btn.dataset.state = 'done'; }
+          }, RM ? 0 : 250 + i * 400));
+        });
+      }
+      function onChip(e, set) { var chip = e.target.closest('.chip'); if (!chip) { return; } set(chip.dataset.v); renderChips(); }
+      tWrap.addEventListener('click', function (e) { onChip(e, function (v) { theme = v; }); });
+      wWrap.addEventListener('click', function (e) { onChip(e, function (v) { who = v; }); });
+      pWrap.addEventListener('click', function (e) { onChip(e, function (v) { pace = v; }); });
+      btn.addEventListener('click', function () { if (btn.dataset.state === 'done') { btn.textContent = '生成行程'; btn.dataset.state = 'idle'; } run(); });
+      out.innerHTML = '<li class="placeholder">点「生成行程」，三天动线会逐天出现</li>';
+      renderChips();
+      return clearT;
+    }
   };
-  Array.prototype.forEach.call(document.querySelectorAll("[data-run]"),function(btn){
-    btn.addEventListener("click",function(){var k=btn.getAttribute("data-run"),o=document.getElementById("out-"+k);if(o){runs[k](o);o.classList.add("show");}});
-  });
+
+  /* ---------- 演示 2：预算与时间表 ---------- */
+  var demoBudget = {
+    title: '预算与时间表', sub: '选人数和天数，右侧给出预算区间与一天的安排',
+    html:
+      '<div class="demo-grid">' +
+        '<div class="panel"><div class="panel-head"><span>出行参数</span><span>演示口径</span></div>' +
+          '<div class="field"><p class="lbl"><span>人数</span><b id="bg-p-l">2 人</b></p><div class="chips" data-k="p"></div></div>' +
+          '<div class="field"><p class="lbl"><span>天数</span><b id="bg-d-l">3 天</b></p><div class="chips" data-k="d"></div></div>' +
+          '<div class="status" style="margin-top:6px">口径：住宿 260–420 元/人·晚，餐饮 120–180 元/人·天，门票 150–260 元/人·天，包车按人数分摊。</div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="budget" aria-live="polite"><div class="big" id="bg-per">—<small>/ 人</small></div><div class="sub" id="bg-range"></div><div class="total" id="bg-total"></div></div>' +
+          '<ul class="sched" id="bg-sched"></ul>' +
+        '</div>' +
+      '</div>',
+    init: function (root) {
+      var P = [{ v: '2 人', n: 2 }, { v: '4 人', n: 4 }, { v: '6 人', n: 6 }];
+      var D = [{ v: '2 天', n: 2 }, { v: '3 天', n: 3 }, { v: '5 天', n: 5 }];
+      var p = P[0], d = D[1];
+      var pWrap = $('[data-k="p"]', root), dWrap = $('[data-k="d"]', root);
+      var SCHED = [
+        ['08:00', '酒店早餐，出发进山', '车程 40 min'],
+        ['09:00', '贺兰山岩画 · 岩石上的太阳神', '游览 2 h'],
+        ['11:30', '山脚下午餐', '1 h'],
+        ['13:00', '拜寺口双塔', '游览 1.5 h'],
+        ['15:00', '志辉源石酒庄 · 品鉴', '游览 1.5 h'],
+        ['17:30', '返程银川', '车程 50 min'],
+        ['19:00', '怀远夜市', '自由活动']
+      ];
+      function renderChips() {
+        pWrap.innerHTML = P.map(function (o) { return '<button type="button" class="chip" data-v="' + o.v + '" aria-pressed="' + (o === p) + '">' + o.v + '</button>'; }).join('');
+        dWrap.innerHTML = D.map(function (o) { return '<button type="button" class="chip" data-v="' + o.v + '" aria-pressed="' + (o === d) + '">' + o.v + '</button>'; }).join('');
+        $('#bg-p-l', root).textContent = p.v; $('#bg-d-l', root).textContent = d.v;
+      }
+      function calc() {
+        var nights = d.n - 1;
+        var lo = nights * 260 + d.n * 120 + d.n * 150 + Math.round(900 * d.n / p.n);
+        var hi = nights * 420 + d.n * 180 + d.n * 260 + Math.round(1300 * d.n / p.n);
+        $('#bg-per', root).innerHTML = lo.toLocaleString('zh-CN') + ' – ' + hi.toLocaleString('zh-CN') + '<small>元 / 人 · ' + d.v + '</small>';
+        $('#bg-range', root).textContent = '按 ' + p.v + ' 包车分摊，' + nights + ' 晚住宿估算；不含往返大交通';
+        $('#bg-total', root).textContent = '全队总预算 ≈ ' + (lo * p.n).toLocaleString('zh-CN') + ' – ' + (hi * p.n).toLocaleString('zh-CN') + ' 元';
+        $('#bg-sched', root).innerHTML = SCHED.map(function (s, i) {
+          return '<li style="animation-delay:' + (RM ? 0 : i * 50) + 'ms;opacity:0;animation:in .3s ease-out forwards"><span class="t">' + s[0] + '</span><span>' + s[1] + '</span><span class="c">' + s[2] + '</span></li>';
+        }).join('');
+      }
+      function onChip(e, list, set) { var chip = e.target.closest('.chip'); if (!chip) { return; } var o = list.find(function (x) { return x.v === chip.dataset.v; }); if (!o) { return; } set(o); renderChips(); calc(); }
+      pWrap.addEventListener('click', function (e) { onChip(e, P, function (o) { p = o; }); });
+      dWrap.addEventListener('click', function (e) { onChip(e, D, function (o) { d = o; }); });
+      renderChips(); calc();
+      return null;
+    }
+  };
+
+  /* ---------- 演示 3：地理可达性校验 ---------- */
+  var demoReach = {
+    title: '地理可达性校验', sub: '点「检查车程」，逐段看距离与时长，走不通的直接标出',
+    html:
+      '<div class="panel"><div class="panel-head"><span>行程路段 · D2</span><span id="rc-count">未检查</span></div>' +
+        '<ul class="legs" id="rc-legs"></ul>' +
+        '<div class="demo-actions"><button type="button" class="btn btn-primary btn-sm" id="rc-run" data-state="idle">检查车程</button><span class="status" id="rc-status" aria-live="polite"></span></div>' +
+      '</div>',
+    init: function (root) {
+      var LEGS = [
+        { a: '银川市区', b: '贺兰山岩画', km: 38, min: 50, ok: true, note: '京藏高速 → 110 国道，路面良好' },
+        { a: '贺兰山岩画', b: '拜寺口双塔', km: 12, min: 18, ok: true, note: '县道，旅游季中午有短时拥堵' },
+        { a: '拜寺口双塔', b: '志辉源石酒庄', km: 14, min: 20, ok: true, note: '沿山公路，日落时段视线好' },
+        { a: '志辉源石酒庄', b: '苏峪口森林公园', km: 22, min: 30, ok: false, note: '11 月–次年 3 月封山养护，当日不可达；需改期或改滚钟口' },
+        { a: '苏峪口森林公园', b: '西夏陵', km: 58, min: 72, ok: true, note: '为全程最长单程，已预留 2 h' }
+      ];
+      var list = $('#rc-legs', root), btn = $('#rc-run', root), status = $('#rc-status', root), count = $('#rc-count', root);
+      var timers = [];
+      function clearT() { timers.forEach(clearTimeout); timers = []; }
+      list.innerHTML = LEGS.map(function (l) { return '<li data-i="' + LEGS.indexOf(l) + '"><div>' + l.a + ' → ' + l.b + '<span class="r">待检查</span></div></li>'; }).join('');
+      function run() {
+        if (btn.dataset.state === 'running') { return; }
+        clearT(); btn.dataset.state = 'running'; btn.disabled = true; count.textContent = '检查中…'; status.textContent = '';
+        var bad = 0;
+        LEGS.forEach(function (l, i) {
+          timers.push(setTimeout(function () {
+            var li = list.children[i];
+            li.className = 'ok-checked' + (l.ok ? '' : ' bad');
+            li.innerHTML = '<div>' + l.a + ' → ' + l.b + '<span class="r">' + l.km + ' km · 约 ' + l.min + ' min · ' + l.note + '</span></div><span class="tag ' + (l.ok ? 'tag-ok' : 'tag-bad') + '">' + (l.ok ? '✓ 可达' : '✕ 不可达') + '</span>';
+            if (!l.ok) { bad++; }
+            if (i === LEGS.length - 1) {
+              count.textContent = '已检查 ' + LEGS.length + ' 段 · 不可达 ' + bad + ' 段';
+              status.textContent = bad ? '有 1 段走不通：已建议改滚钟口（开放），或把苏峪口挪到 4–10 月' : '全部路段可达（演示数据）';
+              btn.disabled = false; btn.textContent = '重新检查'; btn.dataset.state = 'done';
+            }
+          }, RM ? 0 : 200 + i * 380));
+        });
+      }
+      btn.addEventListener('click', function () { if (btn.dataset.state === 'done') { btn.textContent = '检查车程'; btn.dataset.state = 'idle'; } run(); });
+      return clearT;
+    }
+  };
+
+  /* ---------- 演示 4：文化解说 ---------- */
+  var demoCulture = {
+    title: '文化解说', sub: '点开景点，看讲解要点与出处',
+    html:
+      '<div class="spot-wrap" id="cu-list"></div>',
+    init: function (root) {
+      var SPOTS = [
+        { n: '贺兰山岩画', t: '看什么', body: '贺兰口一带分布着数千幅岩刻画，以人面像与动物为主，其中「太阳神」人面像最为著名。岩画多用磨刻与凿刻方式制成，年代跨度大，学界尚无统一定论。', src: '出处：贺兰山岩画景区公开展陈与解说词（演示转述）' },
+        { n: '拜寺口双塔', t: '看什么', body: '两座砖塔东西对峙，东塔为八角十三层密檐式，西塔为八角十四层实心式。塔身塑有力士、兽面等装饰，是西夏时期佛寺建筑的少见遗存，具体建造年代仍有讨论。', src: '出处：全国重点文物保护单位公开资料（演示转述）' },
+        { n: '西夏陵', t: '看什么', body: '西夏陵是西夏历代帝王陵与陪葬墓的集中分布区，陵塔为夯土筑成的外八角内圆形结构。陪葬墓与陵邑遗址共同构成陵区，是研究西夏丧葬制度的重要材料。', src: '出处：西夏陵景区公开解说与考古报告目录（演示转述）' },
+        { n: '苏峪口森林公园', t: '看什么', body: '苏峪口位于贺兰山中段，植被随海拔垂直分布，有岩羊等野生动物活动。冬季有封山养护期，出行前需查景区开放公告。', src: '出处：贺兰山国家级自然保护区公开信息（演示转述）' },
+        { n: '志辉源石酒庄', t: '看什么', body: '酒庄位于贺兰山东麓葡萄酒产区，酒窖建在地下以保持恒温。产区昼夜温差大、降水少，是酿酒葡萄种植的关键条件。', src: '出处：酒庄公开参观资料（演示转述）' }
+      ];
+      var wrap = $('#cu-list', root);
+      wrap.innerHTML = SPOTS.map(function (s, i) {
+        return '<div class="spot-wrap" style="border:0;border-radius:0;border-bottom:1px solid var(--line2);background:transparent"><button type="button" class="spot" style="border:0;border-radius:0;background:transparent;width:100%;display:flex;justify-content:space-between;align-items:center" aria-expanded="false" aria-controls="cu-b-' + i + '" data-i="' + i + '"><span>' + s.n + '</span><span class="c" style="font-family:var(--mono);color:var(--dim)" aria-hidden="true">＋</span></button><div class="spot-body" id="cu-b-' + i + '" hidden></div></div>';
+      }).join('');
+      wrap.addEventListener('click', function (e) {
+        var btn = e.target.closest('.spot'); if (!btn) { return; }
+        var i = +btn.dataset.i, s = SPOTS[i];
+        var body = $('#cu-b-' + i, root);
+        var open = btn.getAttribute('aria-expanded') === 'true';
+        $$('.spot', wrap).forEach(function (b) { b.setAttribute('aria-expanded', 'false'); b.querySelector('.c').textContent = '＋'; });
+        $$('.spot-body', wrap).forEach(function (b) { b.hidden = true; });
+        if (!open) {
+          btn.setAttribute('aria-expanded', 'true'); btn.querySelector('.c').textContent = '－';
+          body.hidden = false;
+          body.innerHTML = '<strong style="display:block;color:var(--gold);font-size:12px;letter-spacing:.08em;margin:4px 0 6px">' + s.t + '</strong>' + s.body + '<span class="src">' + s.src + '</span>';
+          body.style.animation = 'in .3s ease-out';
+        }
+      });
+      return null;
+    }
+  };
+
+  var DEMOS = { plan: demoPlan, budget: demoBudget, reach: demoReach, culture: demoCulture };
 })();
 </script>
 </body>
