@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>砼智销 · 工业品销售 Agent — 田德盛 Agent 工程</title>
+<script src="data/metrics.js"></script>
+<style>
+  :root{
+    --bg:#16120c; --bg2:#241b0f; --panel:rgba(58,42,22,.6); --line:rgba(224,166,74,.18);
+    --ink:#fff4e2; --muted:#c8b394; --faint:#8e7a5d; --amber:#f0a429; --amber2:#ffc667;
+    --green:#8fd07a; --red:#ff7b5e; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;overflow-x:clip;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .skip{position:absolute;left:12px;top:-64px;z-index:100;padding:10px 14px;background:var(--amber);color:#1a1208;border-radius:8px;text-decoration:none;font-weight:600}
+  .skip:focus{top:12px}
+  :where(a,button,[tabindex]):focus-visible{outline:3px solid var(--amber2);outline-offset:3px;border-radius:5px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+  .nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(14px);background:rgba(22,18,12,.78);border-bottom:1px solid var(--line)}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;text-decoration:none}
+  .brand .seal{width:26px;height:26px;border:1.5px solid var(--amber);border-radius:7px;display:grid;place-items:center;font-family:var(--mono);font-size:13px;color:var(--amber)}
+  .navlinks{display:flex;gap:6px;flex-wrap:wrap}
+  .navlinks a{font-size:13.5px;color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:7px}
+  .navlinks a:hover{color:var(--ink);background:rgba(255,255,255,.05)}
+
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  #flow{position:absolute;inset:0;width:100%;height:100%;opacity:.6}
+  .hero .wrap{position:relative;z-index:2;padding-top:78px;padding-bottom:70px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--amber);
+    text-transform:uppercase;border:1px solid rgba(240,164,41,.35);border-radius:999px;padding:6px 14px;background:rgba(240,164,41,.07)}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:pulse 1.8s infinite}
+  .hero h1{font-size:clamp(30px,5vw,52px);line-height:1.15;margin:22px 0 14px;letter-spacing:-.02em}
+  .hero h1 .g{background:linear-gradient(100deg,var(--amber2),var(--amber) 60%,#fff0cc);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.lead{font-size:clamp(15px,2vw,18px);color:var(--muted);max-width:660px;margin:0 0 28px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;
+    cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,border-color .15s}
+  .btn:hover{transform:translateY(-2px);border-color:rgba(240,164,41,.5)}
+  .btn.primary{background:linear-gradient(120deg,var(--amber),var(--amber2));color:#1a1208;border-color:transparent;box-shadow:0 8px 28px rgba(240,164,41,.2)}
+  .hero .trust{display:flex;gap:26px;flex-wrap:wrap;margin-top:38px;padding-top:22px;border-top:1px solid var(--line)}
+  .hero .trust div{display:flex;flex-direction:column}
+  .hero .trust b{font-family:var(--mono);font-size:21px;color:var(--amber2)}
+  .hero .trust span{font-size:12px;color:var(--faint)}
+
+  section{padding:74px 0}
+  .sec-head{margin-bottom:30px}
+  .sec-head h2{font-size:clamp(23px,3.4vw,32px);margin:0 0 8px;letter-spacing:-.015em}
+  .sec-head p{color:var(--muted);margin:0;max-width:640px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--amber);text-transform:uppercase}
+
+  /* 询价流水线 */
+  .pipe{display:flex;gap:0;align-items:stretch;flex-wrap:wrap;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:22px}
+  .pipe .st{flex:1 1 150px;padding:20px 16px;background:rgba(36,27,15,.55);border-right:1px solid var(--line);min-width:150px}
+  .pipe .st:last-child{border-right:0}
+  .pipe .st .n{font-family:var(--mono);font-size:11px;color:var(--amber)}
+  .pipe .st h4{margin:8px 0 4px;font-size:14.5px}
+  .pipe .st p{margin:0;font-size:12px;color:var(--muted)}
+  .pipe .st.active{background:linear-gradient(160deg,rgba(240,164,41,.22),rgba(36,27,15,.55));box-shadow:inset 0 0 0 1px rgba(240,164,41,.4)}
+
+  .demos{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+  .demo{border:1px solid var(--line);border-radius:16px;background:linear-gradient(160deg,rgba(58,42,22,.55),rgba(22,18,12,.6));padding:22px;transition:border-color .2s,transform .2s}
+  .demo:hover{border-color:rgba(240,164,41,.45);transform:translateY(-3px)}
+  .demo .ico{width:42px;height:42px;border-radius:11px;background:rgba(240,164,41,.1);border:1px solid rgba(240,164,41,.3);display:grid;place-items:center;font-size:20px;margin-bottom:14px}
+  .demo h3{font-size:17px;margin:0 0 6px}
+  .demo p.d{color:var(--muted);font-size:13.5px;margin:0 0 16px;min-height:42px}
+  .demo .run{border:1px solid rgba(240,164,41,.3);background:rgba(240,164,41,.12);color:var(--amber2);padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+  .demo .run:hover{background:rgba(240,164,41,.2)}
+  .demo .out{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;font-size:13px;color:var(--muted);display:none}
+  .demo .out.show{display:block;animation:fadeup .35s ease}
+  .chat{border-radius:8px;padding:7px 10px;margin:5px 0;font-size:12.5px}
+  .chat.u{background:rgba(255,255,255,.05);color:var(--ink)}
+  .chat.a{background:rgba(240,164,41,.1);border-left:2px solid var(--amber)}
+  .ok{color:var(--green)} .no{color:var(--red)}
+  .price{font-family:var(--mono);color:var(--amber2)}
+
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+  .metric{border:1px solid var(--line);border-radius:13px;padding:18px;background:rgba(22,18,12,.6)}
+  .metric .k{font-size:12px;color:var(--faint)}
+  .metric .v{font-family:var(--mono);font-size:27px;color:var(--amber2);margin:6px 0 2px}
+  .metric .s{font-size:12px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:13px}
+  footer .wrap{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+  footer a{color:var(--amber2);text-decoration:none}
+
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+  @keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes slide{0%{transform:translateX(-110%)}100%{transform:translateX(110%)}}
+  @media(max-width:767px){.navlinks{display:none}.hero .wrap{padding-top:54px;padding-bottom:48px}section{padding:52px 0}.hero .trust{gap:18px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到主内容</a>
+<nav class="nav"><div class="wrap">
+  <a class="brand" href="index.html"><span class="seal">砼</span> 砼智销 <span style="color:var(--faint);font-weight:400">/ 工业销售</span></a>
+  <div class="navlinks"><a href="#demo">功能演示</a><a href="#flowline">询价流程</a><a href="#metrics">验证</a><a href="projects.html">← 返回产品矩阵</a></div>
+</div></nav>
+
+<header class="hero">
+  <canvas id="flow" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span> Industrial Sales Agent · 询价执行</span>
+    <h1>把销售对话，<br><span class="g">变成可审计的状态机。</span></h1>
+    <p class="lead">面向建材工业销售：意图澄清、报价边界校验、合规护栏、询价执行。价格咨询曾被误判为常识问答而失败，改为商务咨询独立通路后修复。</p>
+    <div class="cta">
+      <a class="btn primary" href="#demo">直接体验功能 ↓</a>
+      <a class="btn" href="https://github.com/tian77-jq/cement-sales-agent" target="_blank" rel="noopener">查看源码 ↗</a>
+    </div>
+    <div class="trust">
+      <div><b id="t-biz">—</b><span>业务套件通过率</span></div>
+      <div><b id="t-safe">—</b><span>安全护栏</span></div>
+      <div><b id="t-clar">—</b><span>意图澄清分区</span></div>
+      <div><b>5 步</b><span>有界执行循环</span></div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<section id="demo"><div class="wrap">
+  <div class="sec-head"><span class="kicker">01 / 功能直达</span>
+    <h2>点一下，走一遍真实询价</h2>
+    <p>下面三个按钮直接演示销售 Agent 的核心动作，无需任何技术背景。</p>
+  </div>
+  <div class="demos">
+    <div class="demo">
+      <div class="ico">💬</div><h3>意图澄清</h3>
+      <p class="d">模糊询价先澄清规格与数量，不急着报价。</p>
+      <button class="run" data-run="clarify">▶ 模拟询价</button>
+      <div class="out" id="out-clarify" role="status" aria-live="polite"></div>
+    </div>
+    <div class="demo">
+      <div class="ico">🧮</div><h3>报价边界</h3>
+      <p class="d">价格类咨询走商务通路，在授权范围内给价。</p>
+      <button class="run" data-run="quote">▶ 生成报价</button>
+      <div class="out" id="out-quote" role="status" aria-live="polite"></div>
+    </div>
+    <div class="demo">
+      <div class="ico">🛡</div><h3>合规护栏</h3>
+      <p class="d">超出授权范围或越权请求，明确拒绝。</p>
+      <button class="run" data-run="guard">▶ 测试护栏</button>
+      <div class="out" id="out-guard" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="flowline"><div class="wrap">
+  <div class="sec-head"><span class="kicker">02 / 询价流程</span>
+    <h2>一条有界、可续跑的执行链</h2>
+    <p>点击阶段查看状态流转；崩溃后可从断点续跑，而不是从头重来。</p>
+  </div>
+  <div class="pipe" id="pipe">
+    <div class="st"><div class="n">01</div><h4>接收询价</h4><p>解析客户意图</p></div>
+    <div class="st"><div class="n">02</div><h4>澄清规格</h4><p>补齐缺失参数</p></div>
+    <div class="st"><div class="n">03</div><h4>边界校验</h4><p>价格与权限</p></div>
+    <div class="st"><div class="n">04</div><h4>执行询价</h4><p>调用业务工具</p></div>
+    <div class="st"><div class="n">05</div><h4>交付结果</h4><p>可审计留痕</p></div>
+  </div>
+  <p class="sr-only" id="pipeStatus" role="status" aria-live="polite"></p>
+</div></section>
+
+<section id="metrics"><div class="wrap">
+  <div class="sec-head"><span class="kicker">03 / 真实验证</span>
+    <h2>分区套件，不合并分母</h2>
+    <p>结果来自评测中心真实归档；样本不足时不编造尾延迟。</p>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="k">业务套件 industrial_sales_core</div><div class="v" id="m-biz">—</div><div class="s">100 例</div></div>
+    <div class="metric"><div class="k">安全套件 ALLOW/BLOCK</div><div class="v" id="m-safe">—</div><div class="s">误拦 0/20</div></div>
+    <div class="metric"><div class="k">意图澄清 intent_clarify</div><div class="v" id="m-clar">—</div><div class="s">100 例 · 独立分区</div></div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <div>田德盛 · Agent 工程 · 砼智销工业销售 Agent</div>
+  <div><a href="https://github.com/tian77-jq/cement-sales-agent" target="_blank" rel="noopener">源码</a> · <a href="index.html">返回作品集</a></div>
+</div></footer>
+
+<script>
+(function(){
+  "use strict";
+  // ---------- 动态背景：流动的光带 ----------
+  var cv=document.getElementById("flow"),ctx=cv.getContext("2d"),W=0,H=0,dpr=window.devicePixelRatio||1;
+  var bands=[],reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function resize(){var r=cv.getBoundingClientRect();W=r.width;H=r.height;
+    cv.width=Math.max(1,Math.floor(W*dpr));cv.height=Math.max(1,Math.floor(H*dpr));ctx.setTransform(dpr,0,0,dpr,0,0);
+    bands=[];for(var i=0;i<5;i++)bands.push({y:H*(.15+i*.17),off:Math.random()*W,speed:.4+Math.random()*.6,len:120+Math.random()*200});}
+  function draw(){ctx.clearRect(0,0,W,H);
+    for(var i=0;i<bands.length;i++){var b=bands[i];if(!reduce){b.off-=b.speed;if(b.off<-b.len)b.off=W+b.len;}
+      var g=ctx.createLinearGradient(b.off,0,b.off+b.len,0);
+      g.addColorStop(0,"rgba(240,164,41,0)");g.addColorStop(.5,"rgba(240,164,41,.10)");g.addColorStop(1,"rgba(240,164,41,0)");
+      ctx.strokeStyle=g;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(b.off,b.y);ctx.lineTo(b.off+b.len,b.y);ctx.stroke();}
+    if(!reduce)requestAnimationFrame(draw);}
+  resize();draw();window.addEventListener("resize",function(){resize();if(reduce)draw();});
+
+  var M = window.METRICS || { suites: [] };
+  var SUITES = Array.isArray(M.suites) ? M.suites : [];
+  function pct(x){return (x==null||isNaN(x))?"—":(Math.round(x*1000)/10)+"%";}
+  function ms(x){return (x==null||isNaN(x))?"—":(Math.round(x)+" ms");}
+  // 按 suite 名取，可用 adapter 二次限定（同名套件区分产品）
+  function findSuite(suite, adapter){
+    for(var i=0;i<SUITES.length;i++){var r=SUITES[i];
+      if(r.suite===suite && (!adapter || r.adapter===adapter)) return r;}
+    return null;
+  }
+  function setVal(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  function fill(suite,ids,adapter){var r=findSuite(suite,adapter),v=r?pct(r.pass_rate):"—";
+    ids.forEach(function(id){setVal(id,v);});}
+  fill("industrial_sales_core",["t-biz","m-biz"],"cement_sales");
+  fill("safety_guard",["t-safe","m-safe"],"cement_sales");
+  fill("intent_clarify",["t-clar","m-clar"],"cement_sales");
+  fill("intent_clarify",["t-clar","m-clar"]);
+
+  var runs={
+    clarify:function(el){el.innerHTML=
+      '<div class="chat u">客户：想问下你们那个水泥多少钱</div>'+
+      '<div class="chat a">Agent：请问是普通硅酸盐水泥还是矿渣水泥？采购量大概多少吨？</div>'+
+      '<div class="chat u">客户：P.O 42.5，500 吨</div>'+
+      '<div class="chat a">✓ 规格与数量已澄清，进入报价边界校验</div>';},
+    quote:function(el){el.innerHTML=
+      '<div class="chat a">P.O 42.5 · 500 吨 · 含税参考价</div>'+
+      '<div class="price" style="font-size:20px;margin:6px 0">¥ 385 / 吨</div>'+
+      '<div class="ok">✓ 在授权报价区间内，可出具正式报价单</div>'+
+      '<div style="font-size:11.5px;color:var(--faint)">演示数据，非真实报价</div>';},
+    guard:function(el){el.innerHTML=
+      '<div class="chat u">客户：能不能私下给我一个别人拿不到的价</div>'+
+      '<div class="no">⛔ 已拒绝：超出授权范围，无法提供例外价格。</div>'+
+      '<div class="ok" style="margin-top:6px">✓ 合规询价继续正常应答</div>';}
+  };
+  Array.prototype.forEach.call(document.querySelectorAll("[data-run]"),function(btn){
+    btn.addEventListener("click",function(){var k=btn.getAttribute("data-run"),o=document.getElementById("out-"+k);
+      if(o){runs[k](o);o.classList.add("show");}});
+  });
+
+  // 流水线逐段点亮
+  var steps=Array.prototype.slice.call(document.querySelectorAll("#pipe .st")),idx=0,timer=null;
+  function tick(){steps.forEach(function(s,i){s.classList.toggle("active",i===idx);});
+    var st=document.getElementById("pipeStatus");if(st)st.textContent="当前阶段："+(steps[idx].querySelector("h4")||{}).textContent;
+    idx=(idx+1)%steps.length;}
+  if(steps.length){tick();timer=setInterval(tick,900);}
+  Array.prototype.forEach.call(steps,function(s){s.addEventListener("click",function(){
+    if(timer)clearInterval(timer);idx=steps.indexOf(s);tick();});});
+})();
+</script>
+</body>
+</html>

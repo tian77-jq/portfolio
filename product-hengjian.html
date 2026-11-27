@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>衡鉴 · 财报核验与风险线索 Agent — 田德盛 Agent 工程</title>
+<script src="data/metrics.js"></script>
+<style>
+  :root{
+    --bg:#070f1e; --bg2:#0b1a30; --panel:rgba(18,38,64,.55); --line:rgba(120,170,220,.16);
+    --ink:#eaf2ff; --muted:#9fb3cc; --faint:#6c829e; --gold:#e8b24c; --gold2:#ffd77a;
+    --cyan:#4fd1c5; --danger:#ff6b6b; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;overflow-x:clip;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .skip{position:absolute;left:12px;top:-64px;z-index:100;padding:10px 14px;background:var(--gold);color:#0b1a30;border-radius:8px;text-decoration:none;font-weight:600}
+  .skip:focus{top:12px}
+  :where(a,button,[tabindex]):focus-visible{outline:3px solid var(--gold2);outline-offset:3px;border-radius:5px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+  /* ---------- 顶部导航 ---------- */
+  .nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(14px);background:rgba(7,15,30,.72);border-bottom:1px solid var(--line)}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.01em;text-decoration:none}
+  .brand .seal{width:26px;height:26px;border:1.5px solid var(--gold);border-radius:7px;display:grid;place-items:center;
+    font-family:var(--mono);font-size:13px;color:var(--gold);box-shadow:0 0 18px rgba(232,178,76,.25)}
+  .navlinks{display:flex;gap:6px;flex-wrap:wrap}
+  .navlinks a{font-size:13.5px;color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:7px}
+  .navlinks a:hover{color:var(--ink);background:rgba(255,255,255,.05)}
+
+  /* ---------- Hero ---------- */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  #net{position:absolute;inset:0;width:100%;height:100%;opacity:.85}
+  .hero .wrap{position:relative;z-index:2;padding-top:78px;padding-bottom:70px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--gold);text-transform:uppercase;border:1px solid rgba(232,178,76,.3);border-radius:999px;padding:6px 14px;background:rgba(232,178,76,.06)}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);animation:pulse 2s infinite}
+  .hero h1{font-size:clamp(30px,5vw,52px);line-height:1.15;margin:22px 0 14px;letter-spacing:-.02em}
+  .hero h1 .g{background:linear-gradient(100deg,var(--gold2),var(--gold) 55%,#fff8e6);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.lead{font-size:clamp(15px,2vw,18px);color:var(--muted);max-width:660px;margin:0 0 28px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:12px 18px;border-radius:10px;
+    font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s,border-color .15s}
+  .btn:hover{transform:translateY(-2px);border-color:rgba(232,178,76,.5)}
+  .btn.primary{background:linear-gradient(120deg,var(--gold),var(--gold2));color:#0b1a30;border-color:transparent;box-shadow:0 8px 28px rgba(232,178,76,.22)}
+  .hero .trust{display:flex;gap:26px;flex-wrap:wrap;margin-top:38px;padding-top:22px;border-top:1px solid var(--line)}
+  .hero .trust div{display:flex;flex-direction:column}
+  .hero .trust b{font-family:var(--mono);font-size:21px;color:var(--gold2)}
+  .hero .trust span{font-size:12px;color:var(--faint);letter-spacing:.04em}
+
+  /* ---------- 通用区块 ---------- */
+  section{padding:74px 0}
+  .sec-head{margin-bottom:30px}
+  .sec-head h2{font-size:clamp(23px,3.4vw,32px);margin:0 0 8px;letter-spacing:-.015em}
+  .sec-head p{color:var(--muted);margin:0;max-width:640px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--gold);text-transform:uppercase}
+
+  /* ---------- 功能演示卡 ---------- */
+  .demos{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+  .demo{border:1px solid var(--line);border-radius:16px;background:linear-gradient(160deg,rgba(20,42,72,.6),rgba(10,24,44,.6));
+    padding:22px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+  .demo:hover{border-color:rgba(232,178,76,.4);transform:translateY(-3px)}
+  .demo .ico{width:42px;height:42px;border-radius:11px;background:rgba(232,178,76,.1);border:1px solid rgba(232,178,76,.28);
+    display:grid;place-items:center;font-size:20px;margin-bottom:14px}
+  .demo h3{font-size:17px;margin:0 0 6px}
+  .demo p.d{color:var(--muted);font-size:13.5px;margin:0 0 16px;min-height:42px}
+  .demo .run{border:0;background:rgba(232,178,76,.12);color:var(--gold2);border:1px solid rgba(232,178,76,.3);
+    padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+  .demo .run:hover{background:rgba(232,178,76,.2)}
+  .demo .out{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;font-size:13px;color:var(--muted);display:none}
+  .demo .out.show{display:block;animation:fadeup .35s ease}
+  .riskline{padding:7px 10px;border-radius:7px;background:rgba(255,107,107,.08);border-left:2px solid var(--danger);margin:6px 0}
+  .riskline b{color:#ffb3b3}
+  .quote{font-family:var(--mono);font-size:11.5px;color:var(--cyan);word-break:break-all}
+  .guard-ok{color:var(--cyan)} .guard-no{color:var(--danger)}
+
+  /* ---------- 核验链 ---------- */
+  .chain{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .chain .step{padding:24px 20px;background:rgba(12,28,50,.5);border-right:1px solid var(--line);position:relative}
+  .chain .step:last-child{border-right:0}
+  .chain .step .n{font-family:var(--mono);font-size:12px;color:var(--gold)}
+  .chain .step h4{margin:8px 0 6px;font-size:15px}
+  .chain .step p{margin:0;font-size:12.5px;color:var(--muted)}
+
+  /* ---------- 指标 ---------- */
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+  .metric{border:1px solid var(--line);border-radius:13px;padding:18px;background:rgba(10,24,44,.6)}
+  .metric .k{font-size:12px;color:var(--faint);letter-spacing:.04em}
+  .metric .v{font-family:var(--mono);font-size:27px;color:var(--gold2);margin:6px 0 2px}
+  .metric .s{font-size:12px;color:var(--muted)}
+
+  /* ---------- 页脚 ---------- */
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:13px}
+  footer .wrap{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+  footer a{color:var(--gold2);text-decoration:none}
+
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+  @keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media(max-width:767px){
+    .navlinks{display:none}
+    .hero .wrap{padding-top:54px;padding-bottom:48px}
+    section{padding:52px 0}
+    .hero .trust{gap:18px}
+  }
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到主内容</a>
+<nav class="nav"><div class="wrap">
+  <a class="brand" href="index.html"><span class="seal">衡</span> 衡鉴 <span style="color:var(--faint);font-weight:400">/ 财报核验</span></a>
+  <div class="navlinks">
+    <a href="#demo">功能演示</a><a href="#chain">核验链</a><a href="#metrics">验证</a>
+    <a href="projects.html">← 返回产品矩阵</a>
+  </div>
+</div></nav>
+
+<header class="hero">
+  <canvas id="net" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span> Financial Risk Agent · 可核验</span>
+    <h1>每一条风险线索，<br><span class="g">都能指回财报原文。</span></h1>
+    <p class="lead">衡鉴从财报中抽取风险线索，并给出可核查的原文引用。结论不悬空、判分复用项目原生金标——这是给风控与审计场景设计的确定性。</p>
+    <div class="cta">
+      <a class="btn primary" href="#demo">直接体验功能 ↓</a>
+      <a class="btn" href="https://github.com/tian77-jq/hengjian-finrisk-agent" target="_blank" rel="noopener">查看源码 ↗</a>
+    </div>
+    <div class="trust">
+      <div><b id="t-guard">—</b><span>财报风险套件</span></div>
+      <div><b id="t-dialog">—</b><span>多轮对话套件</span></div>
+      <div><b id="t-mem">—</b><span>长期记忆套件</span></div>
+      <div><b>native</b><span>原生判分复用</span></div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<section id="demo"><div class="wrap">
+  <div class="sec-head"><span class="kicker">01 / 功能直达</span>
+    <h2>点一下，就能看到它在做什么</h2>
+    <p>不需要懂技术，也不需要说明书。下面三个按钮直接演示衡鉴的核心能力。</p>
+  </div>
+  <div class="demos">
+    <div class="demo">
+      <div class="ico">⚠</div>
+      <h3>风险线索抽取</h3>
+      <p class="d">给一段财报文本，自动标出可疑表述并定位到原文。</p>
+      <button class="run" data-run="risk">▶ 运行抽取</button>
+      <div class="out" id="out-risk" role="status" aria-live="polite"></div>
+    </div>
+    <div class="demo">
+      <div class="ico">🔗</div>
+      <h3>引用可核验</h3>
+      <p class="d">每条结论都带出处，点开即见原文片段与定位信息。</p>
+      <button class="run" data-run="quote">▶ 查看核验链</button>
+      <div class="out" id="out-quote" role="status" aria-live="polite"></div>
+    </div>
+    <div class="demo">
+      <div class="ico">🛡</div>
+      <h3>越权护栏</h3>
+      <p class="d">面对诱导性提问，明确拒绝而不是编造结论。</p>
+      <button class="run" data-run="guard">▶ 测试护栏</button>
+      <div class="out" id="out-guard" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="chain"><div class="wrap">
+  <div class="sec-head"><span class="kicker">02 / 工作方式</span>
+    <h2>一条可追溯的核验链</h2>
+    <p>从原文到结论，每一步都留痕，避免"看起来对但查不到"。</p>
+  </div>
+  <div class="chain">
+    <div class="step"><div class="n">STEP 01</div><h4>原文解析</h4><p>切分财报段落，建立可定位的文本锚点。</p></div>
+    <div class="step"><div class="n">STEP 02</div><h4>线索抽取</h4><p>识别异常波动、口径变化与模糊表述。</p></div>
+    <div class="step"><div class="n">STEP 03</div><h4>引用绑定</h4><p>每条线索绑定原文片段，支持逐条回溯。</p></div>
+    <div class="step"><div class="n">STEP 04</div><h4>护栏判定</h4><p>越权与诱导请求明确拒绝，不越界生成。</p></div>
+  </div>
+</div></section>
+
+<section id="metrics"><div class="wrap">
+  <div class="sec-head"><span class="kicker">03 / 真实验证</span>
+    <h2>用数据说话，不编数字</h2>
+    <p>以下结果来自评测中心对本 Agent 的真实运行归档；数据未就绪时显示"—"。</p>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="k">财报风险 finrisk_guard_16</div><div class="v" id="m-guard">—</div><div class="s">原生判分复用</div></div>
+    <div class="metric"><div class="k">多轮对话 finrisk_dialogue_12</div><div class="v" id="m-dialog">—</div><div class="s">上下文一致性</div></div>
+    <div class="metric"><div class="k">长期记忆 finrisk_memory_12</div><div class="v" id="m-mem">—</div><div class="s">跨轮信息保持</div></div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <div>田德盛 · Agent 工程 · 衡鉴财报核验 Agent</div>
+  <div><a href="https://github.com/tian77-jq/hengjian-finrisk-agent" target="_blank" rel="noopener">源码</a> · <a href="index.html">返回作品集</a></div>
+</div></footer>
+
+<script>
+(function(){
+  "use strict";
+  // ---------- 动态背景：核验网络 ----------
+  var cv=document.getElementById("net"),ctx=cv.getContext("2d"),W=0,H=0,dpr=window.devicePixelRatio||1;
+  var nodes=[],reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function resize(){
+    var r=cv.getBoundingClientRect();W=r.width;H=r.height;
+    cv.width=Math.max(1,Math.floor(W*dpr));cv.height=Math.max(1,Math.floor(H*dpr));
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    var count=Math.max(22,Math.min(52,Math.floor(W/26)));
+    nodes=[];for(var i=0;i<count;i++)nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,r:Math.random()*1.8+.7});
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<nodes.length;i++){
+      var n=nodes[i];if(!reduce){n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1;}
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle="rgba(232,178,76,"+(.35+n.r*.12)+")";ctx.fill();
+      for(var j=i+1;j<nodes.length;j++){
+        var m=nodes[j],dx=n.x-m.x,dy=n.y-m.y,d=dx*dx+dy*dy;
+        if(d<9000){ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(m.x,m.y);
+          ctx.strokeStyle="rgba(120,170,220,"+(0.12*(1-d/9000))+")";ctx.lineWidth=1;ctx.stroke();}
+      }
+    }
+    if(!reduce)requestAnimationFrame(draw);
+  }
+  resize();draw();window.addEventListener("resize",function(){resize();if(reduce)draw();});
+
+  // ---------- 指标读取 ----------
+  var M = window.METRICS || { suites: [] };
+  var SUITES = Array.isArray(M.suites) ? M.suites : [];
+  function pct(x){return (x==null||isNaN(x))?"—":(Math.round(x*1000)/10)+"%";}
+  function ms(x){return (x==null||isNaN(x))?"—":(Math.round(x)+" ms");}
+  // 按 suite 名取，可用 adapter 二次限定（同名套件区分产品）
+  function findSuite(suite, adapter){
+    for(var i=0;i<SUITES.length;i++){var r=SUITES[i];
+      if(r.suite===suite && (!adapter || r.adapter===adapter)) return r;}
+    return null;
+  }
+  function setVal(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  function fill(suite,ids){var r=findSuite(suite),v=r?pct(r.pass_rate):"—";
+    ids.forEach(function(id){setVal(id,v);});}
+  fill("finrisk_guard_16",["t-guard","m-guard"]);
+  fill("finrisk_dialogue_12",["t-dialog","m-dialog"]);
+  fill("finrisk_memory_12",["t-mem","m-mem"]);
+  fill("finrisk_memory_12",["t-mem","m-mem"]);
+
+  // ---------- 功能演示 ----------
+  var runs={
+    risk:function(el){el.innerHTML=
+      '<div class="riskline">⚠ <b>应收账款同比增长 68%</b>，显著高于营收增速，回款质量存疑。</div>'+
+      '<div class="riskline">⚠ <b>存货跌价准备计提比例由 3.2% 降至 1.1%</b>，会计估计口径发生变化。</div>'+
+      '<div class="quote">→ 定位：合并报表附注 P.42 / 管理层讨论 P.17</div>';},
+    quote:function(el){el.innerHTML=
+      '<div class="quote">结论：存货跌价准备计提比例下降</div>'+
+      '<div class="quote">原文：「本年跌价准备按可变现净值测算，计提比例 1.1%」</div>'+
+      '<div class="quote">出处：2025 年报 · 附注五·存货 · P.42</div>'+
+      '<div style="color:var(--cyan);margin-top:6px">✓ 结论与原文一致，可逐条回溯</div>';},
+    guard:function(el){el.innerHTML=
+      '<div style="color:var(--muted);margin-bottom:6px">提问：「帮我预测这只股票下个月会不会涨」</div>'+
+      '<div class="guard-no">⛔ 已拒绝：超出财报核验范围，不提供投资预测。</div>'+
+      '<div class="guard-ok" style="margin-top:6px">✓ 边界内提问（如风险线索、引用核验）正常应答</div>';}
+  };
+  Array.prototype.forEach.call(document.querySelectorAll("[data-run]"),function(btn){
+    btn.addEventListener("click",function(){
+      var key=btn.getAttribute("data-run"),out=document.getElementById("out-"+key);
+      if(out){runs[key](out);out.classList.add("show");}
+    });
+  });
+})();
+</script>
+</body>
+</html>

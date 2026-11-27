@@ -464,7 +464,7 @@ body nav .wrap { display: flex; flex-wrap: wrap; }
   var products = [
     {
       tag: "工业品销售", tagCls: "", name: "砼智销 · 销售 Agent",
-      repo: "cement-sales-agent",
+      repo: "cement-sales-agent", page: "product-cement.html",
       desc: "面向建材销售的对话式 Agent：意图澄清、报价边界、安全护栏。价格类合法咨询曾被误判为常识问答而 503，改为商务咨询独立通路后修复。",
       metrics: [
         ["业务套件通过率", pct(cement.pass_rate), cement.passed + "/" + cement.n],
@@ -474,7 +474,7 @@ body nav .wrap { display: flex; flex-wrap: wrap; }
     },
     {
       tag: "财报核验", tagCls: "", name: "衡鉴 · 风险线索 Agent",
-      repo: "hengjian-finrisk-agent",
+      repo: "hengjian-finrisk-agent", page: "product-hengjian.html",
       desc: "从财报原文抽取风险线索并给出可核验引用。判分复用项目原生金标脚本（native_verdict），不另造标签。",
       metrics: [
         ["财报风险", pct(hg.pass_rate), hg.passed + "/" + hg.n],
@@ -484,7 +484,7 @@ body nav .wrap { display: flex; flex-wrap: wrap; }
     },
     {
       tag: "文旅行程", tagCls: "", name: "贺兰有灵 · 行程 Agent",
-      repo: "helan-lingyou-agent",
+      repo: "helan-lingyou-agent", page: "product-helan.html",
       desc: "把「贺兰山一日游」这类模糊需求变成可执行行程：地点、动线、预算与讲解内容必须相互一致，端到端判分。",
       metrics: [
         ["端到端通过率", pct(helan.pass_rate), helan.passed + "/" + helan.n],
@@ -494,7 +494,7 @@ body nav .wrap { display: flex; flex-wrap: wrap; }
     },
     {
       tag: "科研检索", tagCls: "gray", name: "ResearchOS · 科研 Agent",
-      repo: "researchos-agent",
+      repo: "researchos-agent", page: "product-researchos.html",
       desc: "检索—抽取—核验三段的科研助手，治理套件检查引用是否可核验、结论是否越界。",
       metrics: [
         ["治理套件", pct(ro.pass_rate), ro.passed + "/" + ro.n],
@@ -511,14 +511,15 @@ body nav .wrap { display: flex; flex-wrap: wrap; }
       '<div class="tagrow"><span class="tag ' + p.tagCls + '">' + p.tag + "</span>" +
       '<button type="button" class="card-toggle" id="' + toggleId + '" aria-expanded="true" aria-controls="' + metricsId + '">' +
       '<span class="card-toggle-label">收起指标</span></button></div>' +
-      "<h3><a href='" + gh + "' target='_blank' rel='noopener'>" + p.name + "</a></h3>" +
+      "<h3><a href='" + p.page + "'>" + p.name + "</a></h3>" +
       "<p class='desc'>" + p.desc + "</p>" +
       "<div class='metrics' id='" + metricsId + "'>" + p.metrics.map(function (m) {
         return "<div class='mrow'><span>" + m[0] +
           (m[2] ? "<em class='msub'>" + m[2] + "</em>" : "") +
           "</span><b>" + m[1] + "</b></div>";
       }).join("") + "</div>" +
-      "<a class='go' href='" + gh + "' target='_blank' rel='noopener'>查看仓库 →</a>" +
+      "<a class='go' href='" + p.page + "'>打开产品页 →</a>" +
+      "<a class='go' style='margin-left:14px' href='" + gh + "' target='_blank' rel='noopener'>源码 ↗</a>" +
       "</div>";
   }).join("");
   // 产品卡展开 / 收起：按钮原生支持 Tab 聚焦与 Enter / Space 触发

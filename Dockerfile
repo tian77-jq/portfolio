@@ -16,6 +16,10 @@ COPY index.html /srv/
 COPY projects.html /srv/
 COPY eval.html /srv/
 COPY arch.html /srv/
+COPY product-hengjian.html /srv/
+COPY product-cement.html /srv/
+COPY product-helan.html /srv/
+COPY product-researchos.html /srv/
 COPY assets/ /srv/assets/
 COPY data/ /srv/data/
 

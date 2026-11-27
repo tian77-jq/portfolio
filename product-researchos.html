@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResearchOS · 科研 Agent 与证据检索 — 田德盛 Agent 工程</title>
+<script src="data/metrics.js"></script>
+<style>
+  :root{
+    --bg:#06110f; --bg2:#0a201c; --panel:rgba(20,60,52,.45); --line:rgba(110,220,190,.16);
+    --ink:#e9fbf5; --muted:#a7c9be; --faint:#6d9388; --teal:#3fd6a8; --teal2:#8ff0cc;
+    --blue:#6fc9ff; --amber:#ffd48a; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;overflow-x:clip;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .skip{position:absolute;left:12px;top:-64px;z-index:100;padding:10px 14px;background:var(--teal);color:#05140f;border-radius:8px;text-decoration:none;font-weight:600}
+  .skip:focus{top:12px}
+  :where(a,button,[tabindex]):focus-visible{outline:3px solid var(--teal2);outline-offset:3px;border-radius:5px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+  .nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(14px);background:rgba(6,17,15,.76);border-bottom:1px solid var(--line)}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;text-decoration:none}
+  .brand .seal{width:26px;height:26px;border:1.5px solid var(--teal);border-radius:7px;display:grid;place-items:center;font-family:var(--mono);font-size:13px;color:var(--teal2)}
+  .navlinks{display:flex;gap:6px;flex-wrap:wrap}
+  .navlinks a{font-size:13.5px;color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:7px}
+  .navlinks a:hover{color:var(--ink);background:rgba(255,255,255,.05)}
+
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);
+    background:radial-gradient(900px 380px at 30% 0%,rgba(63,214,168,.14),transparent 60%),linear-gradient(180deg,#06110f,#08201a)}
+  #graph{position:absolute;inset:0;width:100%;height:100%;opacity:.75}
+  .hero .wrap{position:relative;z-index:2;padding-top:78px;padding-bottom:70px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--teal2);
+    text-transform:uppercase;border:1px solid rgba(63,214,168,.35);border-radius:999px;padding:6px 14px;background:rgba(63,214,168,.07)}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:pulse 2s infinite}
+  .hero h1{font-size:clamp(30px,5vw,52px);line-height:1.15;margin:22px 0 14px;letter-spacing:-.02em}
+  .hero h1 .g{background:linear-gradient(100deg,var(--teal2),var(--teal) 55%,#e9fff6);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.lead{font-size:clamp(15px,2vw,18px);color:var(--muted);max-width:660px;margin:0 0 28px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;
+    cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,border-color .15s}
+  .btn:hover{transform:translateY(-2px);border-color:rgba(63,214,168,.5)}
+  .btn.primary{background:linear-gradient(120deg,var(--teal),var(--teal2));color:#05140f;border-color:transparent;box-shadow:0 8px 28px rgba(63,214,168,.2)}
+  .hero .trust{display:flex;gap:26px;flex-wrap:wrap;margin-top:38px;padding-top:22px;border-top:1px solid var(--line)}
+  .hero .trust div{display:flex;flex-direction:column}
+  .hero .trust b{font-family:var(--mono);font-size:21px;color:var(--teal2)}
+  .hero .trust span{font-size:12px;color:var(--faint)}
+
+  section{padding:74px 0}
+  .sec-head{margin-bottom:30px}
+  .sec-head h2{font-size:clamp(23px,3.4vw,32px);margin:0 0 8px;letter-spacing:-.015em}
+  .sec-head p{color:var(--muted);margin:0;max-width:640px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--teal2);text-transform:uppercase}
+
+  .steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:20px}
+  .step{border:1px solid var(--line);border-radius:14px;padding:22px;background:linear-gradient(160deg,rgba(20,60,52,.35),rgba(8,32,26,.55));position:relative}
+  .step .idx{font-family:var(--mono);font-size:12px;color:var(--teal)}
+  .step h4{margin:8px 0 6px;font-size:16px}
+  .step p{margin:0;font-size:13px;color:var(--muted)}
+
+  .demos{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+  .demo{border:1px solid var(--line);border-radius:16px;background:linear-gradient(160deg,rgba(20,60,52,.3),rgba(8,32,26,.55));padding:22px;transition:border-color .2s,transform .2s}
+  .demo:hover{border-color:rgba(63,214,168,.45);transform:translateY(-3px)}
+  .demo .ico{width:42px;height:42px;border-radius:11px;background:rgba(63,214,168,.1);border:1px solid rgba(63,214,168,.3);display:grid;place-items:center;font-size:20px;margin-bottom:14px}
+  .demo h3{font-size:17px;margin:0 0 6px}
+  .demo p.d{color:var(--muted);font-size:13.5px;margin:0 0 16px;min-height:42px}
+  .demo .run{border:1px solid rgba(63,214,168,.3);background:rgba(63,214,168,.12);color:var(--teal2);padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+  .demo .out{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;font-size:13px;color:var(--muted);display:none}
+  .demo .out.show{display:block;animation:fadeup .35s ease}
+  .cite{font-family:var(--mono);font-size:11.5px;color:var(--blue);word-break:break-all;line-height:1.7}
+  .ok{color:var(--teal2)}
+
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+  .metric{border:1px solid var(--line);border-radius:13px;padding:18px;background:rgba(8,32,26,.6)}
+  .metric .k{font-size:12px;color:var(--faint)}
+  .metric .v{font-family:var(--mono);font-size:27px;color:var(--teal2);margin:6px 0 2px}
+  .metric .s{font-size:12px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:13px}
+  footer .wrap{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+  footer a{color:var(--teal2);text-decoration:none}
+
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+  @keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media(max-width:767px){.navlinks{display:none}.hero .wrap{padding-top:54px;padding-bottom:48px}section{padding:52px 0}.hero .trust{gap:18px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到主内容</a>
+<nav class="nav"><div class="wrap">
+  <a class="brand" href="index.html"><span class="seal">R</span> ResearchOS <span style="color:var(--faint);font-weight:400">/ 科研检索</span></a>
+  <div class="navlinks"><a href="#demo">功能演示</a><a href="#process">工作链路</a><a href="#metrics">验证</a><a href="projects.html">← 返回产品矩阵</a></div>
+</div></nav>
+
+<header class="hero">
+  <canvas id="graph" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span> Research Agent · 证据可追溯</span>
+    <h1>每一个结论，<br><span class="g">都指得回原文。</span></h1>
+    <p class="lead">检索—抽取—核验三段式科研助手。核心不是"生成得像"，而是每条结论都能回溯到语料原文、经得起核验。</p>
+    <div class="cta">
+      <a class="btn primary" href="#demo">直接体验功能 ↓</a>
+      <a class="btn" href="https://github.com/tian77-jq/researchos-agent" target="_blank" rel="noopener">查看源码 ↗</a>
+    </div>
+    <div class="trust">
+      <div><b id="t-gov">—</b><span>治理套件通过率</span></div>
+      <div><b>3 段</b><span>检索/抽取/核验</span></div>
+      <div><b>可核验</b><span>引用回溯语料</span></div>
+      <div><b>诚实</b><span>单套件如实标注</span></div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<section id="demo"><div class="wrap">
+  <div class="sec-head"><span class="kicker">01 / 功能直达</span>
+    <h2>点一下，看证据如何被点亮</h2>
+    <p>三个按钮直接演示检索助手的核心价值，不需要任何背景知识。</p>
+  </div>
+  <div class="demos">
+    <div class="demo"><div class="ico">🔍</div><h3>检索与抽取</h3>
+      <p class="d">从语料中找出相关段落，抽取候选结论。</p>
+      <button class="run" data-run="retrieve">▶ 运行检索</button>
+      <div class="out" id="out-retrieve" role="status" aria-live="polite"></div></div>
+    <div class="demo"><div class="ico">🔗</div><h3>引用回溯</h3>
+      <p class="d">结论绑定原文片段，点开即见出处。</p>
+      <button class="run" data-run="cite">▶ 查看引用</button>
+      <div class="out" id="out-cite" role="status" aria-live="polite"></div></div>
+    <div class="demo"><div class="ico">✓</div><h3>越界检查</h3>
+      <p class="d">语料不足时明确说明，不硬编结论。</p>
+      <button class="run" data-run="gov">▶ 测试治理</button>
+      <div class="out" id="out-gov" role="status" aria-live="polite"></div></div>
+  </div>
+</div></section>
+
+<section id="process"><div class="wrap">
+  <div class="sec-head"><span class="kicker">02 / 工作链路</span>
+    <h2>检索 → 抽取 → 核验</h2>
+    <p>三段各司其职，治理套件专门检查引用是否可核验、结论是否越界。</p>
+  </div>
+  <div class="steps3">
+    <div class="step"><div class="idx">STAGE 01</div><h4>检索</h4><p>混合检索定位相关语料片段，保留来源标识。</p></div>
+    <div class="step"><div class="idx">STAGE 02</div><h4>抽取</h4><p>从片段中抽取候选结论，暂不当作事实。</p></div>
+    <div class="step"><div class="idx">STAGE 03</div><h4>核验</h4><p>逐条比对原文，能回溯才算成立。</p></div>
+  </div>
+</div></section>
+
+<section id="metrics"><div class="wrap">
+  <div class="sec-head"><span class="kicker">03 / 真实验证</span>
+    <h2>覆盖到哪就说到哪</h2>
+    <p>治理套件结果来自评测中心真实归档。本 Agent 当前为单套件覆盖，全链路尚未跑通——如实标注，不夸大。</p>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="k">治理套件 researchos_governance</div><div class="v" id="m-gov">—</div><div class="s">引用可核验性</div></div>
+    <div class="metric"><div class="k">判分方式</div><div class="v" style="font-size:20px">可核验性</div><div class="s">引用回溯语料</div></div>
+    <div class="metric"><div class="k">覆盖状态</div><div class="v" style="font-size:20px">单套件</div><div class="s">未覆盖全链路</div></div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <div>田德盛 · Agent 工程 · ResearchOS 科研 Agent</div>
+  <div><a href="https://github.com/tian77-jq/researchos-agent" target="_blank" rel="noopener">源码</a> · <a href="index.html">返回作品集</a></div>
+</div></footer>
+
+<script>
+(function(){
+  "use strict";
+  // ---------- 动态背景：证据网络逐渐点亮 ----------
+  var cv=document.getElementById("graph"),ctx=cv.getContext("2d"),W=0,H=0,dpr=window.devicePixelRatio||1;
+  var nodes=[],edges=[],reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches,t=0;
+  function resize(){var r=cv.getBoundingClientRect();W=r.width;H=r.height;
+    cv.width=Math.max(1,Math.floor(W*dpr));cv.height=Math.max(1,Math.floor(H*dpr));ctx.setTransform(dpr,0,0,dpr,0,0);
+    nodes=[];edges=[];var n=Math.max(16,Math.min(30,Math.floor(W/42)));
+    for(var i=0;i<n;i++)nodes.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2+1.4,ph:Math.random()*Math.PI*2});
+    for(var i=0;i<n;i++)for(var j=i+1;j<n;j++){var dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y;
+      if(dx*dx+dy*dy<16000)edges.push([i,j]);}}
+  function draw(){ctx.clearRect(0,0,W,H);if(!reduce)t+=.016;
+    for(var e=0;e<edges.length;e++){var a=nodes[edges[e][0]],b=nodes[edges[e][1]];
+      var lit=.10+.25*(.5+.5*Math.sin(t*.8+edges[e][0]));
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle="rgba(111,201,255,"+lit+")";ctx.lineWidth=1;ctx.stroke();}
+    for(var i=0;i<nodes.length;i++){var n=nodes[i];var glow=.5+.5*Math.sin(t*1.2+n.ph);
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r+2*glow,0,Math.PI*2);ctx.fillStyle="rgba(63,214,168,"+(.05+.08*glow)+")";ctx.fill();
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle="rgba(143,240,204,"+(.6+.4*glow)+")";ctx.fill();}
+    if(!reduce)requestAnimationFrame(draw);}
+  resize();draw();window.addEventListener("resize",function(){resize();if(reduce)draw();});
+
+  var M = window.METRICS || { suites: [] };
+  var SUITES = Array.isArray(M.suites) ? M.suites : [];
+  function pct(x){return (x==null||isNaN(x))?"—":(Math.round(x*1000)/10)+"%";}
+  function ms(x){return (x==null||isNaN(x))?"—":(Math.round(x)+" ms");}
+  function findSuite(suite, adapter){
+    for(var i=0;i<SUITES.length;i++){var r=SUITES[i];
+      if(r.suite===suite && (!adapter || r.adapter===adapter)) return r;}
+    return null;
+  }
+  function setVal(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  var gov=findSuite("researchos_governance");
+  var v=gov?pct(gov.pass_rate):"—";
+  setVal("t-gov",v);setVal("m-gov",v);
+
+  var runs={
+    retrieve:function(el){el.innerHTML=
+      '<div class="cite">命中片段 #023：「本研究表明方法 A 在数据集 X 上优于基线」</div>'+
+      '<div class="cite">命中片段 #047：「该结论仅在特定条件下成立」</div>'+
+      '<div class="ok" style="margin-top:6px">✓ 抽取 2 条候选结论，待核验</div>';},
+    cite:function(el){el.innerHTML=
+      '<div>结论：方法 A 在数据集 X 上优于基线</div>'+
+      '<div class="cite">↳ 来源：片段 #023 · 语料库 research_corpus_v2</div>'+
+      '<div class="cite">↳ 限定条件：见片段 #047（特定条件下成立）</div>'+
+      '<div class="ok" style="margin-top:6px">✓ 可回溯，条件已标注</div>';},
+    gov:function(el){el.innerHTML=
+      '<div style="color:var(--muted)">提问：语料中没有记载的年份数据是多少？</div>'+
+      '<div style="color:var(--amber);margin-top:5px">⚠ 语料不足，未生成结论。</div>'+
+      '<div class="ok" style="margin-top:6px">✓ 不硬编、不越界，治理规则生效</div>';}
+  };
+  Array.prototype.forEach.call(document.querySelectorAll("[data-run]"),function(btn){
+    btn.addEventListener("click",function(){var k=btn.getAttribute("data-run"),o=document.getElementById("out-"+k);if(o){runs[k](o);o.classList.add("show");}});
+  });
+})();
+</script>
+</body>
+</html>
