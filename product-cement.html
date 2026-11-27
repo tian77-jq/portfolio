@@ -4,18 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>砼智销 · 工业销售询价 Agent</title>
-<meta name="description" content="把每一条混凝土询价变成可执行的报价单：意图澄清、规则试算、跟进节奏、风险红线拦截。">
+<meta name="description" content="面向水泥建材售前场景的可信智能销售数字人：把碎片化询价转成结构化需求、可核查的本地业务草稿与报价试算。2026 长三角（芜湖）算力算法创新应用大赛 数字人赛道 复赛材料。">
 <meta name="color-scheme" content="dark">
 <script src="data/metrics.js"></script>
 <style>
 :root{
-  --bg:#121110;--bg2:#1a1816;--ink:#ece6dc;--muted:#a39b8e;--dim:#6f685e;
-  --line:rgba(236,230,220,.11);--line2:rgba(236,230,220,.06);--panel:rgba(255,255,255,.035);
-  --amber:#f0a830;--amber2:#ffc45c;--soft:rgba(240,168,48,.14);
-  --rust:#d9622b;--rust-soft:rgba(217,98,43,.16);
-  --bad:#e0604f;--bad-soft:rgba(224,96,79,.15);
-  --ok:#9fcf7a;--ok-soft:rgba(159,207,122,.14);
+  --bg:#0f1012;--bg2:#17181b;--ink:#f1ede6;--muted:#b3aca0;--dim:#7a746a;
+  --line:rgba(241,237,230,.12);--line2:rgba(241,237,230,.06);--panel:rgba(255,255,255,.035);
+  --amber:#f0a83a;--amber2:#ffc46b;--amber-soft:rgba(240,168,58,.14);
+  --steel:#7fb3d5;--steel-soft:rgba(127,179,213,.14);
+  --bad:#ef7c8a;--bad-soft:rgba(239,124,138,.15);
+  --ok:#8fd3b6;--ok-soft:rgba(143,211,182,.14);
   --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+  --serif:"Noto Serif SC","Songti SC","STSong","SimSun",Georgia,serif;
   --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -23,192 +24,238 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;overflow-x:clip;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 button{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:6px}
+img{max-width:100%;display:block}
+:focus-visible{outline:2px solid var(--amber2);outline-offset:3px;border-radius:6px}
 .wrap{width:min(1120px,100% - 48px);margin-inline:auto}
 @media (max-width:600px){.wrap{width:calc(100% - 32px)}}
 
 /* 导航 */
-.nav{position:fixed;inset:0 0 auto 0;z-index:50;height:64px;display:flex;align-items:center;background:rgba(18,17,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line2)}
+.nav{position:fixed;inset:0 0 auto 0;z-index:50;height:64px;display:flex;align-items:center;background:rgba(15,16,18,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line2)}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--amber)}
-.brand-name{font-size:20px;font-weight:700;color:var(--ink);letter-spacing:.1em;line-height:1}
+.brand-name{font-family:var(--serif);font-size:20px;color:var(--ink);letter-spacing:.14em;line-height:1}
 .brand-sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-top:5px}
 .nav nav{display:flex;gap:4px}
 .nav nav a{padding:8px 14px;border-radius:8px;font-size:14px;color:var(--muted);text-decoration:none;transition:color .2s,background .2s;white-space:nowrap}
 .nav nav a:hover{color:var(--ink);background:rgba(255,255,255,.05)}
 
 /* 按钮 */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:8px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s,border-color .2s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s,border-color .2s}
 .btn:active{transform:translateY(1px)}
-.btn-primary{color:#1a1205;background:linear-gradient(135deg,#ffc45c,#f0a830 55%,#c9831a);box-shadow:0 8px 28px -10px rgba(240,168,48,.6),inset 0 1px 0 rgba(255,255,255,.35)}
-.btn-primary:hover{box-shadow:0 12px 34px -10px rgba(240,168,48,.85)}
+.btn-primary{color:#1c1305;background:linear-gradient(135deg,#ffd58a,#f0a83a 55%,#d8861c);box-shadow:0 8px 28px -10px rgba(240,168,58,.7),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn-primary:hover{box-shadow:0 12px 34px -10px rgba(240,168,58,.9)}
 .btn-ghost{color:var(--ink);border-color:var(--line);background:rgba(255,255,255,.03)}
-.btn-ghost:hover{border-color:rgba(240,168,48,.5);background:rgba(240,168,48,.06)}
-.btn-sm{padding:8px 14px;font-size:13px;border-radius:8px}
+.btn-ghost:hover{border-color:rgba(255,196,107,.6);background:rgba(240,168,58,.08)}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:999px}
 .btn[disabled]{opacity:.55;cursor:default;transform:none}
 
 /* Hero */
-.hero{position:relative;padding:150px 0 80px;min-height:92vh;display:flex;align-items:center;overflow:hidden;
-  background:radial-gradient(1000px 520px at 85% -10%,rgba(240,168,48,.14),transparent 60%),radial-gradient(800px 480px at -5% 60%,rgba(217,98,43,.09),transparent 60%)}
+.hero{position:relative;padding:150px 0 150px;min-height:92vh;display:flex;align-items:center;overflow:hidden;
+  background:radial-gradient(900px 500px at 85% -10%,rgba(240,168,58,.16),transparent 60%),radial-gradient(700px 420px at 0% 30%,rgba(127,179,213,.1),transparent 60%),linear-gradient(180deg,#0f1012 0%,#17181b 60%,#1b1a17 100%)}
 #bg-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.hero-grid{position:relative;display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
-.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.06em;color:var(--amber);margin:0 0 18px}
-.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 4px rgba(240,168,48,.18);animation:pulse 2.6s ease-in-out infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(240,168,48,.18)}50%{box-shadow:0 0 0 9px rgba(240,168,48,.05)}}
-h1{font-weight:700;font-size:clamp(32px,4.4vw,54px);line-height:1.2;margin:0 0 22px;letter-spacing:.005em}
-h1 em{font-style:normal;background:linear-gradient(92deg,#ffe0a0,#f0a830 50%,#b9771a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:.5}
+.hero-grid{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.08em;color:var(--amber2);margin:0 0 18px}
+.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 4px rgba(240,168,58,.18);animation:pulse 2.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(240,168,58,.18)}50%{box-shadow:0 0 0 10px rgba(240,168,58,.04)}}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(32px,4.4vw,54px);line-height:1.25;margin:0 0 22px}
+h1 em{font-style:normal;background:linear-gradient(92deg,#fff1d6,#ffc46b 45%,#7fb3d5);-webkit-background-clip:text;background-clip:text;color:transparent}
 .lead{font-size:17px;color:var(--muted);max-width:520px;margin:0 0 32px}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px}
-.hero-tags{list-style:none;display:flex;flex-wrap:wrap;gap:8px 20px;margin:0;padding:0;font-size:13px;color:var(--dim)}
-.hero-tags li::before{content:"";display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:1px;background:var(--amber);vertical-align:middle}
+.hero-tags{list-style:none;display:flex;flex-wrap:wrap;gap:8px 20px;margin:0 0 22px;padding:0;font-size:13px;color:var(--dim)}
+.hero-tags li::before{content:"■";display:inline-block;margin-right:8px;color:var(--amber);font-size:9px;vertical-align:middle}
+.contest{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 14px;border-radius:12px;border:1px solid rgba(240,168,58,.35);background:var(--amber-soft);font-size:13px;color:#f6e3c2;line-height:1.5}
+.contest b{color:var(--amber2);font-weight:700}
+.contest span{color:var(--muted)}
 
-/* 报价单示意 */
-.sheet-wrap{position:relative;display:flex;justify-content:flex-end}
-.sheet{position:relative;width:100%;max-width:420px;background:linear-gradient(180deg,#211e1a,#191715);border:1px solid var(--line);border-radius:12px;padding:26px 26px 22px;box-shadow:0 30px 60px -30px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.05);animation:float 7s ease-in-out infinite}
-.sheet::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--amber),var(--rust),transparent)}
-.sheet-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding-bottom:12px;margin-bottom:14px;border-bottom:1px dashed var(--line)}
-.sheet-head strong{font-size:15px;letter-spacing:.06em}
-.sheet-head span{font-family:var(--mono);font-size:12px;color:var(--dim)}
-.sheet-rows{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.sheet-rows li{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:8px 10px;border-radius:6px;animation:row-in 5s ease-in-out infinite}
-.sheet-rows li:nth-child(1){animation-delay:0s}.sheet-rows li:nth-child(2){animation-delay:1.2s}.sheet-rows li:nth-child(3){animation-delay:2.4s}.sheet-rows li:nth-child(4){animation-delay:3.6s}
-.sheet-rows .k{color:var(--muted)}
-.sheet-rows .v{font-family:var(--mono);color:var(--ink)}
-.sheet-rows .v.price{color:var(--amber2);font-weight:700}
-@keyframes row-in{0%,15%,100%{background:transparent}22%,70%{background:rgba(240,168,48,.1)}}
-.sheet-rules{margin:16px 0 0;padding:12px 12px;border:1px solid var(--line);border-radius:8px;background:rgba(0,0,0,.25);font-size:12px;color:var(--muted);line-height:1.8}
-.sheet-rules b{color:var(--amber2);font-family:var(--mono);font-weight:600}
-.stamp{position:absolute;top:-18px;right:-14px;width:76px;height:76px;border-radius:6px;border:2px solid rgba(240,168,48,.8);display:grid;place-items:center;text-align:center;color:var(--amber);font-weight:700;font-size:13px;line-height:1.15;letter-spacing:.1em;transform:rotate(8deg);background:rgba(18,17,16,.92);box-shadow:0 0 0 4px rgba(240,168,48,.08);animation:stamp-in .7s cubic-bezier(.2,.8,.2,1) both .6s;pointer-events:none}
-.stamp::before{content:"";position:absolute;inset:5px;border:1px dashed rgba(240,168,48,.55)}
-.stamp i{display:block;font-style:normal;font-size:14px;margin-bottom:2px}
-@keyframes stamp-in{from{opacity:0;transform:rotate(8deg) scale(1.7)}to{opacity:1;transform:rotate(8deg) scale(1)}}
+/* Hero 右侧：数字人对话卡 */
+.chat-card{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));border:1px solid var(--line);border-radius:18px;padding:22px 24px 20px;box-shadow:0 30px 70px -30px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.08);animation:float 8s ease-in-out infinite}
+.chat-card::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;border-radius:18px 18px 0 0;background:linear-gradient(90deg,var(--amber),var(--steel),transparent)}
+.chat-head{display:flex;align-items:center;gap:14px;padding-bottom:14px;margin-bottom:16px;border-bottom:1px dashed var(--line)}
+.avatar{width:64px;height:64px;border-radius:16px;object-fit:cover;border:1px solid rgba(240,168,58,.5);box-shadow:0 0 0 4px rgba(240,168,58,.12);flex:none}
+.chat-head strong{display:block;font-family:var(--serif);font-size:17px;letter-spacing:.06em}
+.chat-head .s{font-size:12px;color:var(--dim);font-family:var(--mono)}
+.chat-head .on{margin-left:auto;font-size:11px;color:var(--ok);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chat-head .on::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.bubbles{display:grid;gap:10px}
+.bubble{max-width:92%;padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.7;opacity:0;transform:translateY(6px);animation:in .5s ease-out forwards}
+.bubble.bot{background:rgba(240,168,58,.1);border:1px solid rgba(240,168,58,.3);color:#f6e3c2;border-bottom-left-radius:4px}
+.bubble.user{justify-self:end;background:rgba(127,179,213,.12);border:1px solid rgba(127,179,213,.3);color:#dcecf6;border-bottom-right-radius:4px}
+.bubble:nth-child(1){animation-delay:.1s}.bubble:nth-child(2){animation-delay:.9s}.bubble:nth-child(3){animation-delay:1.8s}.bubble:nth-child(4){animation-delay:2.7s}
+.bubble code{font-family:var(--mono);font-size:.9em;color:var(--amber2)}
+.chat-foot{margin-top:14px;padding:10px 12px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--line2);font-size:12px;color:var(--muted);line-height:1.8}
+.chat-foot b{color:var(--amber2);font-family:var(--mono);font-weight:600}
+@keyframes in{to{opacity:1;transform:none}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
 /* 区块 */
 .section{padding:96px 0}
 .sec-head{margin-bottom:44px}
-.sec-head h2{font-size:clamp(26px,3vw,36px);font-weight:700;margin:0 0 12px}
-.sec-head p{color:var(--muted);margin:0;max-width:660px}
-.sec-head code{font-family:var(--mono);font-size:.9em;color:var(--amber2);background:var(--soft);padding:1px 6px;border-radius:4px}
-.flow{display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden;position:relative}
-.flow::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--amber),var(--rust),transparent)}
+.sec-head h2{font-family:var(--serif);font-size:clamp(26px,3vw,36px);font-weight:600;margin:0 0 12px}
+.sec-head p{color:var(--muted);margin:0;max-width:700px}
+.sec-head code{font-family:var(--mono);font-size:.9em;color:var(--amber2);background:var(--amber-soft);padding:1px 6px;border-radius:4px}
+
+/* 报价单流水线 */
+.pipeline{position:relative;display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.pipeline::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--amber),var(--steel),transparent)}
+.pipeline li{padding:22px 22px 20px;border-right:1px solid var(--line);position:relative}
+.pipeline li:last-child{border-right:0}
+.pipeline .n{font-family:var(--mono);color:var(--amber2);font-size:12px;letter-spacing:.1em;display:block;margin-bottom:6px}
+.pipeline strong{display:block;font-size:15px;margin-bottom:4px}
+.pipeline span{font-size:13px;color:var(--dim);line-height:1.7}
+.pipeline .bar{display:block;height:3px;border-radius:2px;margin-top:12px;background:rgba(255,255,255,.06);overflow:hidden}
+.pipeline .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--amber2));animation:fill 2.4s ease-out forwards}
+.pipeline li:nth-child(2) .bar i{animation-delay:.5s}.pipeline li:nth-child(3) .bar i{animation-delay:1s}.pipeline li:nth-child(4) .bar i{animation-delay:1.5s}
+@keyframes fill{to{width:var(--w,80%)}}
+
+/* 流程 */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;position:relative}
+.flow::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--steel),var(--amber),transparent)}
 .flow li{padding:20px 22px;border-right:1px solid var(--line)}
 .flow li:last-child{border-right:0}
-.flow .n{font-family:var(--mono);color:var(--amber);font-size:13px;letter-spacing:.1em;display:block;margin-bottom:6px}
+.flow .n{font-family:var(--mono);color:var(--steel);font-size:13px;letter-spacing:.1em;display:block;margin-bottom:6px}
 .flow strong{display:block;font-size:15px;margin-bottom:2px}
 .flow span{font-size:13px;color:var(--dim)}
 
 /* 功能 */
 .features{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
-.feature{position:relative;display:block;border-radius:14px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));overflow:hidden;text-decoration:none;transition:transform .35s,border-color .35s,box-shadow .35s}
-.feature::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 220px at 100% 0%,rgba(240,168,48,.14),transparent 60%);opacity:0;transition:opacity .35s;pointer-events:none}
-.feature:hover{transform:translateY(-4px);border-color:rgba(240,168,48,.45);box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+.feature{position:relative;display:block;border-radius:16px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));overflow:hidden;text-decoration:none;transition:transform .35s,border-color .35s,box-shadow .35s}
+.feature::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 220px at 100% 0%,rgba(240,168,58,.16),transparent 60%);opacity:0;transition:opacity .35s;pointer-events:none}
+.feature:hover{transform:translateY(-4px);border-color:rgba(255,196,107,.45);box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
 .feature:hover::before{opacity:1}
 .feature-in{display:block;padding:28px}
-.feature-icon{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--amber);background:var(--soft);border:1px solid rgba(240,168,48,.3);margin-bottom:18px}
-.feature h3{margin:0 0 8px;font-size:19px;font-weight:700}
+.feature-icon{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;color:var(--amber2);background:var(--amber-soft);border:1px solid rgba(240,168,58,.3);margin-bottom:18px}
+.feature h3{margin:0 0 8px;font-size:19px;font-weight:600}
 .feature p{margin:0 0 18px;color:var(--muted);font-size:14.5px}
 .feature .try{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--amber2)}
 .feature .try::after{content:"→";transition:transform .3s}
 .feature:hover .try::after{transform:translateX(4px)}
 
+/* 技术难点 */
+.tech{display:grid;gap:16px}
+.tech-item{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:22px 24px}
+.tech-item h3{margin:0 0 10px;font-size:17px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tech-item h3 .tag{font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:999px;border:1px solid rgba(240,168,58,.4);color:var(--amber2);background:var(--amber-soft);font-weight:600}
+.tech-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tech-col{padding:12px 14px;border-radius:10px;font-size:13.5px;line-height:1.75}
+.tech-col.done{background:rgba(143,211,182,.06);border:1px solid rgba(143,211,182,.22)}
+.tech-col.todo{background:rgba(239,124,138,.06);border:1px solid rgba(239,124,138,.22)}
+.tech-col .h{display:block;font-size:12px;letter-spacing:.08em;margin-bottom:6px;font-weight:700}
+.tech-col.done .h{color:var(--ok)}
+.tech-col.todo .h{color:var(--bad)}
+.tech-col ul{margin:0;padding-left:16px}
+.tech-col li{margin-bottom:4px}
+.tech-col li::marker{color:var(--dim)}
+.tech-col code{font-family:var(--mono);font-size:.9em;color:var(--amber2)}
+.tech-src{margin-top:10px;font-size:12px;color:var(--dim);font-family:var(--mono)}
+.mini-table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 4px}
+.mini-table th,.mini-table td{padding:7px 10px;border-bottom:1px solid var(--line2);text-align:left;white-space:nowrap}
+.mini-table th{color:var(--dim);font-weight:600;font-size:11.5px;letter-spacing:.04em}
+.mini-table td.n{font-family:var(--mono)}
+.sig{color:var(--amber2);font-weight:700}
+.nosig{color:var(--muted)}
+
 /* 指标 */
 .metric-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
-.metric{padding:22px 24px;border-radius:12px;border:1px solid var(--line);background:var(--panel);position:relative;overflow:hidden}
+.metric{padding:22px 24px;border-radius:14px;border:1px solid var(--line);background:var(--panel);position:relative;overflow:hidden}
 .metric::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--amber),transparent)}
 .metric .k{font-size:13px;color:var(--dim);margin:0 0 8px}
-.metric .v{font-size:clamp(26px,3vw,36px);color:var(--ink);margin:0;line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums}
-.metric .v small{font-size:14px;color:var(--muted);font-weight:400;margin-left:4px}
-.table-wrap{border:1px solid var(--line);border-radius:12px;overflow-x:auto;background:var(--panel)}
-table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
-th,td{padding:14px 18px;text-align:left;border-bottom:1px solid var(--line2);white-space:nowrap}
+.metric .v{font-family:var(--serif);font-size:clamp(26px,3vw,36px);color:var(--ink);margin:0;line-height:1.1;font-variant-numeric:tabular-nums}
+.metric .v small{font-size:14px;color:var(--muted);font-family:var(--sans);margin-left:4px}
+.metric .v.low{color:var(--bad)}
+.table-wrap{border:1px solid var(--line);border-radius:14px;overflow-x:auto;background:var(--panel)}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:680px}
+th,td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line2);white-space:nowrap;vertical-align:top}
 th{font-size:12px;letter-spacing:.06em;color:var(--dim);font-weight:600;background:rgba(255,255,255,.02)}
 tr:last-child td{border-bottom:0}
 td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .dash{color:var(--dim)}
+.lowv{color:var(--bad);font-weight:700}
+.sub{display:block;margin-top:4px;font-size:11.5px;color:var(--dim);font-family:var(--mono);white-space:normal;line-height:1.6}
 .note{font-size:13px;color:var(--dim);margin:14px 0 0}
 
 /* 页脚 */
 footer{border-top:1px solid var(--line);padding:40px 0 48px;background:rgba(0,0,0,.2)}
 .foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px}
 .foot-links{display:flex;gap:10px;flex-wrap:wrap}
-.foot-links a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:8px;border:1px solid var(--line);font-size:14px;text-decoration:none;color:var(--muted);transition:.2s}
-.foot-links a:hover{color:var(--ink);border-color:rgba(240,168,48,.5)}
+.foot-links a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1px solid var(--line);font-size:14px;text-decoration:none;color:var(--muted);transition:.2s}
+.foot-links a:hover{color:var(--ink);border-color:rgba(255,196,107,.5)}
 .foot p{margin:0;font-size:13px;color:var(--dim)}
 
 /* 弹窗 */
 dialog{border:0;padding:0;background:transparent;color:var(--ink);width:min(960px,calc(100% - 32px));max-height:calc(100vh - 48px);margin:auto}
-dialog::backdrop{background:rgba(8,7,6,.74);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+dialog::backdrop{background:rgba(5,6,8,.76);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
 @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
-.modal-box{background:#1b1916;border:1px solid var(--line);border-radius:16px;box-shadow:0 40px 100px -40px rgba(0,0,0,.9),0 0 0 1px rgba(240,168,48,.08);display:flex;flex-direction:column;max-height:calc(100vh - 48px);overflow:hidden}
+.modal-box{background:#17181b;border:1px solid var(--line);border-radius:18px;box-shadow:0 40px 100px -40px rgba(0,0,0,.9),0 0 0 1px rgba(240,168,58,.1);display:flex;flex-direction:column;max-height:calc(100vh - 48px);overflow:hidden}
 .modal-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 24px;border-bottom:1px solid var(--line)}
-.modal-head h3{margin:0;font-size:20px;font-weight:700}
+.modal-head h3{margin:0;font-family:var(--serif);font-size:20px;font-weight:600}
 .modal-head .sub{font-size:13px;color:var(--dim);margin-top:2px}
-.modal-close{flex:none;width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer;display:grid;place-items:center;font-size:18px;line-height:1;transition:.2s}
-.modal-close:hover{border-color:rgba(240,168,48,.5);color:var(--amber2)}
+.modal-close{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer;display:grid;place-items:center;font-size:18px;line-height:1;transition:.2s}
+.modal-close:hover{border-color:rgba(255,196,107,.5);color:var(--amber2)}
 .modal-body{padding:24px;overflow:auto}
 .modal-foot{padding:12px 24px;border-top:1px solid var(--line2);font-size:12px;color:var(--dim)}
 
 /* 演示通用 */
-.demo-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px}
+.demo-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:20px}
 .panel{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);padding:18px 20px}
 .panel-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--dim);letter-spacing:.04em;padding-bottom:10px;margin-bottom:12px;border-bottom:1px dashed var(--line)}
 .status{font-size:13px;color:var(--muted)}
 .demo-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13px;color:var(--muted);cursor:pointer;transition:.2s}
-.chip:hover{border-color:rgba(240,168,48,.5);color:var(--ink)}
-.chip[aria-pressed="true"]{background:var(--soft);border-color:rgba(240,168,48,.6);color:var(--amber2)}
+.chip{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13px;color:var(--muted);cursor:pointer;transition:.2s}
+.chip:hover{border-color:rgba(255,196,107,.5);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--amber-soft);border-color:rgba(255,196,107,.6);color:var(--amber2)}
 .field{margin-bottom:12px}
 .field .lbl{font-size:12px;color:var(--dim);margin:0 0 6px;display:flex;justify-content:space-between;gap:8px}
 .field .lbl b{color:var(--amber2);font-family:var(--mono);font-weight:600}
-@keyframes in{to{opacity:1;transform:none}}
+.itin{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.itin li{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);padding:12px 14px;opacity:0;transform:translateY(8px);animation:in .45s ease-out forwards}
+.itin .d{font-family:var(--mono);font-size:12px;color:var(--amber2);font-weight:700;letter-spacing:.08em}
+.itin strong{display:block;font-size:14px;margin:2px 0 4px}
+.itin p{margin:0;font-size:13px;color:var(--muted);line-height:1.7}
+.itin .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.itin .meta span{font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid var(--line2);color:var(--amber2);background:rgba(240,168,58,.08)}
+.placeholder{color:var(--dim);font-size:13px;padding:14px;border:1px dashed var(--line);border-radius:10px;text-align:center;list-style:none}
 
-/* 演示 1 */
-.req{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-family:var(--mono);font-size:13px}
-.req li{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:6px;background:rgba(0,0,0,.25);border:1px solid var(--line2)}
-.req .k{color:var(--muted)}
-.req .v{color:var(--ink);text-align:right}
-.req .v.pending{color:var(--dim)}
-.req .v.set{color:var(--amber2)}
-.progress{height:4px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden;margin:14px 0 6px}
-.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--rust));transition:width .5s ease}
+/* 演示 1：结构化需求 */
+.spec{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.spec li{display:grid;grid-template-columns:96px 1fr auto;gap:10px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid var(--line2);font-size:13.5px;opacity:0;animation:in .3s ease-out forwards}
+.spec .k{color:var(--dim);font-size:12px}
+.spec .v{font-family:var(--mono);color:var(--ink)}
+.spec .st{font-family:var(--mono);font-size:11.5px;padding:1px 8px;border-radius:999px;align-self:start;white-space:nowrap}
+.st-ok{color:#c6efdd;background:var(--ok-soft);border:1px solid rgba(143,211,182,.35)}
+.st-ask{color:#ffe2b8;background:var(--amber-soft);border:1px solid rgba(240,168,58,.4)}
 
-/* 演示 2 */
-.quote{margin:0;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,rgba(240,168,48,.08),rgba(0,0,0,.2))}
-.quote .big{font-family:var(--mono);font-size:clamp(24px,3vw,32px);font-weight:700;color:var(--amber2);line-height:1.1}
-.quote .big small{font-size:13px;color:var(--muted);font-weight:400;margin-left:6px}
-.quote .range{font-family:var(--mono);font-size:14px;color:var(--muted);margin-top:6px}
+/* 演示 2：报价 */
+.quote{margin:0;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,rgba(240,168,58,.1),rgba(0,0,0,.2))}
+.quote .big{font-family:var(--serif);font-size:clamp(24px,3vw,32px);font-weight:600;color:var(--amber2);line-height:1.1}
+.quote .big small{font-size:13px;color:var(--muted);font-family:var(--sans);margin-left:6px}
+.quote .sub{font-size:13px;color:var(--muted);margin-top:6px}
 .quote .total{font-size:13px;color:var(--ink);margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
-.rules{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:6px;font-size:13px}
-.rules li{display:flex;gap:10px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,.03);border:1px solid var(--line2);opacity:0;animation:in .3s ease-out forwards}
-.rules li b{font-family:var(--mono);color:var(--amber2);min-width:52px}
-.rules li span{color:var(--muted)}
+.basis{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:6px;font-size:13px}
+.basis li{display:grid;grid-template-columns:1fr auto;gap:10px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,.03);border:1px solid var(--line2);opacity:0;animation:in .3s ease-out forwards}
+.basis .c{color:var(--amber2);font-family:var(--mono);white-space:nowrap}
 
-/* 演示 3 */
-.plan{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.plan li{display:grid;grid-template-columns:72px 1fr;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.03);opacity:0;transform:translateY(8px);animation:in .4s ease-out forwards}
-.plan .d{font-family:var(--mono);font-size:13px;color:var(--amber2);font-weight:700}
-.plan strong{display:block;font-size:14px;margin-bottom:2px}
-.plan span{font-size:13px;color:var(--muted);line-height:1.6}
-.plan-empty{color:var(--dim);font-size:13px;padding:14px;border:1px dashed var(--line);border-radius:10px;text-align:center;list-style:none}
+/* 演示 3：跟进计划 */
+.plan{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.plan li{display:grid;grid-template-columns:100px 1fr auto;gap:10px;align-items:start;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13.5px;opacity:0;animation:in .3s ease-out forwards}
+.plan .t{font-family:var(--mono);color:var(--amber2);font-size:12.5px}
+.plan .g{color:var(--muted);font-size:12.5px;display:block;margin-top:2px}
+.plan .tag{font-family:var(--mono);font-size:11.5px;padding:2px 9px;border-radius:999px;white-space:nowrap;align-self:start}
+.tag-ok{color:#c6efdd;background:var(--ok-soft);border:1px solid rgba(143,211,182,.35)}
+.tag-warn{color:#ffe2b8;background:var(--amber-soft);border:1px solid rgba(240,168,58,.4)}
 
-/* 演示 4 */
-.phrases{display:grid;gap:8px}
-.phrase{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer;font-size:14px;line-height:1.5;transition:.2s}
-.phrase:hover{border-color:rgba(240,168,48,.5)}
-.phrase[aria-pressed="true"]{border-color:rgba(240,168,48,.6);background:var(--soft)}
-.verdict{margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;animation:in .35s ease-out}
-.verdict-head{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:14px;font-weight:700;border-bottom:1px solid var(--line2)}
-.verdict.block .verdict-head{color:#ffb3a8;background:var(--bad-soft)}
-.verdict.pass .verdict-head{color:#c9ecab;background:var(--ok-soft)}
-.verdict-body{padding:14px 16px;font-size:13.5px;color:#d9d2c6;line-height:1.8}
-.verdict-body .q{display:block;padding:8px 12px;margin-bottom:10px;border-left:2px solid var(--amber);background:rgba(240,168,48,.06);border-radius:0 6px 6px 0;color:var(--ink)}
-.verdict-body .fix{display:block;margin-top:10px;padding:10px 12px;border-radius:6px;background:rgba(159,207,122,.08);border:1px solid rgba(159,207,122,.25);color:#d7efc4}
+/* 演示 4：风险红线 */
+.redline{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.redline li{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13.5px;opacity:0;animation:in .3s ease-out forwards}
+.redline .why{display:block;color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.6}
+.tag-bad{color:#ffc4cc;background:var(--bad-soft);border:1px solid rgba(239,124,138,.4)}
+.redline li.hit{border-color:rgba(239,124,138,.45)}
+.redline li.pass{border-color:rgba(143,211,182,.3)}
 
 /* 响应式 */
-@media (max-width:960px){.hero{min-height:0;padding-top:124px}.hero-grid{grid-template-columns:1fr;gap:44px}.sheet-wrap{justify-content:center}.metric-cards{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:960px){.hero{min-height:0;padding-top:124px;padding-bottom:130px}.hero-grid{grid-template-columns:1fr;gap:44px}.metric-cards{grid-template-columns:repeat(2,1fr)}.pipeline{grid-template-columns:repeat(2,1fr)}.pipeline li:nth-child(2){border-right:0}.pipeline li:nth-child(-n+2){border-bottom:1px solid var(--line)}.tech-grid{grid-template-columns:1fr}}
 @media (max-width:720px){
   .features{grid-template-columns:1fr}
   .flow{grid-template-columns:repeat(2,1fr)}
@@ -220,11 +267,12 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
   .nav nav a{padding:8px 10px}
   .brand-sub{display:none}
 }
-@media (max-width:480px){.hero-cta .btn{flex:1}.stamp{width:64px;height:64px;font-size:11px}}
+@media (max-width:480px){.hero-cta .btn{flex:1}.spec li,.plan li{grid-template-columns:80px 1fr}.spec .st,.plan .tag{grid-column:2}}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-  .sheet-rows li,.plan li,.rules li{opacity:1;transform:none;animation:none;background:transparent}
+  .bubble,.itin li,.spec li,.basis li,.plan li,.redline li{opacity:1;transform:none;animation:none}
+  .pipeline .bar i{width:var(--w,80%)}
 }
 </style>
 </head>
@@ -233,12 +281,14 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
 <header class="nav">
   <div class="wrap">
     <a class="brand" href="#top" aria-label="砼智销 · 回到顶部">
-      <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true"><rect x="3" y="3" width="30" height="30" rx="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 25V13l8-4 8 4v12M10 17h16M14 25v-5h4v5M22 25v-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true"><rect x="2" y="2" width="32" height="32" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 26V16l6-4 6 4 8-5v15z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 26h20" stroke="currentColor" stroke-width="1.7"/></svg>
       <span class="brand-name">砼智销</span>
       <span class="brand-sub">Cement Sales Agent</span>
     </a>
     <nav aria-label="页面导航">
+      <a href="#pipeline">流程</a>
       <a href="#features">功能</a>
+      <a href="#tech">技术难点</a>
       <a href="#metrics">指标</a>
       <a href="https://github.com/tian77-jq/cement-sales-agent" target="_blank" rel="noopener">源码</a>
     </nav>
@@ -250,45 +300,62 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
     <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="dot"></span>工业销售询价 Agent · 混凝土 / 建材</p>
-        <h1>每一条询价，<br><em>都变成可执行的报价单。</em></h1>
-        <p class="lead">砼智销把微信、电话里的碎片化询价澄清成结构化需求，按量价与账期规则试算报价区间，生成跟进节奏，并在越权话术出现前拦截。</p>
+        <p class="eyebrow"><span class="dot"></span>工业销售询价 Agent · 水泥建材售前</p>
+        <h1>碎片化的询价丢进来，<br><em>出去的是一份能核对的报价草稿。</em></h1>
+        <p class="lead">砼智销把微信里零散的「明天要 300 方 C30、账期能不能宽一点」整理成结构化需求，按本地业务规则试算报价区间与依据，标出越权承诺并生成跟进节奏。每一步都留痕，销售人员接手时知道客户说过什么。</p>
         <div class="hero-cta">
           <a class="btn btn-primary" href="#features">试用功能演示</a>
           <a class="btn btn-ghost" href="#metrics">查看核验指标</a>
         </div>
         <ul class="hero-tags">
-          <li>询价意图自动澄清</li>
-          <li>报价依据逐条可查</li>
-          <li>风险红线先拦再说</li>
+          <li>报价依据可回溯</li>
+          <li>越权话术当场拦截</li>
+          <li>本地部署，数据不出厂</li>
         </ul>
+        <div class="contest"><b>2026 长三角（芜湖）算力算法创新应用大赛</b><span>数字人赛道 · 复赛材料：项目方案 + Agent 能力与可靠性实测报告</span><span>奖项等级 —</span></div>
       </div>
 
       <div class="hero-visual">
-        <div class="sheet-wrap">
-          <div class="sheet" aria-label="报价单示意（演示数据）">
-            <span class="stamp" aria-hidden="true"><i>✓</i>已核价</span>
-            <div class="sheet-head"><strong>报价单 · 询价回执</strong><span>Q-2026-0318</span></div>
-            <ul class="sheet-rows">
-              <li><span class="k">产品</span><span class="v">C30 泵送 · 坍落度 180±20</span></li>
-              <li><span class="k">数量 / 运距</span><span class="v">800 m³ · 15 km</span></li>
-              <li><span class="k">账期</span><span class="v">月结 30 天</span></li>
-              <li><span class="k">参考单价</span><span class="v price">437 元/m³ · 432–442</span></li>
-            </ul>
-            <div class="sheet-rules">规则命中 <b>3</b> 条：阶梯量价 <b>−6</b> · 账期加价 <b>+8</b> · 15 km 运费 <b>已含</b><br>风险红线 <b>0</b> 条 · 引用 <b>可追溯</b></div>
+        <div class="chat-card" aria-label="砼小智对话示意（演示数据）">
+          <div class="chat-head">
+            <img class="avatar" src="assets/tongbot.png" alt="砼小智 TongBot 数字人形象" width="64" height="64">
+            <div><strong>砼小智 TongBot</strong><span class="s">sales-agent · v2</span></div>
+            <span class="on">在线</span>
           </div>
+          <div class="bubbles" aria-live="polite">
+            <div class="bubble bot">把碎片化询价发我，我来做结构化澄清与报价试算。</div>
+            <div class="bubble user">明天要 300 方 C30，送到滨河新区那个工地，账期能不能 90 天？</div>
+            <div class="bubble bot">已整理：<code>C30 × 300 m³</code>，送滨河新区，期望账期 <code>90 天</code>。还差两项：泵送方式、是否夜间施工。90 天账期超出我的授权（上限 60 天），会转人工审批。</div>
+            <div class="bubble bot">先给一个试算区间：<code>412 – 438 元/m³</code>，依据见报价单。</div>
+          </div>
+          <div class="chat-foot">已澄清 <b>3/5</b> 项 · 待确认 <b>2</b> 项 · 越权标记 <b>1</b> 条 · 本地规则命中 <b>4</b> 条（演示数据）</div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section" style="padding-top:0">
+  <section class="section" id="pipeline" style="padding-top:0">
     <div class="wrap">
-      <ol class="flow" aria-label="询价处理流程">
-        <li><span class="n">01</span><strong>询价接入</strong><span>微信 / 电话 / 邮件统一进单</span></li>
-        <li><span class="n">02</span><strong>意图澄清</strong><span>强度、数量、运距、账期逐项补齐</span></li>
-        <li><span class="n">03</span><strong>规则试算</strong><span>量价阶梯、账期、运费给出区间与依据</span></li>
-        <li><span class="n">04</span><strong>跟进与拦截</strong><span>生成节奏，越权话术先拦后发</span></li>
+      <header class="sec-head">
+        <h2>一条询价的流水线</h2>
+        <p>从一句话进来，到一份可签字的草稿出去。每个环节都有规则边界，不是开放式聊天。</p>
+      </header>
+      <ol class="pipeline" aria-label="询价处理流水线">
+        <li><span class="n">01</span><strong>意图澄清</strong><span>强度、方量、工地、工期、泵送、账期 —— 缺哪项问哪项</span><span class="bar"><i style="--w:86%"></i></span></li>
+        <li><span class="n">02</span><strong>报价试算</strong><span>按本地价格表与运距规则给出区间，逐项列出依据</span><span class="bar"><i style="--w:72%"></i></span></li>
+        <li><span class="n">03</span><strong>红线拦截</strong><span>越权账期、私自降价、无授权承诺，命中即标红</span><span class="bar"><i style="--w:100%"></i></span></li>
+        <li><span class="n">04</span><strong>跟进节奏</strong><span>按客户阶段生成下一步动作与时间点，可直接执行</span><span class="bar"><i style="--w:64%"></i></span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:24px">
+    <div class="wrap">
+      <ol class="flow" aria-label="工作流程">
+        <li><span class="n">STEP 1</span><strong>接收</strong><span>微信 / 电话记录 / 邮件原文</span></li>
+        <li><span class="n">STEP 2</span><strong>结构化</strong><span>抽取字段，缺项追问</span></li>
+        <li><span class="n">STEP 3</span><strong>试算与拦截</strong><span>规则引擎，不靠模型猜价</span></li>
+        <li><span class="n">STEP 4</span><strong>交付草稿</strong><span>报价单 + 跟进计划 + 审计留痕</span></li>
       </ol>
     </div>
   </section>
@@ -297,22 +364,22 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
     <div class="wrap">
       <header class="sec-head">
         <h2>功能直达</h2>
-        <p>点开卡片即可上手，不用配置。演示数据为模拟语境，交互方式与产品一致。</p>
+        <p>点开卡片即可上手，不用配置。演示数据为模拟语境，价格与规则为示意。</p>
       </header>
       <div class="features">
         <a class="feature" href="#features" data-demo="clarify" aria-haspopup="dialog">
           <span class="feature-in">
             <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg></span>
             <h3>询价意图澄清</h3>
-            <p>「要一批 C30，便宜点，尽快送」——点选缺失项，看它如何变成结构化需求。</p>
+            <p>点一句客户原话，看它被拆成哪些字段，哪些还缺、需要追问。</p>
             <span class="try">点击体验</span>
           </span>
         </a>
         <a class="feature" href="#features" data-demo="quote" aria-haspopup="dialog">
           <span class="feature-in">
-            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-3-2-3 2-3-2-3 2z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg></span>
+            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-7-4-7 4z"/><path d="M9 8h6M9 12h4"/></svg></span>
             <h3>报价规则试算</h3>
-            <p>选择数量与账期，立刻得到报价区间、总额和每一条命中的规则依据。</p>
+            <p>选强度、方量与账期，输出单价区间、总价和每一条依据。</p>
             <span class="try">点击体验</span>
           </span>
         </a>
@@ -320,18 +387,72 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
           <span class="feature-in">
             <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
             <h3>跟进节奏生成</h3>
-            <p>选客户类型，一键生成从报价送达 to 复盘的跟进计划，每一步带话术要点。</p>
+            <p>点「生成跟进计划」，按报价后的时间线排出下一步动作。</p>
             <span class="try">点击体验</span>
           </span>
         </a>
         <a class="feature" href="#features" data-demo="guard" aria-haspopup="dialog">
           <span class="feature-in">
-            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8v5M12 16v.5"/></svg></span>
+            <span class="feature-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
             <h3>风险红线拦截</h3>
-            <p>点一句销售常说的话术，看哪些会被拦下、为什么、以及合规的说法是什么。</p>
+            <p>点一句越权话术，看它被哪条规则拦下、原因是什么。</p>
             <span class="try">点击体验</span>
           </span>
         </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="tech" style="padding-top:32px">
+    <div class="wrap">
+      <header class="sec-head">
+        <h2>技术难点：框架不是越快越好，配对测量才有意义</h2>
+        <p>同一个 RfqLoop 循环体，分别装进四个框架的编排容器，与裸循环基线在同一进程配对测量。已做到与边界分开写，不宣称已解决。</p>
+      </header>
+      <div class="tech">
+        <article class="tech-item">
+          <h3>多框架同集对照：差别只在「有没有为持久化付费」 <span class="tag">配对测量</span></h3>
+          <table class="mini-table" aria-label="多框架对照结果">
+            <thead><tr><th>框架</th><th>编排容器</th><th>平均延迟</th><th>容器开销（配对）</th><th>95% CI</th><th>判定</th></tr></thead>
+            <tbody>
+              <tr><td>LangGraph 1.2.24</td><td>StateGraph + SqliteSaver</td><td class="n">125.09 ms</td><td class="n">+36.87 ms（+41.8%）</td><td class="n">[29.39, 44.35]</td><td class="sig">显著</td></tr>
+              <tr><td>LlamaIndex 0.14.26</td><td>Workflow（事件驱动）</td><td class="n">86.04 ms</td><td class="n">+14.80 ms（+20.8%）</td><td class="n">[6.20, 23.40]</td><td class="sig">显著</td></tr>
+              <tr><td>LangChain 1.8.5</td><td>LCEL Runnable 链</td><td class="n">73.04 ms</td><td class="n">−2.62 ms（−3.5%）</td><td class="n">[−9.98, 4.74]</td><td class="nosig">噪声内</td></tr>
+              <tr><td>AutoGen 0.2.35</td><td>ConversableAgent 双智能体</td><td class="n">71.58 ms</td><td class="n">−6.33 ms（−8.1%）</td><td class="n">[−19.25, 6.59]</td><td class="nosig">噪声内</td></tr>
+            </tbody>
+          </table>
+          <div class="tech-grid">
+            <div class="tech-col done"><span class="h">已做到</span><ul>
+              <li>四容器业务结果与原生逐字段一致，动作序列 100% 相同；每框架每夹具重复 10 次，n=40 配对样本</li>
+              <li>裸循环基线均值 88.22 ms，随进程在 71–88 ms 波动，因此只认配对差值，不认单次均值</li>
+              <li>LangGraph 多出的约 37 ms 换来 checkpoint：子进程 <code>os._exit</code> 真崩溃后可恢复至 DRAFT_READY / 5 步（verified）</li>
+              <li>其余三家不做持久化，几乎零成本 —— 不是「更轻更快」，是没有买这项能力</li>
+            </ul></div>
+            <div class="tech-col todo"><span class="h">边界</span><ul>
+              <li>没有用 LLM 选动作（<code>model_propose=None</code> 走确定性回退），衡量的是编排与状态管理，不是「谁的 Agent 更准」</li>
+              <li>「对原生」不是干净基准：原生每步还做规划器记账，直接比会把「少做记账」误读成「框架更快」</li>
+              <li>延迟为单机、无并发、每次全新库，不是线上 P95；n=40 足以分辨 30 ms 量级，不足以分辨 2–5 ms，噪声内的两家不排序</li>
+              <li>安装体积与「先进程度」无正相关：LangGraph 42 包 / 64 MB 反而最轻，LlamaIndex 66 包 / 218 MB 最重</li>
+            </ul></div>
+          </div>
+          <div class="tech-src">来源：D:/Cement-SalesAgent/archcompare/RESULTS.md（生成 2026-11-27 14:29，Python 3.12.9）</div>
+        </article>
+
+        <article class="tech-item">
+          <h3>输入侧护栏：按 adapter 分开读，不混用 <span class="tag">口径</span></h3>
+          <div class="tech-grid">
+            <div class="tech-col done"><span class="h">已做到</span><ul>
+              <li><code>safety_guard</code> 在 <code>cement_sales</code> adapter 下 <b>40/40 = 100%</b>：block 20/20、pii 4/4、privilege 3/3、injection 4/4 全部通过，mean 17.472 ms</li>
+              <li>越权话术在规则层拦截，不依赖模型「自觉」；拦截原因可回放</li>
+            </ul></div>
+            <div class="tech-col todo"><span class="h">边界</span><ul>
+              <li>同名套件在 <code>helan</code> adapter 下为 <b>27/40 = 67.5%</b>（block 7/20、pii 0/4、privilege 0/3 失分），属于另一个产品，不计入本页</li>
+              <li>本页指标区只筛 <code>adapter === "cement_sales"</code>；分区套件不合并分母、跨域不相减不排名</li>
+              <li>P95：n&lt;200 不出数，标 <code>INSUFFICIENT_SAMPLE_FOR_P95</code>，p95_raw 仅作参考</li>
+            </ul></div>
+          </div>
+          <div class="tech-src">来源：data/metrics.js · safety_guard（adapter=cement_sales / helan 两次运行）· conventions.domain_isolation</div>
+        </article>
       </div>
     </div>
   </section>
@@ -340,12 +461,12 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
     <div class="wrap">
       <header class="sec-head">
         <h2>核验指标</h2>
-        <p>读取 <code>window.METRICS.suites</code>（<code>data/metrics.js</code>），仅统计 <code>adapter === "cement_sales"</code> 的套件；字段缺失时显示 —，不编造。</p>
+        <p>读取 <code>window.METRICS.suites</code>（<code>data/metrics.js</code>），仅统计 <code>adapter === "cement_sales"</code> 的套件。缺失显示 —。</p>
       </header>
       <div class="metric-cards" id="metric-cards" aria-live="polite"></div>
       <div class="table-wrap">
         <table id="metric-table">
-          <thead><tr><th scope="col">套件</th><th scope="col">产品</th><th scope="col">通过率</th><th scope="col">通过 ÷ 用例</th><th scope="col">平均耗时</th></tr></thead>
+          <thead><tr><th scope="col">套件</th><th scope="col">产品</th><th scope="col">通过率</th><th scope="col">通过 ÷ 用例</th><th scope="col">平均耗时</th><th scope="col">P95</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -356,7 +477,7 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
 
 <footer>
   <div class="wrap foot">
-    <p>砼智销 · 工业销售询价 Agent · 纯静态单文件展示页</p>
+    <p>砼智销 · 工业销售询价 Agent · 2026 长三角（芜湖）算力算法创新应用大赛 数字人赛道 复赛材料 · 纯静态单文件展示页</p>
     <div class="foot-links">
       <a href="https://github.com/tian77-jq/cement-sales-agent" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg>源码入口</a>
       <a href="https://tian77-jq.github.io/portfolio/" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg>返回作品站</a>
@@ -368,10 +489,10 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
   <div class="modal-box">
     <div class="modal-head">
       <div><h3 id="demo-title"></h3><div class="sub" id="demo-sub"></div></div>
-      <button type="button" class="modal-close" id="demo-close" aria-label="关闭演示">✕</button>
+      <button type="button" class="modal-close" id="demo-close" aria-label="关闭">✕</button>
     </div>
     <div class="modal-body" id="demo-body"></div>
-    <div class="modal-foot">演示数据为模拟语境，仅用于展示交互方式，规则与价格不代表任何真实企业。</div>
+    <div class="modal-foot" id="demo-foot">演示数据为模拟语境，仅用于展示交互方式；价格、账期与规则为示意，正式报价以企业价格表与授权为准。</div>
   </div>
 </dialog>
 
@@ -382,63 +503,66 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
   function $(s, r) { return (r || document).querySelector(s); }
   function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
 
-  /* ---------- Hero 背景：流水线订单节点 + 光束 ---------- */
+  /* ---------- Hero 背景：流动的订单节点 / 光束 ---------- */
   (function () {
     var c = document.getElementById('bg-canvas'); if (!c) { return; }
     var ctx = c.getContext('2d'); if (!ctx) { return; }
     var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    var w = 0, h = 0, t = 0, raf = 0, visible = true, nodes = [], lanes = [];
+    var w = 0, h = 0, t = 0, raf = 0, visible = true, lanes = [], dots = [], beams = [];
     function resize() {
       var r = c.parentElement.getBoundingClientRect();
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = r.width; h = r.height;
       c.width = Math.max(1, Math.round(w * dpr)); c.height = Math.max(1, Math.round(h * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      lanes = [0.22, 0.5, 0.78]; nodes = [];
-      lanes.forEach(function (ly, li) {
-        for (var i = 0; i < 7; i++) {
-          nodes.push({ lane: li, x: Math.random(), s: 0.035 + Math.random() * 0.03 + li * 0.012, sz: 5 + Math.random() * 5, a: 0.25 + Math.random() * 0.4 });
-        }
-      });
+      lanes = []; dots = []; beams = [];
+      var n = w < 720 ? 5 : 7, i;
+      for (i = 0; i < n; i++) {
+        var y = h * (0.18 + 0.64 * i / (n - 1));
+        lanes.push({ y: y, amp: 14 + Math.random() * 26, ph: Math.random() * Math.PI * 2, sp: 0.3 + Math.random() * 0.5 });
+        var k = 2 + Math.floor(Math.random() * 3);
+        for (var j = 0; j < k; j++) { dots.push({ lane: i, x: Math.random() * w, v: 18 + Math.random() * 26, r: 1.6 + Math.random() * 1.6, warm: Math.random() < 0.7 }); }
+      }
+      for (i = 0; i < (w < 720 ? 2 : 3); i++) { beams.push({ x: Math.random() * w, v: 60 + Math.random() * 40, lane: Math.floor(Math.random() * n), life: 1 }); }
       draw();
     }
+    function laneY(l, x) { return l.y + Math.sin(x / 180 + l.ph + t * l.sp) * l.amp; }
     function draw() {
       ctx.clearRect(0, 0, w, h);
-      var i, d;
-      ctx.lineWidth = 1;
-      lanes.forEach(function (ly) {
-        var y = Math.round(h * ly) + 0.5;
-        ctx.strokeStyle = 'rgba(236,230,220,0.055)';
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-        ctx.setLineDash([2, 10]);
-        ctx.strokeStyle = 'rgba(240,168,48,0.08)';
-        ctx.beginPath(); ctx.moveTo(0, y + 8); ctx.lineTo(w, y + 8); ctx.stroke();
-        ctx.setLineDash([]);
-      });
-      for (var gx = 0; gx < w; gx += 160) {
-        ctx.strokeStyle = 'rgba(236,230,220,0.025)';
-        ctx.beginPath(); ctx.moveTo(gx + 0.5, 0); ctx.lineTo(gx + 0.5, h); ctx.stroke();
+      var i, x;
+      for (i = 0; i < lanes.length; i++) {
+        var l = lanes[i];
+        ctx.strokeStyle = 'rgba(240,168,58,' + (0.08 + 0.03 * Math.sin(t + i)) + ')';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (x = -20; x <= w + 20; x += 24) { var yy = laneY(l, x); if (x === -20) { ctx.moveTo(x, yy); } else { ctx.lineTo(x, yy); } }
+        ctx.stroke();
       }
-      var bx = (((t * 0.05) % 1.3) - 0.15) * w;
-      var g = ctx.createLinearGradient(bx - 180, 0, bx + 180, 0);
-      g.addColorStop(0, 'rgba(240,168,48,0)'); g.addColorStop(0.5, 'rgba(240,168,48,0.08)'); g.addColorStop(1, 'rgba(240,168,48,0)');
-      ctx.fillStyle = g; ctx.fillRect(bx - 180, 0, 360, h);
-      for (i = 0; i < nodes.length; i++) {
-        d = nodes[i];
-        var x = ((d.x + t * d.s) % 1.2 - 0.1) * w;
-        var y = h * lanes[d.lane];
-        var tw = 0.5 + 0.5 * Math.sin(t * 2 + i);
-        ctx.strokeStyle = 'rgba(240,168,48,' + (d.a * (0.5 + 0.5 * tw)).toFixed(3) + ')';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.moveTo(x - 40, y); ctx.lineTo(x - d.sz - 4, y); ctx.stroke();
-        ctx.fillStyle = 'rgba(27,25,22,0.95)';
-        ctx.fillRect(x - d.sz, y - d.sz * 0.6, d.sz * 2, d.sz * 1.2);
-        ctx.strokeRect(x - d.sz, y - d.sz * 0.6, d.sz * 2, d.sz * 1.2);
-        ctx.fillStyle = 'rgba(240,168,48,' + (d.a * 0.9).toFixed(3) + ')';
-        ctx.fillRect(x - d.sz + 3, y - 2, d.sz * 2 - 6, 4);
+      for (i = 0; i < dots.length; i++) {
+        var d = dots[i];
+        d.x += d.v / 60; if (d.x > w + 20) { d.x = -20; }
+        var dy = laneY(lanes[d.lane], d.x);
+        var g = ctx.createRadialGradient(d.x, dy, 0, d.x, dy, d.r * 4);
+        g.addColorStop(0, d.warm ? 'rgba(255,196,107,.9)' : 'rgba(127,179,213,.9)');
+        g.addColorStop(1, d.warm ? 'rgba(255,196,107,0)' : 'rgba(127,179,213,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(d.x, dy, d.r * 4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = d.warm ? '#ffd58a' : '#bfe0f5'; ctx.beginPath(); ctx.arc(d.x, dy, d.r, 0, Math.PI * 2); ctx.fill();
+      }
+      for (i = beams.length - 1; i >= 0; i--) {
+        var b = beams[i];
+        b.x += b.v / 60; b.life -= 0.006;
+        if (b.life <= 0 || b.x > w + 200) { beams[i] = { x: -200 - Math.random() * 300, v: 60 + Math.random() * 40, lane: Math.floor(Math.random() * lanes.length), life: 1 }; continue; }
+        var by = laneY(lanes[b.lane], b.x);
+        var lg = ctx.createLinearGradient(b.x - 160, by, b.x, by);
+        lg.addColorStop(0, 'rgba(240,168,58,0)'); lg.addColorStop(1, 'rgba(240,168,58,' + (0.35 * b.life).toFixed(3) + ')');
+        ctx.strokeStyle = lg; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(b.x - 160, by); ctx.lineTo(b.x, by); ctx.stroke();
       }
     }
-    function loop() { if (!visible) { raf = 0; return; } t += 1 / 60; draw(); raf = requestAnimationFrame(loop); }
+    function loop() {
+      if (!visible) { raf = 0; return; }
+      t += 1 / 60; draw(); raf = requestAnimationFrame(loop);
+    }
     function start() { if (mq.matches || raf) { return; } raf = requestAnimationFrame(loop); }
     function stop() { if (raf) { cancelAnimationFrame(raf); raf = 0; } }
     resize();
@@ -449,6 +573,28 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
     if (mq.addEventListener) { mq.addEventListener('change', function () { if (mq.matches) { stop(); draw(); } else { start(); } }); }
     start();
   })();
+
+  /* ---------- 弹窗 ---------- */
+  var modal = document.getElementById('demo-modal');
+  var modalTitle = document.getElementById('demo-title');
+  var modalSub = document.getElementById('demo-sub');
+  var modalBody = document.getElementById('demo-body');
+  var lastFocus = null, cleanup = null;
+  var FOOT = '演示数据为模拟语境，仅用于展示交互方式；价格、账期与规则为示意，正式报价以企业价格表与授权为准。';
+  function onClose() { if (cleanup) { cleanup(); cleanup = null; } modalBody.innerHTML = ''; $('#demo-foot').textContent = FOOT; if (lastFocus && lastFocus.focus) { lastFocus.focus(); } }
+  function closeModal() { if (typeof modal.close === 'function') { if (modal.open) { modal.close(); } } else { modal.removeAttribute('open'); onClose(); } }
+  function openModal(title, sub, html, init, opener) {
+    if (modal.open && cleanup) { cleanup(); cleanup = null; }
+    lastFocus = opener || document.activeElement;
+    modalTitle.textContent = title; modalSub.textContent = sub || '';
+    modalBody.innerHTML = html; modalBody.scrollTop = 0;
+    if (typeof modal.showModal === 'function') { if (!modal.open) { modal.showModal(); } } else { modal.setAttribute('open', ''); }
+    cleanup = init ? init(modalBody) : null;
+  }
+  modal.addEventListener('close', onClose);
+  document.getElementById('demo-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) { closeModal(); } });
+  $$('.feature[data-demo]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); var d = DEMOS[a.dataset.demo]; if (d) { openModal(d.title, d.sub, d.html, d.init, a); } }); });
 
   /* ---------- 指标 ---------- */
   (function () {
@@ -463,248 +609,200 @@ dialog[open]{animation:pop .28s cubic-bezier(.2,.8,.2,1)}
       if (typeof v === 'number' && isFinite(v)) { return v <= 1 ? (v * 100).toFixed(1) + '%' : v + '%'; }
       return (v === undefined || v === null || v === '') ? DASH : String(v);
     }
-    function ms(v) { return (typeof v === 'number' && isFinite(v)) ? Math.round(v) + ' ms' : DASH; }
-    function card(k, v, small) { return '<div class="metric"><p class="k">' + k + '</p><p class="v">' + v + (small ? '<small>' + small + '</small>' : '') + '</p></div>'; }
+    function ms(v) { return (typeof v === 'number' && isFinite(v)) ? (v >= 100 ? Math.round(v) + ' ms' : v.toFixed(3) + ' ms') : DASH; }
+    function p95(r) { return (typeof r.p95_ms === 'number' && isFinite(r.p95_ms)) ? Math.round(r.p95_ms) + ' ms' : DASH; }
+    function failTags(r) {
+      if (!r || !r.by_tag) { return ''; }
+      var t = Object.keys(r.by_tag).filter(function (k) { return r.by_tag[k].success < r.by_tag[k].n; });
+      if (!t.length) { return ''; }
+      return '<span class="sub">未全过标签：' + t.map(function (k) { return k + ' ' + r.by_tag[k].success + '/' + r.by_tag[k].n; }).join(' · ') + '</span>';
+    }
+    function card(k, v, small, low) { return '<div class="metric"><p class="k">' + k + '</p><p class="v' + (low ? ' low' : '') + '">' + v + (small ? '<small>' + small + '</small>' : '') + '</p></div>'; }
     function render() {
       if (!rows.length) {
         cards.innerHTML = card('套件数', DASH) + card('用例总数', DASH) + card('通过用例', DASH) + card('汇总通过率', DASH);
-        tbody.innerHTML = '<tr><td colspan="5" class="dash">' + (SUITES.length ? '没有 adapter 为 cement_sales 的套件' : '未找到 window.METRICS.suites，请确认 data/metrics.js 已加载') + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="dash">' + (SUITES.length ? '没有 adapter 为 cement_sales 的套件' : '未找到 window.METRICS.suites，请确认 data/metrics.js 已加载') + '</td></tr>';
         note.textContent = '当前未读取到 cement_sales 指标，所有数值显示为 —。';
         return;
       }
-      var n = 0, p = 0;
-      rows.forEach(function (m) { if (typeof m.n === 'number') { n += m.n; } if (typeof m.passed === 'number') { p += m.passed; } });
-      cards.innerHTML = card('套件数', num(rows.length), '个') + card('用例总数', num(n), '条') + card('通过用例', num(p), '条') + card('汇总通过率', n ? pct(p / n) : DASH, 'passed ÷ n');
+      var n = 0, p = 0, notes = [];
+      rows.forEach(function (m) {
+        if (typeof m.n === 'number') { n += m.n; } if (typeof m.passed === 'number') { p += m.passed; }
+        if (m.p95_note && notes.indexOf(m.p95_note) < 0) { notes.push(m.p95_note); }
+      });
+      cards.innerHTML = card('套件运行数', num(rows.length), '次') + card('用例总数', num(n), '条') + card('通过用例', num(p), '条') + card('汇总通过率', n ? pct(p / n) : DASH, 'passed ÷ n', n && p / n < 0.9);
       tbody.innerHTML = rows.map(function (m) {
-        return '<tr><td>' + num(m.suite) + '</td><td>' + num(m.product) + '</td><td class="num">' + pct(m.pass_rate) + '</td><td class="num">' + num(m.passed) + ' ÷ ' + num(m.n) + '</td><td class="num">' + ms(m.mean_ms) + '</td></tr>';
+        var low = (typeof m.pass_rate === 'number' && m.pass_rate < 0.9);
+        return '<tr><td>' + num(m.suite) + failTags(m) + '</td><td>' + num(m.product) + '</td><td class="num' + (low ? ' lowv' : '') + '">' + pct(m.pass_rate) + '</td><td class="num">' + num(m.passed) + ' ÷ ' + num(m.n) + '</td><td class="num">' + ms(m.mean_ms) + '</td><td class="num dash" title="' + (m.p95_note || '') + '">' + p95(m) + '</td></tr>';
       }).join('');
-      note.textContent = '仅展示 adapter = cement_sales 的套件；通过率为原始 pass_rate 换算为百分比，平均耗时为 mean_ms。';
+      note.innerHTML = 'intent_clarify 为分区套件（cement_sales 与 hengjian 各自金标、分母不同），仅并列不排名；helan adapter 下的 safety_guard 67.5% 不属于本页。P95 为 null 时显示 —。' + (notes.length ? ' 中心标记：' + notes.join('；') + '。' : '');
     }
     render();
     window.addEventListener('load', render);
   })();
 
-  /* ---------- 弹窗 ---------- */
-  var modal = document.getElementById('demo-modal');
-  var modalTitle = document.getElementById('demo-title');
-  var modalSub = document.getElementById('demo-sub');
-  var modalBody = document.getElementById('demo-body');
-  var lastFocus = null, cleanup = null;
-  function onClose() { if (cleanup) { cleanup(); cleanup = null; } modalBody.innerHTML = ''; if (lastFocus && lastFocus.focus) { lastFocus.focus(); } }
-  function closeModal() { if (typeof modal.close === 'function') { if (modal.open) { modal.close(); } } else { modal.removeAttribute('open'); onClose(); } }
-  function openDemo(id, opener) {
-    var d = DEMOS[id]; if (!d) { return; }
-    if (typeof modal.close === 'function' && modal.open) { if (cleanup) { cleanup(); cleanup = null; } }
-    lastFocus = lastFocus && !opener ? lastFocus : (opener || document.activeElement);
-    modalTitle.textContent = d.title; modalSub.textContent = d.sub || '';
-    modalBody.innerHTML = d.html; modalBody.scrollTop = 0;
-    if (typeof modal.showModal === 'function') { if (!modal.open) { modal.showModal(); } } else { modal.setAttribute('open', ''); }
-    cleanup = d.init ? d.init(modalBody) : null;
-  }
-  modal.addEventListener('close', onClose);
-  document.getElementById('demo-close').addEventListener('click', closeModal);
-  modal.addEventListener('click', function (e) { if (e.target === modal) { closeModal(); } });
-  $$('.feature[data-demo]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); openDemo(a.dataset.demo, a); }); });
-
   /* ---------- 演示 1：询价意图澄清 ---------- */
   var demoClarify = {
-    title: '询价意图澄清', sub: '客户原话缺什么就点什么补齐，右侧同步生成结构化需求',
+    title: '询价意图澄清', sub: '点一句客户原话，看它被拆成哪些字段、还缺什么',
     html:
       '<div class="demo-grid">' +
-        '<div class="panel"><div class="panel-head"><span>客户原话（微信）</span><span>演示数据</span></div>' +
-          '<p style="margin:0 0 14px;font-size:15px;line-height:1.9;color:#d9d2c6">“要一批 C30，泵送，便宜点，下周就要，送到贺兰那边。”</p>' +
-          '<div id="cl-fields"></div>' +
+        '<div class="panel"><div class="panel-head"><span>客户原话（演示）</span><span>点选</span></div><div class="chips" id="cl-chips"></div>' +
+          '<div class="status" id="cl-quote" style="margin-top:14px;padding:12px 14px;border-left:3px solid var(--amber);background:rgba(240,168,58,.06);border-radius:0 8px 8px 0">—</div>' +
+          '<div class="demo-actions"><button type="button" class="btn btn-primary btn-sm" id="cl-run">结构化需求</button><span class="status" id="cl-status" aria-live="polite"></span></div>' +
         '</div>' +
-        '<div class="panel"><div class="panel-head"><span>结构化需求</span><span id="cl-count">已明确 1 / 5</span></div>' +
-          '<ul class="req" id="cl-req" aria-live="polite"></ul>' +
-          '<div class="progress" aria-hidden="true"><i id="cl-bar"></i></div>' +
-          '<div class="status" id="cl-status" aria-live="polite">还差 4 项，补齐后可进入报价试算。</div>' +
-          '<div class="demo-actions" style="margin-top:14px"><button type="button" class="btn btn-primary btn-sm" id="cl-next" disabled>进入报价试算</button></div>' +
-        '</div>' +
+        '<div class="panel"><div class="panel-head"><span>结构化需求</span><span id="cl-count">0 / 6 字段</span></div><ul class="spec" id="cl-out"></ul></div>' +
       '</div>',
     init: function (root) {
-      var FIELDS = [
-        { k: 'grade', label: '强度等级', opts: ['C30', 'C35', 'C40'], val: 'C30' },
-        { k: 'qty', label: '数量', opts: ['约 300 m³', '约 800 m³', '约 2000 m³'], val: null },
-        { k: 'dist', label: '运距', opts: ['15 km', '45 km'], val: null },
-        { k: 'pay', label: '账期', opts: ['现款', '月结 30 天', '月结 60 天'], val: null },
-        { k: 'time', label: '交付时间', opts: ['本周内', '下周', '下月'], val: null }
+      var QUOTES = [
+        { q: '明天要 300 方 C30，送滨河新区那个工地，账期能不能 90 天？', f: { 强度: ['C30', 'ok'], 方量: ['300 m³', 'ok'], 工地: ['滨河新区', 'ok'], 泵送: ['—', 'ask'], 夜间施工: ['—', 'ask'], 账期: ['90 天（超授权）', 'ask']} },
+        { q: '老规矩，再来一车，跟上次一样。', f: { 强度: ['沿用上次（待确认）', 'ask'], 方量: ['1 车（待核吨位）', 'ask'], 工地: ['—', 'ask'], 泵送: ['—', 'ask'], 夜间施工: ['—', 'ask'], 账期: ['—', 'ask']} },
+        { q: 'C50 两百方，泵送，今晚十点后进场，账期 45 天。', f: { 强度: ['C50', 'ok'], 方量: ['200 m³', 'ok'], 工地: ['—', 'ask'], 泵送: ['泵送', 'ok'], 夜间施工: ['22:00 后', 'ok'], 账期: ['45 天', 'ok']} }
       ];
-      var wrap = $('#cl-fields', root), req = $('#cl-req', root), bar = $('#cl-bar', root), count = $('#cl-count', root), status = $('#cl-status', root), next = $('#cl-next', root);
-      function renderFields() {
-        wrap.innerHTML = FIELDS.map(function (f) {
-          return '<div class="field"><p class="lbl"><span>' + f.label + '</span><b>' + (f.val || '待澄清') + '</b></p><div class="chips" data-k="' + f.k + '">' +
-            f.opts.map(function (o) { return '<button type="button" class="chip" data-v="' + o + '" aria-pressed="' + (f.val === o) + '">' + o + '</button>'; }).join('') + '</div></div>';
-        }).join('');
+      var pick = 0;
+      var chips = $('#cl-chips', root), quote = $('#cl-quote', root), out = $('#cl-out', root), count = $('#cl-count', root), status = $('#cl-status', root), btn = $('#cl-run', root);
+      var timers = [];
+      function clearT() { timers.forEach(clearTimeout); timers = []; }
+      function renderChips() {
+        chips.innerHTML = QUOTES.map(function (o, i) { return '<button type="button" class="chip" data-i="' + i + '" aria-pressed="' + (i === pick) + '">原话 ' + (i + 1) + '</button>'; }).join('');
+        quote.textContent = '「' + QUOTES[pick].q + '」';
       }
-      function renderReq() {
-        var done = FIELDS.filter(function (f) { return !!f.val; }).length;
-        req.innerHTML = FIELDS.map(function (f) {
-          return '<li><span class="k">' + f.k + '</span><span class="v ' + (f.val ? 'set' : 'pending') + '">' + (f.val ? f.val : '待澄清') + '</span></li>';
-        }).join('');
-        bar.style.width = (done / FIELDS.length * 100) + '%';
-        count.textContent = '已明确 ' + done + ' / ' + FIELDS.length;
-        if (done === FIELDS.length) { status.textContent = '需求已结构化，可进入报价规则试算。'; next.disabled = false; }
-        else { status.textContent = '还差 ' + (FIELDS.length - done) + ' 项，补齐后可进入报价试算。'; next.disabled = true; }
+      function run() {
+        clearT(); out.innerHTML = ''; count.textContent = '0 / 6 字段'; status.textContent = '正在抽取字段…'; btn.disabled = true;
+        var f = QUOTES[pick].f, keys = Object.keys(f), ok = 0;
+        keys.forEach(function (k, i) {
+          timers.push(setTimeout(function () {
+            var v = f[k];
+            if (v[1] === 'ok') { ok++; }
+            var li = document.createElement('li');
+            li.innerHTML = '<span class="k">' + k + '</span><span class="v">' + v[0] + '</span><span class="st ' + (v[1] === 'ok' ? 'st-ok' : 'st-ask') + '">' + (v[1] === 'ok' ? '✓ 已确认' : '? 待追问') + '</span>';
+            out.appendChild(li); count.textContent = (i + 1) + ' / 6 字段';
+            if (i === keys.length - 1) { status.textContent = '已确认 ' + ok + ' 项，需追问 ' + (6 - ok) + ' 项' + (f['账期'][0].indexOf('超授权') >= 0 ? '；账期超出授权，转人工审批' : ''); btn.disabled = false; btn.textContent = '重新抽取'; }
+          }, RM ? 0 : 150 + i * 220));
+        });
       }
-      wrap.addEventListener('click', function (e) {
-        var chip = e.target.closest('.chip'); if (!chip) { return; }
-        var k = chip.parentElement.dataset.k;
-        var f = FIELDS.find(function (x) { return x.k === k; }); if (!f) { return; }
-        f.val = chip.dataset.v; renderFields(); renderReq();
-      });
-      next.addEventListener('click', function () { openDemo('quote', next); });
-      renderFields(); renderReq();
-      return null;
+      chips.addEventListener('click', function (e) { var c = e.target.closest('.chip'); if (!c) { return; } pick = +c.dataset.i; renderChips(); out.innerHTML = ''; count.textContent = '0 / 6 字段'; status.textContent = ''; btn.textContent = '结构化需求'; btn.disabled = false; });
+      btn.addEventListener('click', function () { run(); });
+      out.innerHTML = '<li class="placeholder" style="grid-template-columns:1fr">点「结构化需求」，字段会逐条出现</li>';
+      renderChips();
+      return clearT;
     }
   };
 
   /* ---------- 演示 2：报价规则试算 ---------- */
   var demoQuote = {
-    title: '报价规则试算', sub: '选数量与账期，右侧实时给出报价区间、总额和依据',
+    title: '报价规则试算', sub: '选强度、方量与账期，输出单价区间、总价与依据',
     html:
       '<div class="demo-grid">' +
-        '<div class="panel"><div class="panel-head"><span>试算条件 · C30 泵送 15 km</span><span>演示规则</span></div>' +
-          '<div class="field"><p class="lbl"><span>数量（阶梯量价）</span><b id="qt-qty-l">约 800 m³</b></p><div class="chips" data-k="qty"></div></div>' +
-          '<div class="field"><p class="lbl"><span>账期（资金占用加价）</span><b id="qt-pay-l">现款</b></p><div class="chips" data-k="pay"></div></div>' +
-          '<div class="status" style="margin-top:6px">基准单价 435 元/m³；15 km 内运费已含。</div>' +
+        '<div class="panel"><div class="panel-head"><span>询价参数</span><span>演示口径</span></div>' +
+          '<div class="field"><p class="lbl"><span>强度等级</span><b id="qt-g-l">C30</b></p><div class="chips" data-k="g"></div></div>' +
+          '<div class="field"><p class="lbl"><span>方量</span><b id="qt-v-l">300 m³</b></p><div class="chips" data-k="v"></div></div>' +
+          '<div class="field"><p class="lbl"><span>账期</span><b id="qt-p-l">30 天</b></p><div class="chips" data-k="p"></div></div>' +
+          '<div class="status" style="margin-top:6px">口径：基准价 C30 405、C40 432、C50 468 元/m³；≥500 m³ 让利 2%；账期 60 天 +1.5%，90 天 +3%（需审批）。</div>' +
         '</div>' +
         '<div>' +
-          '<div class="quote" aria-live="polite"><div class="big" id="qt-price">—<small>元/m³</small></div><div class="range" id="qt-range"></div><div class="total" id="qt-total"></div></div>' +
-          '<ul class="rules" id="qt-rules"></ul>' +
+          '<div class="quote" aria-live="polite"><div class="big" id="qt-per">—<small>元 / m³</small></div><div class="sub" id="qt-range"></div><div class="total" id="qt-total"></div></div>' +
+          '<ul class="basis" id="qt-basis"></ul>' +
         '</div>' +
       '</div>',
     init: function (root) {
-      var BASE = 435, QTY = [{ v: '约 300 m³', mid: 300, d: 0 }, { v: '约 800 m³', mid: 800, d: -6 }, { v: '约 2000 m³', mid: 2000, d: -12 }];
-      var PAY = [{ v: '现款', d: 0 }, { v: '月结 30 天', d: 8 }, { v: '月结 60 天', d: 15 }];
-      var qty = QTY[1], pay = PAY[0];
-      var qWrap = $('[data-k="qty"]', root), pWrap = $('[data-k="pay"]', root);
-      function chips(list, key) {
-        return list.map(function (o) { return '<button type="button" class="chip" data-v="' + o.v + '" aria-pressed="' + ((key === 'qty' ? qty : pay).v === o.v) + '">' + o.v + '</button>'; }).join('');
-      }
-      function renderChips() {
-        qWrap.innerHTML = chips(QTY, 'qty'); pWrap.innerHTML = chips(PAY, 'pay');
-        $('#qt-qty-l', root).textContent = qty.v; $('#qt-pay-l', root).textContent = pay.v;
-      }
+      var G = [{ v: 'C30', base: 405 }, { v: 'C40', base: 432 }, { v: 'C50', base: 468 }];
+      var V = [{ v: '300 m³', n: 300 }, { v: '600 m³', n: 600 }, { v: '1200 m³', n: 1200 }];
+      var P = [{ v: '30 天', add: 0 }, { v: '60 天', add: 0.015 }, { v: '90 天', add: 0.03, approve: true }];
+      var g = G[0], v = V[0], p = P[0];
+      var gW = $('[data-k="g"]', root), vW = $('[data-k="v"]', root), pW = $('[data-k="p"]', root);
+      function chips(list, cur, wrap) { wrap.innerHTML = list.map(function (o) { return '<button type="button" class="chip" data-v="' + o.v + '" aria-pressed="' + (o === cur) + '">' + o.v + '</button>'; }).join(''); }
+      function render() { chips(G, g, gW); chips(V, v, vW); chips(P, p, pW); $('#qt-g-l', root).textContent = g.v; $('#qt-v-l', root).textContent = v.v; $('#qt-p-l', root).textContent = p.v; }
       function calc() {
-        var price = BASE + qty.d + pay.d;
-        $('#qt-price', root).innerHTML = price + '<small>元/m³</small>';
-        $('#qt-range', root).textContent = '报价区间 ' + (price - 5) + ' – ' + (price + 5) + ' 元/m³（原材料波动预留）';
-        $('#qt-total', root).textContent = '参考总额 ≈ ' + (price * qty.mid).toLocaleString('zh-CN') + ' 元 / ' + qty.mid + ' m³';
-        var rules = [
-          ['基准价', 'C30 泵送 坍落度 180±20 · 435 元/m³'],
-          ['阶梯量价', qty.v + ' → ' + (qty.d === 0 ? '无折扣' : qty.d + ' 元/m³')],
-          ['账期加价', pay.v + ' → ' + (pay.d === 0 ? '不加价' : '+' + pay.d + ' 元/m³')],
-          ['运费', '15 km 内已含；超出按 1.2 元/m³·km 另计']
-        ];
-        $('#qt-rules', root).innerHTML = rules.map(function (r, i) {
-          return '<li style="animation-delay:' + (RM ? 0 : i * 60) + 'ms"><b>' + r[0] + '</b><span>' + r[1] + '</span></li>';
-        }).join('');
+        var disc = v.n >= 500 ? 0.02 : 0;
+        var lo = Math.round(g.base * (1 - disc) * (1 + p.add));
+        var hi = Math.round(lo * 1.06);
+        $('#qt-per', root).innerHTML = lo.toLocaleString('zh-CN') + ' – ' + hi.toLocaleString('zh-CN') + '<small>元 / m³ · 不含税、不含运费</small>';
+        $('#qt-range', root).textContent = g.v + ' × ' + v.n + ' m³，账期 ' + p.v + (disc ? '，方量让利 2%' : '') + (p.add ? '，账期加点 ' + (p.add * 100).toFixed(1) + '%' : '');
+        $('#qt-total', root).textContent = '总价区间 ≈ ' + (lo * v.n).toLocaleString('zh-CN') + ' – ' + (hi * v.n).toLocaleString('zh-CN') + ' 元' + (p.approve ? ' · 90 天账期超出授权，需区域经理审批' : '');
+        var items = [['基准价', g.base + ' 元/m³（本地价格表 ' + g.v + '）'], ['运距', '待工地确认后另计'], ['方量让利', disc ? '−2.0%（≥500 m³）' : '0（未达门槛）'], ['账期加点', p.add ? '+' + (p.add * 100).toFixed(1) + '%（' + p.v + '）' : '0（' + p.v + '）'], ['区间上浮', '+6%（原材料波动预留）']];
+        $('#qt-basis', root).innerHTML = items.map(function (it, i) { return '<li style="animation-delay:' + (RM ? 0 : i * 60) + 'ms"><span>' + it[0] + '</span><span class="c">' + it[1] + '</span></li>'; }).join('');
       }
-      function onChip(e, list, set) {
-        var chip = e.target.closest('.chip'); if (!chip) { return; }
-        var o = list.find(function (x) { return x.v === chip.dataset.v; }); if (!o) { return; }
-        set(o); renderChips(); calc();
-      }
-      qWrap.addEventListener('click', function (e) { onChip(e, QTY, function (o) { qty = o; }); });
-      pWrap.addEventListener('click', function (e) { onChip(e, PAY, function (o) { pay = o; }); });
-      renderChips(); calc();
+      function pick(list, set) { return function (e) { var c = e.target.closest('.chip'); if (!c) { return; } var o = list.filter(function (x) { return x.v === c.dataset.v; })[0]; if (!o) { return; } set(o); render(); calc(); }; }
+      gW.addEventListener('click', pick(G, function (o) { g = o; }));
+      vW.addEventListener('click', pick(V, function (o) { v = o; }));
+      pW.addEventListener('click', pick(P, function (o) { p = o; }));
+      render(); calc();
       return null;
     }
   };
 
   /* ---------- 演示 3：跟进节奏生成 ---------- */
   var demoFollow = {
-    title: '跟进节奏生成', sub: '选客户类型，点「生成跟进计划」',
+    title: '跟进节奏生成', sub: '点「生成跟进计划」，按报价后的时间线排出下一步',
     html:
-      '<div class="panel"><div class="panel-head"><span>客户类型</span><span>演示数据</span></div><div class="chips" id="fl-type"></div>' +
-        '<div class="demo-actions"><button type="button" class="btn btn-primary btn-sm" id="fl-run" data-state="idle">生成跟进计划</button><span class="status" id="fl-status" aria-live="polite"></span></div></div>' +
-      '<ol class="plan" id="fl-plan" style="margin-top:16px"></ol>',
+      '<div class="panel"><div class="panel-head"><span>报价后跟进 · 客户：滨河新区项目（演示）</span><span id="fo-count">未生成</span></div>' +
+        '<ul class="plan" id="fo-out"></ul>' +
+        '<div class="demo-actions"><button type="button" class="btn btn-primary btn-sm" id="fo-run" data-state="idle">生成跟进计划</button><span class="status" id="fo-status" aria-live="polite"></span></div>' +
+      '</div>',
     init: function (root) {
-      var TYPES = ['总包项目部', '搅拌站', '工地直供'];
-      var PLANS = {
-        '总包项目部': [
-          ['D0', '报价单送达并确认收到', '附规则依据与检测报告，确认收件人与技术负责人'],
-          ['D+1', '电话核对强度等级与泵送要求', '确认是否需要抗渗、早强等特殊要求，避免二次改价'],
-          ['D+3', '技术交底 / 样品送检', '配合项目部完成配合比确认，锁定验收标准'],
-          ['D+7', '复核账期与授信资料', '月结 30 天以上需走授信，提前告知所需材料'],
-          ['D+14', '复盘并更新报价版本', '对比同期项目成交价，调整阶梯与运费策略']
-        ],
-        '搅拌站': [
-          ['D0', '报价单送达并确认收到', '突出稳定供应能力与原材料波动联动条款'],
-          ['D+1', '核对月度用量与配送窗口', '确认高峰期罐车数量与夜间施工需求'],
-          ['D+3', '锁定量价阶梯', '按月度承诺量确定阶梯，写入补充协议'],
-          ['D+7', '确认结算方式', '现款 / 周结优先，月结需授信审批'],
-          ['D+14', '复盘供应节奏', '核对实际供货量与承诺量，调整下月计划']
-        ],
-        '工地直供': [
-          ['D0', '报价单送达并确认收到', '单笔小量优先引导至标准档位，减少定制'],
-          ['D+1', '确认运距与进场条件', '核对路况、泵车位置与等待时间计费'],
-          ['D+3', '确认付款方式', '现款或预付，不开放账期'],
-          ['D+7', '配送后回访', '确认浇筑质量与到场时间，收集反馈'],
-          ['D+14', '纳入区域客户池', '按片区归集，批量跟进同类工地']
-        ]
-      };
-      var type = TYPES[0], wrap = $('#fl-type', root), btn = $('#fl-run', root), status = $('#fl-status', root), plan = $('#fl-plan', root);
+      var STEPS = [
+        ['D+0 17:00', '发送报价单与依据附件', '微信 + 邮件各一份，备注账期需审批', 'warn', '待人工'],
+        ['D+1 10:00', '电话确认收到，问两项缺字段', '泵送方式、夜间施工许可', 'ok', '可自动提醒'],
+        ['D+3 15:00', '未回复则发竞品对比要点', '只发事实，不发未授权折扣', 'ok', '可自动提醒'],
+        ['D+7 09:30', '账期审批结果回传客户', '90 天未批则给 60 天替代方案', 'warn', '待人工'],
+        ['D+14 10:00', '二次跟进或转入长期培育', '两周无进展自动降频', 'ok', '可自动提醒']
+      ];
+      var out = $('#fo-out', root), btn = $('#fo-run', root), status = $('#fo-status', root), count = $('#fo-count', root);
       var timers = [];
       function clearT() { timers.forEach(clearTimeout); timers = []; }
-      function renderChips() {
-        wrap.innerHTML = TYPES.map(function (t) { return '<button type="button" class="chip" data-v="' + t + '" aria-pressed="' + (t === type) + '">' + t + '</button>'; }).join('');
-      }
+      out.innerHTML = '<li class="placeholder" style="display:block;list-style:none">点「生成跟进计划」，动作会按时间线出现</li>';
       function run() {
         if (btn.dataset.state === 'running') { return; }
-        clearT(); plan.innerHTML = ''; btn.dataset.state = 'running'; btn.disabled = true;
-        status.textContent = '正在生成节奏…';
-        var steps = PLANS[type];
-        steps.forEach(function (s, i) {
+        clearT(); out.innerHTML = ''; count.textContent = '生成中…'; status.textContent = ''; btn.dataset.state = 'running'; btn.disabled = true;
+        STEPS.forEach(function (s, i) {
           timers.push(setTimeout(function () {
             var li = document.createElement('li');
-            li.innerHTML = '<span class="d">' + s[0] + '</span><div><strong>' + s[1] + '</strong><span>' + s[2] + '</span></div>';
-            plan.appendChild(li);
-            if (i === steps.length - 1) { status.textContent = '已生成 ' + steps.length + ' 步跟进计划（' + type + '，演示数据）'; btn.disabled = false; btn.textContent = '重新生成'; btn.dataset.state = 'done'; }
-          }, RM ? 0 : 250 + i * 350));
+            li.innerHTML = '<span class="t">' + s[0] + '</span><span>' + s[1] + '<span class="g">' + s[2] + '</span></span><span class="tag ' + (s[3] === 'ok' ? 'tag-ok' : 'tag-warn') + '">' + s[4] + '</span>';
+            out.appendChild(li);
+            if (i === STEPS.length - 1) { count.textContent = '已生成 ' + STEPS.length + ' 步'; status.textContent = '其中 2 步需人工确认，3 步可自动提醒（演示数据）'; btn.disabled = false; btn.textContent = '重新生成'; btn.dataset.state = 'done'; }
+          }, RM ? 0 : 200 + i * 380));
         });
       }
-      wrap.addEventListener('click', function (e) {
-        var chip = e.target.closest('.chip'); if (!chip) { return; }
-        type = chip.dataset.v; renderChips();
-      });
       btn.addEventListener('click', function () { if (btn.dataset.state === 'done') { btn.textContent = '生成跟进计划'; btn.dataset.state = 'idle'; } run(); });
-      plan.innerHTML = '<li class="plan-empty">点击「生成跟进计划」，节奏会按天逐步出现</li>';
-      renderChips();
       return clearT;
     }
   };
 
   /* ---------- 演示 4：风险红线拦截 ---------- */
   var demoGuard = {
-    title: '风险红线拦截', sub: '点一句销售常说的话术，看它会不会被拦、为什么',
+    title: '风险红线拦截', sub: '点「测试拦截」，逐句看哪些话术被拦、原因是什么',
     html:
-      '<div class="demo-grid">' +
-        '<div class="panel"><div class="panel-head"><span>待发送话术</span><span>点击测试</span></div><div class="phrases" id="gd-list"></div></div>' +
-        '<div class="panel"><div class="panel-head"><span>拦截结果</span><span id="gd-count">已测 0 / 5 · 拦截 0</span></div><div id="gd-out"><p class="status" style="margin:0;padding:14px;border:1px dashed var(--line);border-radius:10px;text-align:center">选择左侧任意一句话术</p></div></div>' +
+      '<div class="panel"><div class="panel-head"><span>销售话术测试 · 4 句</span><span id="gd-count">未测试</span></div>' +
+        '<ul class="redline" id="gd-out"></ul>' +
+        '<div class="demo-actions"><button type="button" class="btn btn-primary btn-sm" id="gd-run" data-state="idle">测试拦截</button><span class="status" id="gd-status" aria-live="polite"></span></div>' +
       '</div>',
     init: function (root) {
-      var PHRASES = [
-        { q: '放心，评标那边我有人，保证你们中标。', block: true, why: '承诺评标结果，涉嫌串通投标与商业贿赂；销售无权代表公司作出中标承诺。', fix: '合规说法：「我们可以按招标文件要求提供配合比与检测报告，评标结果由招标方按规则确定。」' },
-        { q: '不开票的话，每方再便宜 5 块。', block: true, why: '规避开票涉及税务违规，且让报价脱离公司价格体系，无法追溯。', fix: '合规说法：「报价均为含税价，如需调整我们可以走阶梯量价或账期方案。」' },
-        { q: '合同我先替客户签了，章后面再补。', block: true, why: '越权代签合同，主体无效风险高，且绕过法务与授信流程。', fix: '合规说法：「合同需客户加盖公章后回传，我们可以先把电子版发过去。」' },
-        { q: '货先发，回款我个人担保。', block: true, why: '以个人担保替代公司授信，越过风控红线，坏账责任无法落地。', fix: '合规说法：「账期 30 天以上需走授信审批，我先把资料清单发您。」' },
-        { q: '账期 60 天需要走授信审批，我先把资料发您。', block: false, why: '按流程引导授信审批，未越权承诺，话术可放行。', fix: '' }
+      var LINES = [
+        { t: '「账期 90 天没问题，我给你批了。」', hit: true, rule: '越权账期：销售授权上限 60 天，超限须区域经理审批', risk: '高' },
+        { t: '「这个价我私下再给你降 15 个点。」', hit: true, rule: '私自降价：超出价格表折扣权限，且无审批留痕', risk: '高' },
+        { t: '「C50 这个价按 200 方算，账期 45 天我帮你走流程。」', hit: false, rule: '—', risk: '—' },
+        { t: '「把你客户的联系方式和合同发我微信就行。」', hit: true, rule: '个人信息 / 合同外发：PII 与商业文件禁止经个人渠道传输', risk: '中' }
       ];
-      var list = $('#gd-list', root), out = $('#gd-out', root), count = $('#gd-count', root);
-      var tested = 0, blocked = 0;
-      list.innerHTML = PHRASES.map(function (p, i) { return '<button type="button" class="phrase" data-i="' + i + '" aria-pressed="false">“' + p.q + '”</button>'; }).join('');
-      list.addEventListener('click', function (e) {
-        var btn = e.target.closest('.phrase'); if (!btn) { return; }
-        var i = +btn.dataset.i; var p = PHRASES[i];
-        $$('.phrase', list).forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
-        if (!btn.dataset.tested) { btn.dataset.tested = '1'; tested++; if (p.block) { blocked++; } }
-        count.textContent = '已测 ' + tested + ' / ' + PHRASES.length + ' · 拦截 ' + blocked;
-        out.innerHTML = '<div class="verdict ' + (p.block ? 'block' : 'pass') + '" aria-live="polite"><div class="verdict-head">' + (p.block ? '⛔ 已拦截 · 风险红线' : '✓ 放行 · 未触发红线') + '</div>' +
-          '<div class="verdict-body"><span class="q">' + p.q + '</span>' + p.why + (p.fix ? '<span class="fix">' + p.fix + '</span>' : '') + '</div></div>';
-      });
-      return null;
+      var out = $('#gd-out', root), btn = $('#gd-run', root), status = $('#gd-status', root), count = $('#gd-count', root);
+      var timers = [];
+      function clearT() { timers.forEach(clearTimeout); timers = []; }
+      out.innerHTML = LINES.map(function (l) { return '<li><span>' + l.t + '<span class="why">待测试</span></span></li>'; }).join('');
+      function run() {
+        if (btn.dataset.state === 'running') { return; }
+        clearT(); btn.dataset.state = 'running'; btn.disabled = true; count.textContent = '测试中…'; status.textContent = '';
+        var hits = 0;
+        LINES.forEach(function (l, i) {
+          timers.push(setTimeout(function () {
+            var li = out.children[i];
+            li.className = l.hit ? 'hit' : 'pass';
+            li.innerHTML = '<span>' + l.t + '<span class="why">' + (l.hit ? '拦截原因：' + l.rule + ' · 风险等级 ' + l.risk : '放行：在授权范围内（45 天账期、按价格表计价）') + '</span></span><span class="tag ' + (l.hit ? 'tag-bad' : 'tag-ok') + '">' + (l.hit ? '✕ 已拦截' : '✓ 放行') + '</span>';
+            if (l.hit) { hits++; }
+            if (i === LINES.length - 1) { count.textContent = '已测试 ' + LINES.length + ' 句 · 拦截 ' + hits + ' 句'; status.textContent = '拦截记录写入审计日志，可回放（演示数据）'; btn.disabled = false; btn.textContent = '重新测试'; btn.dataset.state = 'done'; }
+          }, RM ? 0 : 200 + i * 380));
+        });
+      }
+      btn.addEventListener('click', function () { if (btn.dataset.state === 'done') { btn.textContent = '测试拦截'; btn.dataset.state = 'idle'; } run(); });
+      return clearT;
     }
   };
 
