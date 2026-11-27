@@ -6,10 +6,95 @@
 <title>田德盛 · Agent 工程作品集</title>
 <meta name="description" content="四个可运行 Agent 产品 + 一个统一评测中心：意图澄清、安全护栏、财报风险、文旅行程，全部在同一契约下跑同一套判据。">
 <link rel="stylesheet" href="assets/style.css">
+<style>
+/* ===== 交互与可达性增强：仅补充 assets/style.css，不改动其既有规则 ===== */
+html { max-width: 100%; }
+/* 溢出防护放在 body，不放根元素：根元素 overflow-x:clip 会让 #hash 锚点跳转落到空白区 */
+body { overflow-x: clip; }
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+/* 读屏专用文本 */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* 跳转到主内容 */
+.skip {
+  position: absolute; left: 12px; top: -60px; z-index: 100;
+  padding: 10px 14px; background: #1f2937; color: #fff; border-radius: 8px;
+  text-decoration: none; transition: top .15s ease;
+}
+.skip:focus { top: 12px; }
+
+/* 统一 focus 态：所有可聚焦元素都有清晰可见的焦点环 */
+a:focus, button:focus, [tabindex]:focus { outline: 3px solid #2f4bd8; outline-offset: 3px; border-radius: 4px; }
+a:focus:not(:focus-visible), button:focus:not(:focus-visible), [tabindex]:focus:not(:focus-visible) { outline: none; }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid #2f4bd8; outline-offset: 3px; border-radius: 4px;
+}
+
+/* 导航链接：小屏允许换行，避免横向溢出 */
+body nav .links { flex-wrap: wrap; row-gap: 6px; }
+
+/* 表格：可横向滚动容器 + 表头排序按钮 */
+.tablewrap { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { max-width: 100%; }
+th { white-space: nowrap; }
+th button.sort {
+  all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  font: inherit; color: inherit; padding: 4px 6px; margin: -4px -6px; border-radius: 4px;
+}
+th button.sort:hover { color: #2f4bd8; }
+th button.sort:focus-visible { outline: 3px solid #2f4bd8; outline-offset: 2px; }
+th button.sort::after {
+  content: ""; display: inline-block; width: 0; height: 0; opacity: .35;
+  border-left: 4px solid transparent; border-right: 4px solid transparent;
+  border-bottom: 5px solid currentColor;
+}
+th[aria-sort="ascending"] button.sort::after { opacity: 1; border-bottom: 0; border-top: 5px solid currentColor; }
+th[aria-sort="descending"] button.sort::after { opacity: 1; }
+th button.sort:active { transform: translateY(1px); }
+
+/* 产品卡：键盘可达的展开 / 收起 */
+.card .tagrow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card-toggle {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+  font: inherit; font-size: 13px; line-height: 1; padding: 6px 10px; cursor: pointer;
+  color: #2f4bd8; background: #eaeefe; border: 1px solid #c7d2fe; border-radius: 999px;
+  transition: background .15s ease, color .15s ease;
+}
+.card-toggle:hover { background: #dfe5fd; }
+.card-toggle::after {
+  content: ""; width: 7px; height: 7px; border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px);
+  transition: transform .15s ease;
+}
+.card-toggle[aria-expanded="false"]::after { transform: rotate(-135deg) translateY(-1px); }
+.card .metrics { animation: metricsIn .18s ease; }
+@keyframes metricsIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+
+/* 溢出防护 */
+svg, img, video { max-width: 100%; height: auto; }
+code, pre { overflow-wrap: anywhere; }
+.wrap, .cols, .cards, .kpis, .hero-meta { max-width: 100%; }
+body nav .wrap { display: flex; flex-wrap: wrap; }
+
+@media (max-width: 767px) {
+  .kpis, .cards, .cols, .hero-meta { flex-wrap: wrap; }
+  .cols > div { min-width: 0; }
+  .card-toggle { margin-left: 0; }
+  .tablewrap { margin-left: -4px; margin-right: -4px; padding-left: 4px; padding-right: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
 </head>
 <body>
-
-<nav>
+<a class="skip" href="#main">跳到主内容</a>
+<nav aria-label="站点导航">
   <div class="wrap">
     <div class="brand">田德盛 <span>/ Agent 工程</span></div>
     <div class="links">
@@ -22,7 +107,7 @@
     </div>
   </div>
 </nav>
-
+<main id="main">
 <header class="hero">
   <div class="wrap">
     <div class="eyebrow">Portfolio · 2026</div>
@@ -41,7 +126,6 @@
     <div class="kpis" id="kpis"></div>
   </div>
 </header>
-
 <section id="products">
   <div class="wrap">
     <div class="sec-head">
@@ -55,7 +139,6 @@
     <div class="cards" id="productCards"></div>
   </div>
 </section>
-
 <section id="eval">
   <div class="wrap">
     <div class="sec-head">
@@ -67,30 +150,28 @@
         样本不足时直接输出 <code>INSUFFICIENT_SAMPLE_FOR_P95</code> 而不是编一个尾延迟。
       </p>
     </div>
-
     <div class="arch" style="margin-bottom:26px">
       <svg viewBox="0 0 1000 250" role="img" aria-label="评测中心架构：四个被测 Agent 经适配器层接入统一契约，由套件与判据打分，产物归档为运行记录与报告">
         <defs>
           <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-            <path d="M0,0 L10,5 L0,10 z" fill="#9aa6b8"/>
+            <path d="M0,0 L10,5 L0,10 z" fill="#9aa6b8" />
           </marker>
         </defs>
         <!-- 被测层 -->
         <text x="14" y="24" font-size="11" fill="#8b95a3" font-family="monospace" letter-spacing="1">被测系统</text>
         <g font-family="-apple-system,Microsoft YaHei,sans-serif" font-size="12.5">
-          <rect x="14" y="38" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef"/>
+          <rect x="14" y="38" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef" />
           <text x="30" y="63" fill="#1f2937">砼智销 · 工业品销售</text>
-          <rect x="14" y="88" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef"/>
+          <rect x="14" y="88" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef" />
           <text x="30" y="113" fill="#1f2937">衡鉴 · 财报风险</text>
-          <rect x="14" y="138" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef"/>
+          <rect x="14" y="138" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef" />
           <text x="30" y="163" fill="#1f2937">贺兰有灵 · 文旅</text>
-          <rect x="14" y="188" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef"/>
+          <rect x="14" y="188" width="150" height="40" rx="7" fill="#fff" stroke="#e3e8ef" />
           <text x="30" y="213" fill="#1f2937">ResearchOS · 科研</text>
         </g>
-
         <!-- 适配器 -->
         <text x="222" y="24" font-size="11" fill="#8b95a3" font-family="monospace" letter-spacing="1">适配器层</text>
-        <rect x="222" y="38" width="132" height="190" rx="9" fill="#f7f9fc" stroke="#dde4ee" stroke-dasharray="4 3"/>
+        <rect x="222" y="38" width="132" height="190" rx="9" fill="#f7f9fc" stroke="#dde4ee" stroke-dasharray="4 3" />
         <g font-family="monospace" font-size="10.5" fill="#5b6472">
           <text x="236" y="66">adapter.py</text>
           <text x="236" y="88">domains = {…}</text>
@@ -99,10 +180,9 @@
           <text x="236" y="154">→ Response</text>
           <text x="236" y="182" fill="#a5580a">声明拒绝 ≠ 没跑</text>
         </g>
-
         <!-- 契约 -->
         <text x="410" y="24" font-size="11" fill="#8b95a3" font-family="monospace" letter-spacing="1">统一契约</text>
-        <rect x="410" y="38" width="150" height="100" rx="9" fill="#eaeefe" stroke="#c7d2fe"/>
+        <rect x="410" y="38" width="150" height="100" rx="9" fill="#eaeefe" stroke="#c7d2fe" />
         <g font-family="monospace" font-size="11.5" fill="#2f4bd8">
           <text x="426" y="62">Case</text>
           <text x="426" y="82">Response</text>
@@ -110,27 +190,25 @@
           <text x="426" y="122">RunContext</text>
         </g>
         <g stroke="#9aa6b8" stroke-width="1.2" marker-end="url(#ar)" fill="none">
-          <path d="M164,58 H218"/>
-          <path d="M164,108 H218"/>
-          <path d="M164,158 H218"/>
-          <path d="M164,208 H218"/>
-          <path d="M354,133 H406"/>
+          <path d="M164,58 H218" />
+          <path d="M164,108 H218" />
+          <path d="M164,158 H218" />
+          <path d="M164,208 H218" />
+          <path d="M354,133 H406" />
         </g>
-
         <!-- 判分 -->
         <text x="612" y="24" font-size="11" fill="#8b95a3" font-family="monospace" letter-spacing="1">判分</text>
-        <rect x="612" y="38" width="150" height="100" rx="9" fill="#fff" stroke="#e3e8ef"/>
+        <rect x="612" y="38" width="150" height="100" rx="9" fill="#fff" stroke="#e3e8ef" />
         <g font-family="-apple-system,Microsoft YaHei,sans-serif" font-size="11.5" fill="#1f2937">
           <text x="628" y="62">声明式 checks</text>
           <text x="628" y="82">或 native_verdict</text>
           <text x="628" y="104" fill="#5b6472">复用项目原金标</text>
           <text x="628" y="124" fill="#5b6472">不另造标签</text>
         </g>
-        <path d="M560,88 H608" stroke="#9aa6b8" stroke-width="1.2" marker-end="url(#ar)" fill="none"/>
-
+        <path d="M560,88 H608" stroke="#9aa6b8" stroke-width="1.2" marker-end="url(#ar)" fill="none" />
         <!-- 产物 -->
         <text x="816" y="24" font-size="11" fill="#8b95a3" font-family="monospace" letter-spacing="1">归档产物</text>
-        <rect x="816" y="38" width="168" height="190" rx="9" fill="#fff" stroke="#e3e8ef"/>
+        <rect x="816" y="38" width="168" height="190" rx="9" fill="#fff" stroke="#e3e8ef" />
         <g font-family="-apple-system,Microsoft YaHei,sans-serif" font-size="11.5" fill="#1f2937">
           <text x="830" y="60">run.json（逐例 verdict）</text>
           <text x="830" y="82">Wilson 95% CI</text>
@@ -140,23 +218,27 @@
           <text x="830" y="170">compare__*.md</text>
           <text x="830" y="196" fill="#0f7b46">可复跑 · 可追溯</text>
         </g>
-        <path d="M762,88 H812" stroke="#9aa6b8" stroke-width="1.2" marker-end="url(#ar)" fill="none"/>
-        <path d="M900,138 V186" stroke="#c7d2fe" stroke-width="1.2" marker-end="url(#ar)" fill="none" opacity="0"/>
+        <path d="M762,88 H812" stroke="#9aa6b8" stroke-width="1.2" marker-end="url(#ar)" fill="none" />
+        <path d="M900,138 V186" stroke="#c7d2fe" stroke-width="1.2" marker-end="url(#ar)" fill="none" opacity="0" />
       </svg>
     </div>
-
-    <div class="tablewrap">
+    <p class="sr-only" id="suiteSortStatus" role="status" aria-live="polite"></p>
+    <div class="tablewrap" tabindex="0" role="region" aria-label="评测套件表，可横向滚动">
       <table>
         <thead>
           <tr>
-            <th>套件</th><th>被测</th><th class="n">用例</th><th class="n">通过</th>
-            <th class="n">通过率</th><th class="n">均值延迟</th><th>口径</th>
+            <th scope="col" data-key="suite" data-type="text"><button type="button" class="sort">套件</button></th>
+            <th scope="col" data-key="product" data-type="text"><button type="button" class="sort">被测</button></th>
+            <th scope="col" class="n" data-key="n" data-type="num"><button type="button" class="sort">用例</button></th>
+            <th scope="col" class="n" data-key="passed" data-type="num"><button type="button" class="sort">通过</button></th>
+            <th scope="col" class="n" data-key="pass_rate" data-type="num"><button type="button" class="sort">通过率</button></th>
+            <th scope="col" class="n" data-key="mean_ms" data-type="num"><button type="button" class="sort">均值延迟</button></th>
+            <th scope="col" data-key="comp" data-type="text"><button type="button" class="sort">口径</button></th>
           </tr>
         </thead>
         <tbody id="suiteRows"></tbody>
       </table>
     </div>
-
     <div class="note warn">
       <b>三处刻意不做的判断。</b>
       ① 分区套件 <code>intent_clarify</code> 的砼智销（100 例）与衡鉴（12 例）分母不同、题面不同，
@@ -164,11 +246,9 @@
       它没有输入侧拦截层，实测应拦 20 条仅 3 条拒答，该套件对它不可比；
       ③ n&lt;200 的套件一律不出 P95，宁可空着也不给一个会被误读的尾延迟。
     </div>
-
     <p><a href="eval.html">→ 打开完整数据看板（含每个套件的判分口径与失败样例）</a></p>
   </div>
 </section>
-
 <section id="arch">
   <div class="wrap">
     <div class="sec-head">
@@ -180,10 +260,18 @@
         用同一批用例与同一判据对照 <em>工具调用正确率</em> 与 <em>端到端延迟</em>。
       </p>
     </div>
-    <div class="tablewrap">
+    <p class="sr-only" id="archSortStatus" role="status" aria-live="polite"></p>
+    <div class="tablewrap" tabindex="0" role="region" aria-label="架构对照表，可横向滚动">
       <table>
         <thead>
-          <tr><th>实现</th><th>编排范式</th><th>状态与恢复</th><th class="n">工具调用正确率</th><th class="n">P50 延迟</th><th>状态</th></tr>
+          <tr>
+            <th scope="col" data-key="label" data-type="text"><button type="button" class="sort">实现</button></th>
+            <th scope="col" data-key="container" data-type="text"><button type="button" class="sort">编排范式</button></th>
+            <th scope="col" data-key="state" data-type="text"><button type="button" class="sort">状态与恢复</button></th>
+            <th scope="col" class="n" data-key="action_match" data-type="num"><button type="button" class="sort">工具调用正确率</button></th>
+            <th scope="col" class="n" data-key="overhead" data-type="num"><button type="button" class="sort">P50 延迟</button></th>
+            <th scope="col" data-key="status" data-type="text"><button type="button" class="sort">状态</button></th>
+          </tr>
         </thead>
         <tbody id="archRows"></tbody>
       </table>
@@ -197,7 +285,6 @@
     <p><a href="arch.html">→ 打开完整架构对照（含容器成本、依赖体积与效度边界）</a></p>
   </div>
 </section>
-
 <section id="contact">
   <div class="wrap">
     <div class="sec-head">
@@ -222,20 +309,83 @@
     </div>
   </div>
 </section>
-
+</main>
 <footer>
   <div class="wrap">
     <div>数据生成时间 <span class="num" id="genAt">—</span> · 全部指标来自评测中心归档产物</div>
     <div>本站为静态页，无追踪、无外部依赖</div>
   </div>
 </footer>
-
 <script src="data/metrics.js"></script>
 <script src="data/arch.js"></script>
 <script>
 (function () {
   var M = window.METRICS || { counts: {}, suites: [], conventions: {} };
   var C = M.counts || {};
+  // ---- 通用：表格排序（点击表头，键盘 Enter/Space 同样触发） ----
+  function numOrNegInf(v) { return (v === null || v === undefined || isNaN(v)) ? null : v; }
+  function makeSorter(opts) {
+    // opts: { table, tbody, status, data, keys:{key:{type,get}}, initial:{key,dir}, render }
+    var state = { key: opts.initial && opts.initial.key, dir: (opts.initial && opts.initial.dir) || 1 };
+    var ths = Array.prototype.slice.call(opts.table.querySelectorAll("thead th[data-key]"));
+    function sortedData() {
+      var k = state.key;
+      if (!k || !opts.keys[k]) return opts.data.slice();
+      var def = opts.keys[k];
+      return opts.data.slice().sort(function (a, b) {
+        var va = def.get(a), vb = def.get(b);
+        var aNull = (va === null || va === undefined), bNull = (vb === null || vb === undefined);
+        if (aNull && bNull) return 0;
+        if (aNull) return 1;   // 空值永远排在末尾，不受升降序影响
+        if (bNull) return -1;
+        if (def.type === "num") return (va - vb) * state.dir;
+        return String(va).localeCompare(String(vb), "zh-CN") * state.dir;
+      });
+    }
+    function updateHeads() {
+      ths.forEach(function (th) {
+        if (th.getAttribute("data-key") === state.key) {
+          th.setAttribute("aria-sort", state.dir === 1 ? "ascending" : "descending");
+        } else {
+          th.setAttribute("aria-sort", "none");
+        }
+      });
+    }
+    function announce() {
+      if (!opts.status) return;
+      if (!state.key) { opts.status.textContent = "已恢复默认排序"; return; }
+      var label = opts.keys[state.key].label;
+      opts.status.textContent = "已按「" + label + "」" + (state.dir === 1 ? "升序" : "降序") + "排序";
+    }
+    function apply() {
+      opts.render(sortedData());
+      updateHeads();
+      announce();
+    }
+    ths.forEach(function (th) {
+      var btn = th.querySelector("button.sort");
+      if (!btn) return;
+      var key = th.getAttribute("data-key");
+      var type = th.getAttribute("data-type") || "text";
+      btn.setAttribute("aria-label", "按" + (opts.keys[key] ? opts.keys[key].label : key) + "排序");
+      btn.addEventListener("click", function () {
+        if (state.key === key) {
+          // 第三次点击恢复默认排序
+          if (state.dir === -1 && opts.initial && opts.initial.key) {
+            state = { key: null, dir: 1 };
+          } else {
+            state.dir = -state.dir;
+          }
+        } else {
+          state = { key: key, dir: type === "num" ? -1 : 1 };
+        }
+        apply();
+      });
+    });
+    // 初始渲染
+    apply();
+    return { reapply: apply };
+  }
 
   // ---- KPI ----
   var kpis = [
@@ -248,7 +398,6 @@
   document.getElementById("kpis").innerHTML = kpis.map(function (x) {
     return '<div class="kpi"><div class="v">' + x.v + '</div><div class="k">' + x.k + '</div></div>';
   }).join("");
-
   // ---- 套件表 ----
   function pct(x) {
     if (x === null || x === undefined) return "—";
@@ -263,22 +412,37 @@
     var cls = r === null ? "na" : (r >= 0.98 ? "ok" : "part");
     return '<span class="pill ' + cls + '">' + (s.comparable === false ? "仅并列" : "可比") + "</span>";
   }
-
-  var rows = (M.suites || []).slice().sort(function (a, b) {
-    return (b.n || 0) - (a.n || 0);
+  var suiteData = (M.suites || []).slice();
+  function renderSuites(rows) {
+    document.getElementById("suiteRows").innerHTML = rows.map(function (s) {
+      return "<tr>" +
+        "<td><code>" + s.suite + "</code></td>" +
+        "<td>" + (s.product || s.adapter) + "<div class='muted'>" + (s.domain || "") + "</div></td>" +
+        '<td class="n">' + (s.n === null ? "—" : s.n) + "</td>" +
+        '<td class="n">' + (s.passed === null ? "—" : s.passed) + "</td>" +
+        '<td class="n">' + pct(s.pass_rate) + "</td>" +
+        '<td class="n">' + ms(s.mean_ms) + "</td>" +
+        "<td>" + pill(s) + "<div class='muted'>" + (s.note || "") + "</div></td>" +
+        "</tr>";
+    }).join("");
+  }
+  makeSorter({
+    table: document.getElementById("suiteRows").closest("table"),
+    tbody: document.getElementById("suiteRows"),
+    status: document.getElementById("suiteSortStatus"),
+    data: suiteData,
+    initial: { key: "n", dir: -1 },
+    keys: {
+      suite:     { type: "text", label: "套件", get: function (s) { return s.suite || ""; } },
+      product:   { type: "text", label: "被测", get: function (s) { return s.product || s.adapter || ""; } },
+      n:         { type: "num",  label: "用例", get: function (s) { return numOrNegInf(s.n); } },
+      passed:    { type: "num",  label: "通过", get: function (s) { return numOrNegInf(s.passed); } },
+      pass_rate: { type: "num",  label: "通过率", get: function (s) { return numOrNegInf(s.pass_rate); } },
+      mean_ms:   { type: "num",  label: "均值延迟", get: function (s) { return numOrNegInf(s.mean_ms); } },
+      comp:      { type: "text", label: "口径", get: function (s) { return s.comparable === false ? "仅并列" : "可比"; } }
+    },
+    render: renderSuites
   });
-  document.getElementById("suiteRows").innerHTML = rows.map(function (s) {
-    return "<tr>" +
-      "<td><code>" + s.suite + "</code></td>" +
-      "<td>" + (s.product || s.adapter) + "<div class='muted'>" + (s.domain || "") + "</div></td>" +
-      '<td class="n">' + (s.n === null ? "—" : s.n) + "</td>" +
-      '<td class="n">' + (s.passed === null ? "—" : s.passed) + "</td>" +
-      '<td class="n">' + pct(s.pass_rate) + "</td>" +
-      '<td class="n">' + ms(s.mean_ms) + "</td>" +
-      "<td>" + pill(s) + "<div class='muted'>" + (s.note || "") + "</div></td>" +
-      "</tr>";
-  }).join("");
-
   // ---- 产品卡 ----
   var find = function (id) {
     return (M.suites || []).filter(function (s) { return s.suite === id; })[0] || {};
@@ -297,7 +461,6 @@
   var hm = find("finrisk_memory_12");
   var ic = find("intent_clarify");
   var ro = find("researchos_governance");
-
   var products = [
     {
       tag: "工业品销售", tagCls: "", name: "砼智销 · 销售 Agent",
@@ -340,14 +503,17 @@
       ]
     }
   ];
-
-  document.getElementById("productCards").innerHTML = products.map(function (p) {
+  document.getElementById("productCards").innerHTML = products.map(function (p, i) {
     var gh = "https://github.com/tian77-jq/" + p.repo;
+    var metricsId = "card-metrics-" + i;
+    var toggleId = "card-toggle-" + i;
     return '<div class="card">' +
-      '<div class="tagrow"><span class="tag ' + p.tagCls + '">' + p.tag + "</span></div>" +
+      '<div class="tagrow"><span class="tag ' + p.tagCls + '">' + p.tag + "</span>" +
+      '<button type="button" class="card-toggle" id="' + toggleId + '" aria-expanded="true" aria-controls="' + metricsId + '">' +
+      '<span class="card-toggle-label">收起指标</span></button></div>' +
       "<h3><a href='" + gh + "' target='_blank' rel='noopener'>" + p.name + "</a></h3>" +
       "<p class='desc'>" + p.desc + "</p>" +
-      "<div class='metrics'>" + p.metrics.map(function (m) {
+      "<div class='metrics' id='" + metricsId + "'>" + p.metrics.map(function (m) {
         return "<div class='mrow'><span>" + m[0] +
           (m[2] ? "<em class='msub'>" + m[2] + "</em>" : "") +
           "</span><b>" + m[1] + "</b></div>";
@@ -355,7 +521,22 @@
       "<a class='go' href='" + gh + "' target='_blank' rel='noopener'>查看仓库 →</a>" +
       "</div>";
   }).join("");
-
+  // 产品卡展开 / 收起：按钮原生支持 Tab 聚焦与 Enter / Space 触发
+  Array.prototype.forEach.call(document.querySelectorAll(".card-toggle"), function (btn) {
+    var target = document.getElementById(btn.getAttribute("aria-controls"));
+    if (!target) return;
+    function sync() {
+      var open = btn.getAttribute("aria-expanded") === "true";
+      target.hidden = !open;
+      var label = btn.querySelector(".card-toggle-label");
+      if (label) label.textContent = open ? "收起指标" : "展开指标";
+    }
+    btn.addEventListener("click", function () {
+      btn.setAttribute("aria-expanded", btn.getAttribute("aria-expanded") === "true" ? "false" : "true");
+      sync();
+    });
+    sync();
+  });
   // ---- 架构对照（数据来自 archcompare 实测） ----
   (function () {
     var A = window.ARCH || { ok: false };
@@ -365,33 +546,51 @@
       tb.innerHTML = "<tr><td colspan='6' style='color:var(--faint)'>尚未运行架构对照</td></tr>";
       return;
     }
-    var rows = (A.items || []).map(function (x) {
-      if (!x.available) {
-        return "<tr><td><b>" + x.label + "</b></td><td>—</td><td>—</td>" +
-          "<td class='n'>—</td><td class='n'>—</td>" +
-          "<td><span class='pill na'>" + (x.reason || "未运行") + "</span></td></tr>";
-      }
-      var same = x.business_same
-        ? "<span class='pill' style='background:var(--ok-soft);color:var(--ok)'>业务一致</span>"
-        : "<span class='pill' style='background:var(--stop-soft);color:var(--stop)'>有差异</span>";
-      var ms = (x.paired_overhead_ms === null || x.paired_overhead_ms === undefined)
-        ? "—" : (x.paired_overhead_ms >= 0 ? "+" : "") + x.paired_overhead_ms.toFixed(1) + " ms";
-      return "<tr><td><b>" + x.label + "</b> <small style='color:var(--faint)'>v" +
-        (x.version || "—") + "</small></td>" +
-        "<td>" + (x.container || "—") + "</td>" +
-        "<td>" + (x.state_serializable ? "可序列化" : "无内置状态") +
-        " · " + (x.resume === "verified" ? "续跑已验证" : (x.resume === "unsupported" ? "无续跑" : "续跑未验证")) + "</td>" +
-        "<td class='n'>" + ((x.action_match || 0) * 100).toFixed(1) + "%</td>" +
-        "<td class='n'>" + ms + "</td>" +
-        "<td>" + same + "</td></tr>";
-    }).join("");
-    tb.innerHTML = rows;
+    function resumeText(x) {
+      return x.resume === "verified" ? "续跑已验证" : (x.resume === "unsupported" ? "无续跑" : "续跑未验证");
+    }
+    function renderArch(items) {
+      tb.innerHTML = items.map(function (x) {
+        if (!x.available) {
+          return "<tr><td><b>" + x.label + "</b></td><td>—</td><td>—</td>" +
+            "<td class='n'>—</td><td class='n'>—</td>" +
+            "<td><span class='pill na'>" + (x.reason || "未运行") + "</span></td></tr>";
+        }
+        var same = x.business_same
+          ? "<span class='pill' style='background:var(--ok-soft);color:var(--ok)'>业务一致</span>"
+          : "<span class='pill' style='background:var(--stop-soft);color:var(--stop)'>有差异</span>";
+        var ms = (x.paired_overhead_ms === null || x.paired_overhead_ms === undefined)
+          ? "—" : (x.paired_overhead_ms >= 0 ? "+" : "") + x.paired_overhead_ms.toFixed(1) + " ms";
+        return "<tr><td><b>" + x.label + "</b> <small style='color:var(--faint)'>v" +
+          (x.version || "—") + "</small></td>" +
+          "<td>" + (x.container || "—") + "</td>" +
+          "<td>" + (x.state_serializable ? "可序列化" : "无内置状态") +
+          " · " + resumeText(x) + "</td>" +
+          "<td class='n'>" + ((x.action_match || 0) * 100).toFixed(1) + "%</td>" +
+          "<td class='n'>" + ms + "</td>" +
+          "<td>" + same + "</td></tr>";
+      }).join("");
+    }
+    makeSorter({
+      table: tb.closest("table"),
+      tbody: tb,
+      status: document.getElementById("archSortStatus"),
+      data: (A.items || []).slice(),
+      initial: { key: null, dir: 1 },
+      keys: {
+        label:        { type: "text", label: "实现", get: function (x) { return x.label || ""; } },
+        container:    { type: "text", label: "编排范式", get: function (x) { return x.available ? (x.container || "") : null; } },
+        state:        { type: "text", label: "状态与恢复", get: function (x) { return x.available ? ((x.state_serializable ? "可序列化" : "无内置状态") + " · " + resumeText(x)) : null; } },
+        action_match: { type: "num",  label: "工具调用正确率", get: function (x) { return x.available ? numOrNegInf(x.action_match) : null; } },
+        overhead:     { type: "num",  label: "P50 延迟", get: function (x) { return x.available ? numOrNegInf(x.paired_overhead_ms) : null; } },
+        status:       { type: "text", label: "状态", get: function (x) { return x.available ? (x.business_same ? "业务一致" : "有差异") : (x.reason || "未运行"); } }
+      },
+      render: renderArch
+    });
   })();
-
   var g = document.getElementById("genAt");
   if (g) g.textContent = (M.generated_at || "—").replace("T", " ").slice(0, 19);
 })();
 </script>
-
 </body>
 </html>

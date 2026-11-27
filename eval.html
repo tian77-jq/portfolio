@@ -6,13 +6,91 @@
 <title>数据看板 · Agent 评测中心</title>
 <link rel="stylesheet" href="assets/style.css">
 <style>
+  /* ---------- 原有样式（保持） ---------- */
   .legend { display:flex; gap:18px; flex-wrap:wrap; font-size:13px; color:var(--muted); margin:14px 0 0; }
   .legend i { display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; }
   td small { display:block; color:var(--faint); font-size:12px; margin-top:3px; }
   .wide { min-width: 980px; }
+
+  /* ---------- 键盘可达 & 焦点态 ---------- */
+  a:focus-visible,
+  button:focus-visible,
+  [tabindex]:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--ok, #2f9e6e);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  .skip {
+    position: absolute; left: 12px; top: -60px;
+    background: #111; color: #fff; padding: 8px 14px; border-radius: 6px;
+    z-index: 100; text-decoration: none; font-size: 14px;
+    transition: top .15s ease;
+  }
+  .skip:focus { top: 12px; }
+
+  /* ---------- 可排序表头 ---------- */
+  th.n, td.n { text-align: right; }
+  th.sortable { white-space: nowrap; cursor: pointer; user-select: none; }
+  th.sortable button {
+    all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    font: inherit; color: inherit; width: 100%;
+  }
+  th.sortable button:hover { color: var(--fg, #111); }
+  th.sortable button:focus-visible {
+    outline: 2px solid var(--ok, #2f9e6e); outline-offset: 3px; border-radius: 4px;
+  }
+  th.sortable .arrow {
+    display: inline-block; width: 1em; text-align: center;
+    color: var(--faint, #999); font-size: 12px;
+  }
+  th[aria-sort="ascending"] .arrow,
+  th[aria-sort="descending"] .arrow { color: var(--fg, #111); font-weight: 700; }
+  .sort-hint { font-size: 12px; color: var(--faint, #999); margin: 6px 0 0; }
+
+  /* ---------- 卡片：键盘展开/收起 ---------- */
+  .card { border: 1px solid rgba(0,0,0,.12); border-radius: 10px; margin: 12px 0; background: rgba(255,255,255,.04); }
+  .card > summary {
+    cursor: pointer; list-style: none; padding: 14px 16px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .card > summary::-webkit-details-marker { display: none; }
+  .card > summary::before {
+    content: "▸"; display: inline-block; width: 1em; transition: transform .15s ease;
+    color: var(--muted, #666); font-size: 14px;
+  }
+  .card[open] > summary::before { transform: rotate(90deg); }
+  .card .card-body { padding: 0 16px 14px 32px; }
+
+  /* ---------- 跳转锚点留白 ---------- */
+  section[id] { scroll-margin-top: 16px; }
+
+  /* ---------- 移动端：禁止页面级横向溢出 ---------- */
+  html, body { overflow-x: hidden; max-width: 100%; }
+  .wrap { max-width: 100%; box-sizing: border-box; }
+  .tablewrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    overscroll-behavior-x: contain;
+  }
+  .tablewrap table { box-sizing: border-box; }
+  .kpis { max-width: 100%; }
+  pre, code { max-width: 100%; }
+  @media (max-width: 767px) {
+    .wide { min-width: 0; width: 100%; }
+    table.wide thead th, table.wide tbody td { white-space: normal; overflow-wrap: anywhere; }
+    th.sortable button { width: auto; }
+    nav .wrap, .links { flex-wrap: wrap; gap: 8px 14px; }
+    h1 { word-break: break-word; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; scroll-behavior: auto !important; }
+  }
 </style>
 </head>
 <body>
+<a class="skip" href="#table">跳到明细</a>
 
 <nav>
   <div class="wrap">
@@ -54,13 +132,19 @@
         只能并列，不能相加，也不能排名。
       </p>
     </div>
-    <div class="tablewrap">
-      <table class="wide">
+    <p class="sort-hint" id="sortHint" aria-live="polite">点击表头可排序；再点一次切换升降序。当前：按用例数降序</p>
+    <div class="tablewrap" role="region" aria-label="评测明细表" tabindex="0">
+      <table class="wide" id="evalTable">
         <thead>
           <tr>
-            <th>套件 / 适配器</th><th class="n">用例</th><th class="n">通过</th>
-            <th class="n">通过率</th><th class="n">Wilson 95% CI</th>
-            <th class="n">均值延迟</th><th class="n">P95</th><th>判分口径</th>
+            <th class="sortable" data-key="suite" data-type="text" aria-sort="none"><button type="button">套件 / 适配器<span class="arrow" aria-hidden="true"></span></button></th>
+            <th class="n sortable" data-key="n" data-type="num" aria-sort="descending"><button type="button">用例<span class="arrow" aria-hidden="true">↓</span></button></th>
+            <th class="n sortable" data-key="passed" data-type="num" aria-sort="none"><button type="button">通过<span class="arrow" aria-hidden="true"></span></button></th>
+            <th class="n sortable" data-key="pass_rate" data-type="num" aria-sort="none"><button type="button">通过率<span class="arrow" aria-hidden="true"></span></button></th>
+            <th class="n sortable" data-key="ci95" data-type="ci" aria-sort="none"><button type="button">Wilson 95% CI<span class="arrow" aria-hidden="true"></span></button></th>
+            <th class="n sortable" data-key="mean_ms" data-type="num" aria-sort="none"><button type="button">均值延迟<span class="arrow" aria-hidden="true"></span></button></th>
+            <th class="n sortable" data-key="p95_ms" data-type="num" aria-sort="none"><button type="button">P95<span class="arrow" aria-hidden="true"></span></button></th>
+            <th>判分口径</th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
@@ -75,13 +159,22 @@
       <h2>排除记录</h2>
       <p>被排除的运行必须留痕，否则等于篡改分母</p>
     </div>
-    <div class="tablewrap">
+    <div class="tablewrap" role="region" aria-label="排除记录表" tabindex="0">
       <table>
         <thead><tr><th>套件</th><th>适配器</th><th class="n">用例</th><th class="n">通过率</th><th>排除原因</th></tr></thead>
         <tbody id="exclRows"></tbody>
       </table>
     </div>
     <div class="note warn" id="exclNote" style="display:none"></div>
+  </div>
+</section>
+
+<section id="arch" hidden>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>架构与依赖</h2>
+    </div>
+    <div id="cards"></div>
   </div>
 </section>
 
@@ -115,11 +208,24 @@
 </footer>
 
 <script src="data/metrics.js"></script>
+<script src="data/arch.js"></script>
 <script>
 (function () {
+  "use strict";
+
   var M = window.METRICS || { counts: {}, suites: [], excluded: [], conventions: {} };
+  var A = window.ARCH;
   var C = M.counts || {};
 
+  /* ---------- 工具 ---------- */
+  function esc(s) {
+    return String(s === null || s === undefined ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function isNil(x) { return x === null || x === undefined; }
+
+  /* ---------- KPI（数字原样） ---------- */
   document.getElementById("kpis").innerHTML = [
     { v: C.cases_in_latest_runs || 0, k: "纳入统计的用例" },
     { v: C.passed_in_latest_runs || 0, k: "通过" },
@@ -130,37 +236,111 @@
     return '<div class="kpi"><div class="v">' + x.v + '</div><div class="k">' + x.k + '</div></div>';
   }).join("");
 
-  function f1(x) { return x === null || x === undefined ? "—" : (x * 100).toFixed(1) + "%"; }
+  function f1(x) { return isNil(x) ? "—" : (x * 100).toFixed(1) + "%"; }
   function ms(x) {
-    if (x === null || x === undefined) return "—";
+    if (isNil(x)) return "—";
     return x >= 1000 ? (x / 1000).toFixed(2) + " s" : x.toFixed(1) + " ms";
   }
 
-  var rows = (M.suites || []).slice().sort(function (a, b) { return (b.n || 0) - (a.n || 0); });
-  document.getElementById("rows").innerHTML = rows.map(function (s) {
-    var cls = s.pass_rate >= 0.98 ? "ok" : "part";
-    var ci = s.ci95 ? "[" + s.ci95[0].toFixed(4) + ", " + s.ci95[1].toFixed(4) + "]" : "—";
-    var p95 = s.p95_ms !== null && s.p95_ms !== undefined
-      ? ms(s.p95_ms)
-      : "<span class='muted'>不出数</span><small>" + (s.p95_note || "") + "</small>";
-    return "<tr>" +
-      "<td><code>" + s.suite + "</code><small>" + s.adapter + (s.adapter_version ? " v" + s.adapter_version : "") + "</small></td>" +
-      '<td class="n">' + (s.n === null ? "—" : s.n) + "</td>" +
-      '<td class="n">' + (s.passed === null ? "—" : s.passed) + "</td>" +
-      '<td class="n"><span class="pill ' + cls + '">' + f1(s.pass_rate) + "</span></td>" +
-      '<td class="n">' + ci + "</td>" +
-      '<td class="n">' + ms(s.mean_ms) + "</td>" +
-      '<td class="n">' + p95 + "</td>" +
-      "<td>" + (s.note || "") + "<small>" + (s.comparable === false ? "分区套件：仅并列，不排名" : "同判据，可纵向比较") + "</small></td>" +
-      "</tr>";
-  }).join("");
+  /* ---------- 明细表：渲染 + 排序 ---------- */
+  var allRows = (M.suites || []).slice();
+  var sortState = { key: "n", dir: "desc" };   // 默认：按用例数降序，与原文一致
+  var colNames = {
+    suite: "套件 / 适配器", n: "用例", passed: "通过", pass_rate: "通过率",
+    ci95: "Wilson 95% CI", mean_ms: "均值延迟", p95_ms: "P95"
+  };
 
+  function sortVal(row, key) {
+    var v = row[key];
+    if (key === "ci95") {
+      if (!v || isNil(v[0])) return -Infinity;
+      return v[0];                 // 按区间下界排序
+    }
+    if (key === "suite") return String(row.suite || "") + " " + String(row.adapter || "");
+    return isNil(v) ? -Infinity : v;  // 空值始终沉底
+  }
+
+  function sortedRows() {
+    var k = sortState.key, dir = sortState.dir === "asc" ? 1 : -1;
+    var text = k === "suite";
+    return allRows.slice().sort(function (a, b) {
+      var va = sortVal(a, k), vb = sortVal(b, k), r;
+      if (text) { r = va.localeCompare(vb, "zh-CN"); }
+      else { r = va === vb ? 0 : (va < vb ? -1 : 1); if (va === -Infinity && vb !== -Infinity) r = 1; else if (vb === -Infinity && va !== -Infinity) r = -1; }
+      if (r === 0) r = (b.n || 0) - (a.n || 0);   // 稳定：回落到用例数
+      return r * dir;
+    });
+  }
+
+  function renderRows() {
+    document.getElementById("rows").innerHTML = sortedRows().map(function (s) {
+      var cls = s.pass_rate >= 0.98 ? "ok" : "part";
+      var ci = s.ci95 ? "[" + s.ci95[0].toFixed(4) + ", " + s.ci95[1].toFixed(4) + "]" : "—";
+      var p95 = !isNil(s.p95_ms)
+        ? ms(s.p95_ms)
+        : "<span class='muted'>不出数</span><small>" + esc(s.p95_note || "") + "</small>";
+      return "<tr>" +
+        "<td><code>" + esc(s.suite) + "</code><small>" + esc(s.adapter) + (s.adapter_version ? " v" + esc(s.adapter_version) : "") + "</small></td>" +
+        '<td class="n">' + (s.n === null ? "—" : s.n) + "</td>" +
+        '<td class="n">' + (s.passed === null ? "—" : s.passed) + "</td>" +
+        '<td class="n"><span class="pill ' + cls + '">' + f1(s.pass_rate) + "</span></td>" +
+        '<td class="n">' + ci + "</td>" +
+        '<td class="n">' + ms(s.mean_ms) + "</td>" +
+        '<td class="n">' + p95 + "</td>" +
+        "<td>" + esc(s.note || "") + "<small>" + (s.comparable === false ? "分区套件：仅并列，不排名" : "同判据，可纵向比较") + "</small></td>" +
+        "</tr>";
+    }).join("");
+  }
+
+  function renderSortUI() {
+    var ths = document.querySelectorAll("#evalTable th.sortable");
+    for (var i = 0; i < ths.length; i++) {
+      var th = ths[i];
+      var arrow = th.querySelector(".arrow");
+      if (th.getAttribute("data-key") === sortState.key) {
+        var desc = sortState.dir === "desc";
+        th.setAttribute("aria-sort", desc ? "descending" : "ascending");
+        arrow.textContent = desc ? "↓" : "↑";
+      } else {
+        th.setAttribute("aria-sort", "none");
+        arrow.textContent = "";
+      }
+    }
+    var hint = document.getElementById("sortHint");
+    if (hint) {
+      hint.textContent = "点击表头可排序；再点一次切换升降序。当前：按" + (colNames[sortState.key] || sortState.key) +
+        (sortState.dir === "desc" ? "降序" : "升序");
+    }
+  }
+
+  var table = document.getElementById("evalTable");
+  if (table) {
+    table.addEventListener("click", function (ev) {
+      var btn = ev.target.closest ? ev.target.closest("th.sortable button") : null;
+      if (!btn) return;
+      var th = btn.parentNode;
+      var key = th.getAttribute("data-key");
+      if (sortState.key === key) {
+        sortState.dir = sortState.dir === "desc" ? "asc" : "desc";
+      } else {
+        sortState.key = key;
+        sortState.dir = key === "suite" ? "asc" : "desc";   // 文本列默认升序，数值列默认降序
+      }
+      renderRows();
+      renderSortUI();
+    });
+  }
+
+  renderRows();
+  renderSortUI();
+
+  /* ---------- 排除记录 ---------- */
   var ex = M.excluded || [];
   document.getElementById("exclRows").innerHTML = ex.length ? ex.map(function (e) {
-    return "<tr><td><code>" + e.suite + "</code></td><td>" + e.adapter + "</td>" +
+    return "<tr><td><code>" + esc(e.suite) + "</code></td><td>" + esc(e.adapter) + "</td>" +
       '<td class="n">' + (e.n === null ? "—" : e.n) + "</td>" +
       '<td class="n">' + f1(e.pass_rate) + "</td>" +
-      "<td>" + e.reason + "</td></tr>";
+      "<td>" + esc(e.reason) + "</td></tr>";
   }).join("") : "<tr><td colspan='5' class='muted'>无。全部运行均为有效配置。</td></tr>";
 
   if (ex.length) {
@@ -171,6 +351,63 @@
       "把它算进平均分，等于让一个 bug 冒充能力缺失。排除它，并且把排除动作本身留在页面上。";
   }
 
+  /* ---------- 架构卡片：原生 <details>，Enter/Space 可展开，aria-expanded 同步 ---------- */
+  (function renderCards() {
+    var box = document.getElementById("cards");
+    var sec = document.getElementById("arch");
+    if (!box || !sec) return;
+
+    function itemsOf(list) {
+      if (!list || !list.length) return "<p class='muted'>无</p>";
+      return "<ul class='tight'>" + list.map(function (it) {
+        var t = typeof it === "string" ? it : (it.name || it.title || it.id || "");
+        var d = (it && typeof it === "object") ? (it.desc || it.description || it.note || "") : "";
+        return "<li>" + esc(t) + (d ? "：" + esc(d) : "") + "</li>";
+      }).join("") + "</ul>";
+    }
+
+    var cards = [];
+    var comps = (A && (A.components || A.layers || A.modules)) || [];
+    if (comps.length) {
+      cards.push({ title: "核心组件", body: itemsOf(comps) });
+    }
+    if (A && A.flow) {
+      cards.push({ title: "调用链路", body: "<p>" + esc(Array.isArray(A.flow) ? A.flow.join(" → ") : A.flow) + "</p>" });
+    }
+    if (A && A.stack) {
+      var st = A.stack;
+      var lines = Object.keys(st).map(function (k) {
+        var v = st[k];
+        return "<li><b>" + esc(k) + "：</b>" + esc(Array.isArray(v) ? v.join("、") : (typeof v === "object" ? JSON.stringify(v) : v)) + "</li>";
+      });
+      cards.push({ title: "技术栈", body: "<ul class='tight'>" + lines.join("") + "</ul>" });
+    }
+    if (A && A.nodes && Array.isArray(A.nodes)) {
+      cards.push({ title: "节点", body: itemsOf(A.nodes) });
+    }
+    if (A && A.notes) {
+      cards.push({ title: "说明", body: "<p>" + esc(Array.isArray(A.notes) ? A.notes.join("；") : A.notes) + "</p>" });
+    }
+    if (!cards.length) return;
+
+    sec.hidden = false;
+    box.innerHTML = cards.map(function (c, i) {
+      return "<details class='card'" + (i === 0 ? " open" : "") + ">" +
+        "<summary type='button' role='button' tabindex='0' aria-expanded='" + (i === 0 ? "true" : "false") + "'>" +
+        "<b>" + esc(c.title) + "</b></summary>" +
+        "<div class='card-body'>" + c.body + "</div></details>";
+    }).join("");
+
+    box.addEventListener("toggle", function (ev) {
+      var d = ev.target;
+      if (d && d.tagName === "DETAILS") {
+        var s = d.querySelector("summary");
+        if (s) s.setAttribute("aria-expanded", d.open ? "true" : "false");
+      }
+    }, true);
+  })();
+
+  /* ---------- 口径 ---------- */
   var conv = M.conventions || {};
   var label = { ci: "置信区间", bootstrap: "重采样", provenance: "溯源", p95_gate: "尾延迟门槛", domain_isolation: "域隔离" };
   document.getElementById("convList").innerHTML = Object.keys(conv).map(function (k) {
