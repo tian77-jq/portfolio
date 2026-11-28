@@ -105,7 +105,9 @@
     ".ht-meta{margin-top:7px;display:flex;flex-wrap:wrap;gap:6px;font:11px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#8f8cab}",
     ".ht-meta span{padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid rgba(236,234,247,.08)}",
     ".ht-meta .ev{color:#8fd3b6;max-width:100%;overflow-wrap:anywhere}",
-    ".ht-wait{align-self:flex-start;color:#f0c46a;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace}",
+    ".ht-wait{align-self:flex-start;display:flex;align-items:center;gap:8px;color:#f0c46a;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;padding:8px 12px;border-radius:10px;background:rgba(240,196,106,.07);border:1px solid rgba(240,196,106,.22)}",
+    ".ht-wait::before{content:'';flex:0 0 auto;width:9px;height:9px;border-radius:50%;background:#f0c46a;animation:htpulse 1s ease-in-out infinite}",
+    "@keyframes htpulse{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}",
     ".ht-chips{display:flex;gap:6px;padding:0 12px 10px;flex-wrap:wrap}",
     ".ht-chip{border:1px dashed rgba(236,234,247,.22);background:transparent;color:#a7a4c4;border-radius:9px;",
     "padding:6px 10px;font-size:11.5px;cursor:pointer;text-align:left;max-width:100%}",
@@ -145,6 +147,18 @@
       return v;
     }
     try { return localStorage.getItem("hub_k") || ""; } catch (e) { return ""; }
+  }
+
+  /* 会话号：每个项目一个、存在本地。这样「把第二天换成水洞沟」这类后续指令
+     能接上上一轮生成的行程（贺兰的 revise 依赖同一 session 里的上一版）。 */
+  function sessionId(pid) {
+    var k = "hub_sid_" + pid, v = null;
+    try { v = localStorage.getItem(k); } catch (e) {}
+    if (!v) {
+      v = pid + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+      try { localStorage.setItem(k, v); } catch (e) {}
+    }
+    return v;
   }
 
   function loadLiveScript() {
@@ -221,7 +235,7 @@
       var to = setTimeout(function () { ctl.abort(); }, 125000);
       fetch(A.base + "/api/chat", {
         method: "POST", headers: hdr, signal: ctl.signal,
-        body: JSON.stringify({ project: project, message: text, protocol: "mcp" })
+        body: JSON.stringify({ project: project, message: text, protocol: "mcp", session_id: sessionId(project) })
       }).then(function (r) {
         clearTimeout(to);
         if (r.status === 401) { throw new Error("后端要求访问口令（链接里需带 ?k=…）"); }
@@ -316,6 +330,67 @@
     addMsg("ai", P.blurb + "\n\n下面随便点一句，或直接说你的情况——请求会打到本机真实 adapter。");
   }
 
+  /* 流式对话：先拿到工具名（几十毫秒），再让答案逐段长出来。
+     后端 /api/chat/stream 吐的是标准 SSE：meta → tick… → answer… → done */
+  function parseSSE(block) {
+    var ev = "message", data = "";
+    block.split("\n").forEach(function (line) {
+      if (line.indexOf("event:") === 0) { ev = line.slice(6).trim(); }
+      else if (line.indexOf("data:") === 0) { data += line.slice(5).trim(); }
+    });
+    return { ev: ev, data: data };
+  }
+
+  function chatStream(project, text, on) {
+    return new Promise(function (resolve, reject) {
+      if (!A.base) { return reject(new Error("NO_BACKEND")); }
+      var hdr = { "Content-Type": "application/json", "Accept": "text/event-stream" };
+      var tk = token();
+      if (tk) { hdr["X-Hub-Token"] = tk; }
+      var ctl = new AbortController();
+      var to = setTimeout(function () { ctl.abort(); }, 180000);
+      fetch(A.base + "/api/chat/stream", {
+        method: "POST", headers: hdr, signal: ctl.signal,
+        body: JSON.stringify({ project: project, message: text, protocol: "mcp", session_id: sessionId(project) })
+      }).then(function (r) {
+        if (r.status === 401) { throw new Error("后端要求访问口令（链接里需带 ?k=…）"); }
+        if (r.status === 429) { throw new Error("试用频率超限，请稍等一会儿再试"); }
+        if (!r.ok) { throw new Error("后端返回 HTTP " + r.status); }
+        if (!r.body || !r.body.getReader) { throw new Error("NO_STREAM"); }
+        var reader = r.body.getReader(), dec = new TextDecoder(), buf = "";
+        var final = null, failure = null;
+        function pump() {
+          return reader.read().then(function (x) {
+            if (x.done) {
+              clearTimeout(to);
+              if (final) { return resolve(final); }
+              if (failure) { return reject(failure); }
+              return reject(new Error("流提前结束（后端未给出 done）"));
+            }
+            buf += dec.decode(x.value, { stream: true });
+            var i;
+            while ((i = buf.indexOf("\n\n")) >= 0) {
+              var block = buf.slice(0, i);
+              buf = buf.slice(i + 2);
+              var e = parseSSE(block);
+              if (!e.data) { continue; }
+              var d;
+              try { d = JSON.parse(e.data); } catch (_) { continue; }
+              if (e.ev === "done") { final = d; }
+              else if (e.ev === "error") { failure = new Error(d.message || d.detail || d.code || "后端错误"); }
+              else { on(e.ev, d); }
+            }
+            return pump();
+          });
+        }
+        return pump();
+      }).catch(function (e) {
+        clearTimeout(to);
+        reject(e && e.name === "AbortError" ? new Error("请求超时（后端可能正忙）") : e);
+      });
+    });
+  }
+
   function send(text) {
     text = String(text || "").trim();
     if (!text || A.busy) { return; }
@@ -327,22 +402,84 @@
     var wait = document.createElement("div");
     wait.className = "ht-wait";
     var t0 = performance.now();
-    wait.textContent = "调用真后端 · " + PROJECTS[pid].name + " … 0s";
+    wait.textContent = "正在连真后端 · " + PROJECTS[pid].name + " …";
     logEl.appendChild(wait);
     logEl.scrollTop = logEl.scrollHeight;
-    var tick = setInterval(function () {
-      wait.textContent = "调用真后端 · " + PROJECTS[pid].name + " … " +
-        Math.round((performance.now() - t0) / 1000) + "s";
-    }, 500);
 
-    function done() {
+    var toolName = "", toolNote = "";
+    var bubble = null, acc = "", finished = false;
+
+    var tick = setInterval(function () {
+      var s = Math.round((performance.now() - t0) / 1000);
+      if (toolName) {
+        wait.textContent = "正在调用 " + toolName + " · 已 " + s + " 秒" +
+          (s >= 6 ? "（" + (toolNote || "多步推理，请稍等") + "）" : "");
+      } else {
+        wait.textContent = "正在连真后端 · " + PROJECTS[pid].name + " … " + s + "s";
+      }
+    }, 400);
+
+    function clearWait() {
       clearInterval(tick);
       if (wait.parentNode) { wait.parentNode.removeChild(wait); }
+    }
+    function unlock() {
+      if (finished) { return; }
+      finished = true;
+      clearWait();
       A.busy = false; sendEl.disabled = false;
     }
 
+    function onEvent(ev, d) {
+      if (ev === "meta") {
+        toolName = d.tool || "";
+        toolNote = d.note || "";
+        // 几十毫秒内就把真实工具名摆出来，而不是让用户对着空白等
+        wait.textContent = "已连上 · 正在调用 " + toolName + (toolNote ? "（" + toolNote + "）" : "");
+        return;
+      }
+      if (ev === "tick") {
+        var s = Math.round((d.elapsed_ms || 0) / 1000);
+        wait.textContent = "正在调用 " + toolName + " · 已 " + s + " 秒" +
+          (s >= 6 ? "（" + (toolNote || "多步推理，请稍等") + "）" : "");
+        return;
+      }
+      if (ev === "answer" && d.chunk) {
+        if (!bubble) { clearWait(); bubble = addMsg("ai", "", null); }
+        acc += d.chunk;
+        bubble.innerHTML = esc(acc);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+    }
+
+    function finish(j) {
+      unlock();
+      var meta = [
+        { t: "工具：" + (j.tool || toolName || "—") },
+        { t: "耗时：" + (j.latency_ms != null ? j.latency_ms + " ms" : Math.round(performance.now() - t0) + " ms") }
+      ];
+      if (j.cached) {
+        meta.push({ t: "缓存命中 · 原始 " + (j.origin_latency_ms != null ? j.origin_latency_ms + " ms" : "—"), cls: "ev" });
+      }
+      if (j.evidence) { meta.push({ t: "证据：" + j.evidence, cls: "ev" }); }
+      if (j.demo) { meta.push({ t: "⚠ demo 回包" }); }
+      if (bubble) {
+        bubble.innerHTML = esc(j.answer || acc);
+        var m = document.createElement("div");
+        m.className = "ht-meta";
+        m.innerHTML = meta.map(function (x) {
+          return '<span' + (x.cls ? ' class="' + x.cls + '"' : "") + ">" + esc(x.t) + "</span>";
+        }).join("");
+        bubble.appendChild(m);
+        logEl.scrollTop = logEl.scrollHeight;
+      } else {
+        addMsg("ai", j.answer, meta);
+      }
+      setStatus("ok", j.latency_ms);
+    }
+
     function fail(err) {
-      done();
+      unlock();
       var msg = String((err && err.message) || err);
       if (msg === "NO_BACKEND") {
         addMsg("sys", "真后端现在没连上：本机网关未启动，或公网隧道地址已换。\n" +
@@ -355,17 +492,13 @@
     }
 
     function go() {
-      chat(pid, text).then(function (j) {
-        done();
-        var meta = [
-          { t: "工具：" + (j.tool || "—") },
-          { t: "耗时：" + (j.latency_ms != null ? j.latency_ms + " ms" : Math.round(performance.now() - t0) + " ms") }
-        ];
-        if (j.evidence) { meta.push({ t: "证据：" + j.evidence, cls: "ev" }); }
-        if (j.demo) { meta.push({ t: "⚠ demo 回包" }); }
-        addMsg("ai", j.answer, meta);
-        setStatus("ok", j.latency_ms);
-      }).catch(fail);
+      chatStream(pid, text, onEvent).then(finish).catch(function (e) {
+        // 老后端没有 SSE 端点 / 浏览器不支持流：退回一次性请求，行为不变
+        if (e && (e.message === "NO_STREAM" || /HTTP 404/.test(e.message))) {
+          return chat(pid, text).then(finish).catch(fail);
+        }
+        fail(e);
+      });
     }
 
     if (A.base) { return go(); }
