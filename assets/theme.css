@@ -1,0 +1,61 @@
+/* =====================================================================
+   门户站 hub.html · 设计 token（唯一来源，只服务 hub；四个产品页各自保留原风格，不引此文件）
+   hub 的 :root 只覆写品牌变量：--brand / --brand-2 / --brand-soft
+   ===================================================================== */
+:root{
+  /* 间距：4px 基准 */
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px;
+  /* 圆角 / 阴影 / 动效 */
+  --radius-sm:8px; --radius-md:12px; --radius-lg:18px;
+  --shadow-1:0 1px 2px rgba(0,0,0,.18);
+  --shadow-2:0 12px 32px rgba(0,0,0,.28);
+  --dur-1:150ms; --dur-2:260ms; --ease:cubic-bezier(.2,.8,.2,1);
+  /* 文本 / 表面 / 边框（深色底） */
+  --text-1:#e9eef9; --text-2:#b6c2d9; --text-3:#7b87a0;
+  --surface-1:rgba(16,21,34,.86); --surface-2:rgba(22,28,44,.72);
+  --border-1:rgba(122,146,190,.18); --border-2:rgba(122,146,190,.32);
+  /* 语义色 */
+  --ok:#3fd6b0; --warn:#f0a35e; --bad:#e0724f;
+  /* 字体栈 / 内容宽度 */
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  --serif:"Noto Serif SC","Songti SC","STSong","SimSun",Georgia,serif;
+  --max:1180px;
+
+  /* ---- 任务书清单之外、hub 实际用到的共享 token ---- */
+  --bg:#070a14; --bg2:#0c1120;        /* 门户底色 */
+  --border-0:rgba(122,146,190,.08);   /* 比 --border-1 更淡的分隔线（导航底边） */
+  --nav-h:64px; --nav-bg:rgba(11,14,26,.72); --anchor:84px;   /* 导航高度 / 锚点滚动偏移 */
+}
+
+/* ---------- 基础 ---------- */
+html{scroll-padding-top:var(--anchor)}
+body{
+  margin:0;color:var(--text-1);font-family:var(--sans);overflow-x:clip;-webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+  /* 径向光晕：颜色随品牌变量走，固定不随滚动 */
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(1100px 620px at 12% -8%, var(--brand-soft), transparent 62%),
+    radial-gradient(900px 520px at 92% 4%, var(--brand-soft), transparent 60%);
+  background-attachment:fixed;
+}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--brand-2);outline-offset:3px;border-radius:6px}
+pre,code,kbd{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- 导航条链接（hub 的 <header>） ---------- */
+header nav a{
+  padding:var(--space-2) var(--space-4);border-radius:var(--radius-sm);font-size:14px;color:var(--text-2);text-decoration:none;
+  white-space:nowrap;transition:color var(--dur-1) var(--ease), background var(--dur-1) var(--ease)}
+header nav a:hover{color:var(--text-1);background:var(--brand-soft)}
+header nav a.active{color:var(--text-1);background:var(--brand-soft)}   /* 当前页 */
+
+/* ---------- 卡片：1px 边框 + 轻阴影，hover 位移 ≤2px（位移在 hub 的 .card:hover） ---------- */
+.card{box-shadow:var(--shadow-1)}
+
+/* ---------- 动效降级 ---------- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}

@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>田德盛 · Agent 工作台｜四个项目，一个入口</title>
+<meta name="color-scheme" content="dark">
+<meta name="description" content="ResearchOS / 衡鉴 / 贺兰有灵 / 砼智销 的统一入口：@ 任一项目即可直接对话，路由、工具调用耗时与证据链全部可见。">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+:root{
+  --brand:#7c9cff; --brand-2:#8b7dff; --brand-soft:rgba(124,156,255,.16);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background-color:var(--bg); color:var(--text-1); overflow-x:clip;
+  font:15px/1.7 var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
+.bg{position:fixed;inset:0;z-index:-2;pointer-events:none;background:none}  /* 光晕统一由 theme.css 的 body 背景提供 */
+.stars{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+  background-image:
+    radial-gradient(1px 1px at 18% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 42% 8%, #cfe0ff, transparent),
+    radial-gradient(1px 1px at 68% 31%, #fff, transparent),
+    radial-gradient(1px 1px at 84% 14%, #cfe0ff, transparent),
+    radial-gradient(1px 1px at 30% 62%, #fff, transparent),
+    radial-gradient(1px 1px at 74% 74%, #cfe0ff, transparent),
+    radial-gradient(1px 1px at 92% 52%, #fff, transparent),
+    radial-gradient(1px 1px at 8% 82%, #cfe0ff, transparent);
+  background-size:100% 100%;
+}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--space-5)}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);
+  background:var(--nav-bg);border-bottom:1px solid var(--border-0)}
+.hd{display:flex;align-items:center;gap:var(--space-4);height:var(--nav-h)}
+.brand{display:flex;align-items:center;gap:var(--space-2);font-weight:650;letter-spacing:.2px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(63,214,176,.14)}
+nav{display:flex;gap:var(--space-1);margin-left:auto;flex-wrap:wrap}
+.badge-line{display:flex;align-items:center;gap:var(--space-2);font-size:12.5px;color:var(--text-3)}
+
+/* ---------- hero ---------- */
+.hero{padding:calc(var(--space-4) * 13) 0 var(--space-2)}
+.kicker{display:inline-flex;align-items:center;gap:var(--space-2);font-size:12.5px;color:var(--text-2);
+  border:1px solid var(--border-2);background:rgba(124,156,255,.07);padding:var(--space-1) var(--space-3);border-radius:999px}
+h1{font-size:clamp(30px,4.4vw,50px);line-height:1.16;letter-spacing:-.8px;margin:var(--space-4) 0 var(--space-3);font-weight:700}
+h1 em{font-style:normal;background:linear-gradient(92deg,var(--brand),var(--brand-2) 46%,#3fd6b0);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{color:var(--text-2);max-width:74ch;margin:0 0 var(--space-5);font-size:15.5px}
+
+/* ---------- composer ---------- */
+.composer{position:relative;border:1px solid var(--border-2);border-radius:18px;
+  background:linear-gradient(180deg,rgba(18,24,39,.92),rgba(12,16,27,.92));
+  box-shadow:0 18px 50px -22px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.04);
+  padding:var(--space-4) var(--space-4) var(--space-2)}
+textarea#ask{width:100%;min-height:64px;max-height:180px;resize:vertical;border:0;outline:0;background:transparent;
+  color:var(--text-1);font:15px/1.65 inherit;padding:var(--space-1) var(--space-1) var(--space-2)}
+textarea#ask::placeholder{color:#6b7690}
+.crow{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;padding-top:var(--space-2);border-top:1px solid var(--border-1)}
+.chip{font-size:12.5px;color:var(--text-2);border:1px solid var(--border-2);border-radius:999px;
+  padding:var(--space-1) var(--space-3);cursor:pointer;transition:all var(--dur-1) var(--ease);background:rgba(124,156,255,.05)}
+.chip:hover{border-color:rgba(124,156,255,.5);color:var(--text-1);background:var(--brand-soft)}
+.btn{margin-left:auto;border:0;border-radius:11px;padding:var(--space-2) calc(var(--space-4) * 5);cursor:pointer;font-size:14px;font-weight:600;
+  color:#0a0e19;background:linear-gradient(92deg,var(--brand-2),var(--brand));transition:all var(--dur-1) var(--ease)}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.hint{font-size:12px;color:var(--text-3);padding:var(--space-2) 2px 2px}
+.hint kbd{border:1px solid var(--border-2);border-bottom-width:2px;border-radius:5px;padding:0 var(--space-1);font-size:11px;color:var(--text-2)}
+
+/* @popover */
+.pop{position:absolute;left:14px;bottom:74px;z-index:30;width:min(420px,88vw);
+  border:1px solid var(--border-2);border-radius:13px;background:#0d1220;overflow:hidden;
+  box-shadow:0 22px 60px -18px #000;display:none}
+.pop.on{display:block}
+.pop div{padding:var(--space-2) var(--space-3);display:flex;gap:var(--space-2);align-items:center;cursor:pointer;font-size:13.5px}
+.pop div:hover,.pop div.sel{background:var(--brand-soft)}
+.pop i{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.pop small{color:var(--text-3);margin-left:auto;font-size:11.5px}
+
+/* ---------- stream + trace ---------- */
+.grid{display:grid;grid-template-columns:1.62fr .95fr;gap:var(--space-4);margin-top:calc(var(--space-4) * 5);align-items:start}
+.panel{border:1px solid var(--border-1);border-radius:var(--radius-md);background:var(--surface-1);overflow:hidden}
+.phead{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border-1);
+  font-size:12.5px;color:var(--text-3);letter-spacing:.3px}
+.phead b{color:var(--text-2);font-weight:600;letter-spacing:0}
+.stream{min-height:300px;max-height:560px;overflow-y:auto;padding:var(--space-4)}
+.empty{color:var(--text-3);font-size:13.5px;text-align:center;padding:calc(var(--space-4) * 14) calc(var(--space-4) * 5);line-height:2}
+.empty b{color:var(--text-2)}
+.msg{display:flex;gap:var(--space-3);margin-bottom:var(--space-4)}
+.av{width:28px;height:28px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;font-size:12px;font-weight:700}
+.av.u{background:var(--brand-soft);color:#a9bcff}
+.av.a{background:rgba(63,214,176,.16);color:#7fe3cc}
+.body{min-width:0;flex:1}
+.who{font-size:12px;color:var(--text-3);margin-bottom:var(--space-1);display:flex;gap:var(--space-2);align-items:center;flex-wrap:wrap}
+.who .tag{border:1px solid var(--border-2);border-radius:6px;padding:0 var(--space-2);font-size:11px}
+.text{white-space:pre-wrap;color:var(--text-1);font-size:14.5px;line-height:1.75}
+.meta{margin-top:var(--space-2);display:flex;gap:var(--space-2);flex-wrap:wrap}
+.meta span{font-size:11.5px;color:var(--text-2);background:rgba(124,156,255,.09);
+  border:1px solid rgba(124,156,255,.2);border-radius:6px;padding:2px var(--space-2)}
+.meta span.ev{background:rgba(63,214,176,.09);border-color:rgba(63,214,176,.22)}
+.meta span.demo{background:rgba(240,163,94,.12);border-color:rgba(240,163,94,.3);color:#f5c48f}
+.typing{color:var(--text-3);font-size:13px}
+
+/* trace */
+.trace{padding:var(--space-3) var(--space-4);max-height:560px;overflow-y:auto;font-size:12.5px;line-height:1.85;color:var(--text-2)}
+.trace .step{display:flex;gap:var(--space-2);padding:var(--space-1) 0;border-bottom:1px dashed rgba(122,146,190,.12)}
+.trace .step:last-child{border:0}
+.trace .k{color:var(--text-3);width:64px;flex:0 0 auto}
+.trace .v{word-break:break-word}
+.trace .ok{color:var(--ok)}
+.trace .warn{color:var(--warn)}
+.trace .none{color:var(--text-3)}
+.probes{display:flex;flex-wrap:wrap;gap:var(--space-2);padding:var(--space-2) var(--space-4);border-top:1px solid var(--border-1)}
+.probes b{font-size:11.5px;color:var(--text-3);width:100%;font-weight:500;margin-bottom:2px}
+.probe{font-size:11.5px;display:inline-flex;align-items:center;gap:var(--space-1);color:var(--text-2);
+  border:1px solid var(--border-1);border-radius:999px;padding:2px var(--space-2)}
+.probe i{width:6px;height:6px;border-radius:50%;background:var(--text-3)}
+.probe.on i{background:var(--ok);box-shadow:0 0 0 3px rgba(63,214,176,.14)}
+.probe.off i{background:var(--bad)}
+.probe.unk i{background:var(--warn)}
+
+/* ---------- 地图 / 天气（文字降级是默认态，地图挂载成功才给容器尺寸） ---------- */
+.geo{margin-top:var(--space-3);border-top:1px dashed rgba(122,146,190,.16);padding-top:var(--space-2);font-size:12.5px;color:var(--text-2)}
+.geo h4{margin:0 0 var(--space-2);font-size:12.5px;color:var(--text-3);font-weight:500;letter-spacing:.3px}
+.geo .wx{display:flex;flex-wrap:wrap;gap:var(--space-2) var(--space-3);margin-bottom:var(--space-2)}
+.geo .wx b{color:var(--text-1);font-weight:600}
+.geo .wx .pending{color:var(--warn)}
+.geo-map{margin:var(--space-2) 0}
+.geo-map.live{height:320px;border:1px solid var(--border-1);border-radius:10px;overflow:hidden;background:#0b0f1b}
+.geo ol{margin:var(--space-2) 0 0;padding-left:calc(var(--space-4) * 5);line-height:1.9}
+.geo ol li small{color:var(--text-3);margin-left:var(--space-2)}
+.geo .note{margin-top:var(--space-2);color:var(--warn)}
+
+/* ---------- cards ---------- */
+section.blk{padding:calc(var(--space-4) * 14) 0 0}
+.sh{display:flex;align-items:baseline;gap:var(--space-3);margin-bottom:var(--space-2)}
+h2{font-size:24px;letter-spacing:-.3px;margin:0;font-weight:680}
+.sh span{color:var(--text-3);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-4);margin-top:var(--space-4)}
+.card{position:relative;border:1px solid var(--border-1);border-radius:var(--radius-md);padding:calc(var(--space-4) * 5) calc(var(--space-4) * 5) var(--space-4);
+  background:var(--surface-2);transition:all var(--dur-1) var(--ease);overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:var(--c,var(--brand));opacity:.85}
+.card:hover{transform:translateY(-2px);border-color:var(--border-2);box-shadow:0 18px 40px -24px #000}
+.card h3{margin:0 0 var(--space-1);font-size:17px;display:flex;align-items:center;gap:var(--space-2)}
+.card h3 i{width:9px;height:9px;border-radius:3px;background:var(--c);display:inline-block}
+.card .tg{font-size:12px;color:var(--text-3);margin-bottom:var(--space-2)}
+.card p{margin:0 0 var(--space-3);color:var(--text-2);font-size:13.5px;line-height:1.7}
+.kv{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-4)}
+.kv span{font-size:11.5px;color:var(--text-2);border:1px solid var(--border-2);border-radius:6px;padding:2px var(--space-2)}
+.acts{display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center}
+.mini{font-size:12.5px;padding:var(--space-2) var(--space-3);border-radius:9px;border:1px solid var(--border-2);color:var(--text-2);
+  cursor:pointer;background:transparent;transition:all var(--dur-1) var(--ease)}
+.mini:hover{color:var(--text-1);border-color:rgba(124,156,255,.55);background:var(--brand-soft)}
+.mini.go{background:var(--brand-soft);border-color:rgba(124,156,255,.4);color:#c3d0ff}
+
+/* ---------- eval strip ---------- */
+.strip{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;margin-top:var(--space-4);
+  border:1px solid var(--border-1);border-radius:var(--radius-md);overflow:hidden;background:var(--border-1)}
+.strip div{background:#0b0f1b;padding:var(--space-4) var(--space-4)}
+.strip b{display:block;font-size:22px;letter-spacing:-.5px;color:#cfdaff}
+.strip small{color:var(--text-3);font-size:11.5px}
+
+/* ---------- extend ---------- */
+.extend{margin-top:var(--space-4);border:1px dashed rgba(124,156,255,.34);border-radius:var(--radius-md);
+  background:rgba(124,156,255,.045);padding:calc(var(--space-4) * 5)}
+.extend h3{margin:0 0 var(--space-2);font-size:16px;display:flex;align-items:center;gap:var(--space-2)}
+.extend h3 .plus{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;
+  background:var(--brand-soft);color:#a9bcff;font-size:14px}
+.extend p{color:var(--text-2);font-size:13.5px;margin:0 0 var(--space-3)}
+pre{margin:0;background:#080c16;border:1px solid var(--border-1);border-radius:10px;padding:var(--space-4) var(--space-4);
+  overflow:auto;font:12.5px/1.75 var(--mono);color:#a8b6d0}
+pre .c{color:#5f6f8c}
+pre .s{color:#8fd6b0}
+code.k{background:var(--brand-soft);border:1px solid rgba(124,156,255,.22);border-radius:5px;
+  padding:1px var(--space-2);font-size:12.5px;color:#bfcdff}
+.tools{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-3)}
+.tools span{font:11.5px/1.6 var(--mono);color:#9fb0cc;border:1px solid var(--border-1);border-radius:6px;padding:2px var(--space-2)}
+
+footer{margin-top:var(--space-8);border-top:1px solid var(--border-1);padding:var(--space-5) 0 var(--space-7);color:var(--text-3);font-size:12.5px}
+footer .frow{display:flex;gap:var(--space-4);flex-wrap:wrap;justify-content:space-between}
+footer a:hover{color:var(--text-2)}
+
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+  .strip{grid-template-columns:repeat(2,1fr)}
+  nav{display:none}
+}
+@media(max-width:640px){
+  .hero{padding-top:var(--space-6)}
+  h1{font-size:clamp(28px,7vw,34px)}
+  .strip{grid-template-columns:1fr}
+  .badge-line{display:none}
+  .composer{padding:var(--space-3)}
+  .pop{left:var(--space-2);right:var(--space-2);width:auto}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div><div class="stars"></div>
+
+<header><div class="wrap hd">
+  <div class="brand"><span class="dot"></span> Agent 工作台</div>
+  <div class="badge-line">四项目 · 一个入口</div>
+  <nav>
+    <a href="index.html">首页</a>
+    <a href="projects.html">项目</a>
+    <a href="arch.html">架构</a>
+    <a href="eval.html">评测</a>
+    <a href="hub.html" class="active" aria-current="page">工作台</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <span class="kicker">@ 任一项目即可直接对话 · 路由与证据链全部可见</span>
+    <h1>四个项目，<em>一个入口</em>。<br>点进去就出结果，不是又一个介绍页。</h1>
+    <p class="lede">
+      下面这个框是真的能用的：输入 <b>@贺兰有灵</b> 问行程、<b>@衡鉴</b> 核财报数字、<b>@砼智销</b> 起询价草稿、
+      <b>@ResearchOS</b> 找文献。每个回答都带三样东西——请求路由到哪个 adapter、调了哪个工具、
+      证据是什么。没接后端的项目会明确标「演示数据」，不会假装在线。
+    </p>
+
+    <div class="composer">
+      <div class="pop" id="pop"></div>
+      <textarea id="ask" placeholder="输入 @ 选择项目，或直接描述你要做的事… 例如：@贺兰有灵 三天两晚带老人，预算 3000"></textarea>
+      <div class="crow" id="chips"></div>
+      <div class="hint"><kbd>@</kbd> 选项目 · <kbd>Enter</kbd> 发送 · <kbd>Shift</kbd>+<kbd>Enter</kbd> 换行 · 不 @ 时按意图自动路由并说明理由</div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="phead"><b>对话</b><span id="streamState">等待输入</span></div>
+        <div class="stream" id="stream">
+          <div class="empty" id="emptyState">
+            还没有对话。<br>
+            <b>试试左下角的示例问题</b>，或直接输入 <b>@</b> 看图里能接哪些项目。<br>
+            真实后端未连接时，这里返回的是<b>标注过的演示数据</b>，路由与工具名照样展示。
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="phead"><b>路由与证据</b><span>route → tool → latency → evidence</span></div>
+        <div class="trace" id="trace">
+          <div class="step"><span class="k">状态</span><span class="v none">尚无请求</span></div>
+          <div class="step"><span class="k">说明</span><span class="v none">每次发送后会在这里逐行展开：命中哪个项目、走哪个 adapter、调用哪些工具、耗时、证据摘要、以及是否走了演示回退。</span></div>
+        </div>
+        <div class="probes" id="probes"><b>项目健康探针（并行 · 共享 <span id="probeMs">2.5</span>s 截止时间）</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="sh"><h2>四个项目，能做什么</h2><span>每张卡都能直达可用页面</span></div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section class="blk">
+    <div class="sh"><h2>评测口径</h2><span>数字来自评测中心归档，缺失显示「—」</span></div>
+    <div class="strip">
+      <div><b>12</b><small>评测套件</small></div>
+      <div><b>7</b><small>adapter</small></div>
+      <div><b>426</b><small>最近批次用例</small></div>
+      <div><b>401</b><small>通过数</small></div>
+      <div><b>n≥200</b><small>才出 P95</small></div>
+    </div>
+    <div class="tools">
+      <span>Case / Response / Verdict 契约</span><span>Wilson 95% CI</span><span>bootstrap seed=2026</span>
+      <span>INSUFFICIENT_SAMPLE_FOR_P95</span><span>McNemar 配对检验</span>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="sh"><h2>接入新项目</h2><span>只改一个文件，前端不用动</span></div>
+    <div class="extend">
+      <h3><span class="plus">+</span> 预留插槽：<code class="k">data/projects.js</code> 加一个对象即可</h3>
+      <p>门户站不硬编码任何项目。卡片、@ 菜单、意图路由、健康探针、示例问题，全部从注册表读。
+         这就是「以后新做项目直接接入」的工程答案——不是留个空白 div，是留一条已经跑通的数据通路。</p>
+<pre><span class="c">// data/projects.js 追加一项，刷新页面即生效</span>
+{
+  id: <span class="s">"newproj"</span>, name: <span class="s">"新项目"</span>, tag: <span class="s">"领域 · 类型"</span>,
+  accent: <span class="s">"#7c9cff"</span>, desc: <span class="s">"一句话说清它能干什么"</span>,
+  url: <span class="s">"product-newproj.html"</span>,          <span class="c">// 点「进去用」跳这里</span>
+  tools: [<span class="s">"newproj.do_thing"</span>],           <span class="c">// MCP 工具名，统一 project.verb_object</span>
+  skills: [<span class="s">"do_thing"</span>],                    <span class="c">// A2A skill 名</span>
+  health: <span class="s">"http://127.0.0.1:8250/health"</span>, <span class="c">// 探针，2.5s 超时</span>
+  prompts: [<span class="s">"示例问题一"</span>], demo: [ ... ]
+}</pre>
+      <div class="tools" id="hubTools"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer><div class="wrap frow">
+  <div>© 2026 田德盛 · Agent 工作台</div>
+  <div>
+    <a href="product-researchos.html">ResearchOS</a> ·
+    <a href="product-hengjian.html">衡鉴</a> ·
+    <a href="product-helan.html">贺兰有灵</a> ·
+    <a href="product-cement.html">砼智销</a>
+  </div>
+  <div>真实后端未连接时全部标注「演示数据」</div>
+</div></footer>
+
+<script src="data/projects.js"></script>
+<script>
+/* 腾讯地图 GL JS 安全配置：占位符 __WB_HTTP_PORT__ / __WB_TMAP_SECRET__ 原样保留，由部署环境替换；
+   前端任何位置不许出现真实 key。脚本异步加载，加载失败/无 key 时 hub 逻辑照常运行（地图退文字）。 */
+(function(){
+  var cfg = (window.HUB_CONFIG || {}).map || {};
+  if (cfg.serviceHost) { window._TMapSecurityConfig = { serviceHost: cfg.serviceHost }; }
+  var s = document.createElement("script");
+  s.src = cfg.script || "https://map.qq.com/api/gljs?v=1.exp";
+  s.async = true; s.onerror = function(){ /* 静默：mountGeo 检测不到 TMap 即走文字模式 */ };
+  document.head.appendChild(s);
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  var P = window.PROJECTS || [];
+  var CFG = window.HUB_CONFIG || {};
+  var $ = function(id){ return document.getElementById(id); };
+  var stream = $("stream"), traceEl = $("trace"), pop = $("pop"), ask = $("ask");
+  var emptyState = $("emptyState");
+
+  /* ---------- 找项目 ---------- */
+  function byId(id){ for (var i=0;i<P.length;i++) if (P[i].id===id) return P[i]; return null; }
+  function byName(n){
+    n = (n||"").trim();
+    for (var i=0;i<P.length;i++){
+      if (P[i].name===n || P[i].id===n.toLowerCase()) return P[i];
+    }
+    return null;
+  }
+
+  /* ---------- 渲染能力卡 ---------- */
+  (function renderCards(){
+    var box = $("cards");
+    box.innerHTML = P.map(function(p){
+      var accent = p.accent || "#7c9cff";
+      var nTools = (p.tools && p.tools.length) ? p.tools.length : null;
+      var hasHealth = !!p.health;
+      return '<article class="card" data-card="'+esc(p.id)+'" style="--c:'+accent+'">'+
+        '<h3><i></i>'+esc(p.name||p.id)+'</h3>'+
+        '<div class="tg">'+esc(p.tag || '—')+'</div>'+
+        '<p>'+esc(p.desc || '—')+'</p>'+
+        '<div class="kv">'+ (p.metrics||[]).map(function(m){
+          return '<span>'+esc(m.k)+' <b style="color:#cfdaff">'+esc(m.v)+'</b></span>';
+        }).join("") +
+          '<span>MCP 工具 <b style="color:#cfdaff">'+(nTools!=null? nTools+' 个' : '—')+'</b></span>'+
+          '<span>健康探针 <b style="color:#cfdaff">'+(hasHealth? '已配' : '—')+'</b></span>'+
+        '</div>'+
+        '<div class="acts">'+
+          '<button class="mini go" data-go="'+esc(p.id)+'">进去用 →</button>'+
+          '<button class="mini" data-ask="'+esc(p.id)+'">在这里问</button>'+
+          (p.url ? '<a class="mini" href="'+esc(p.url)+'" style="text-decoration:none">产品页</a>' : '')+
+        '</div>'+
+      '</article>';
+    }).join("");
+    box.addEventListener("click", function(e){
+      var t = e.target.closest("[data-go]");
+      if (t){ var tp = byId(t.getAttribute("data-go")); if (tp && tp.url) location.href = tp.url; return; }
+      var a = e.target.closest("[data-ask]");
+      if (a){ var p = byId(a.getAttribute("data-ask")); ask.value = "@"+p.name+" "; ask.focus(); renderChips(p); }
+    });
+    /* 接入新项目一栏的工具清单：从 HUB_TOOLS 动态渲染，注册表加一项就多一个 */
+    var ht = $("hubTools");
+    if (ht){
+      ht.innerHTML = '<span>MCP · 单次有界工具调用</span><span>A2A · 多智能体长任务</span>' +
+        (window.HUB_TOOLS||[]).map(function(t){
+          return '<span title="'+esc(t.desc||"")+'">'+esc(t.name)+(t.via?' → '+esc(t.via):'')+'</span>';
+        }).join("");
+    }
+  })();
+
+  /* ---------- 示例问题 chips ---------- */
+  var chipsEl = $("chips");
+  function renderChips(p){
+    var list = p ? (p.prompts||[]).slice(0,3) : ["@贺兰有灵 三天两晚，带老人，预算 3000","@衡鉴 这份年报研发费用同比变动多少，口径是什么","@砼智销 住宅建房用水泥，银川，200 平，帮我起一份询价草稿"];
+    chipsEl.innerHTML = list.map(function(q){
+      return '<span class="chip" data-q="'+esc(q)+'">'+esc(q.length>26?q.slice(0,26)+"…":q)+'</span>';
+    }).join("") + '<button class="btn" id="sendBtn">发送</button>';
+    $("sendBtn").onclick = send;
+  }
+  chipsEl.addEventListener("click", function(e){
+    var c = e.target.closest("[data-q]");
+    if (c){ ask.value = c.getAttribute("data-q"); ask.focus(); }
+  });
+  renderChips(null);
+
+  /* ---------- @ 菜单 ---------- */
+  var selIdx = 0, popItems = [];
+  function closePop(){ pop.classList.remove("on"); popItems = []; }
+  function openPop(q){
+    var list = P.filter(function(p){
+      if (!q) return true;
+      var s = (p.name+p.id+p.tag).toLowerCase();
+      return s.indexOf(q.toLowerCase()) >= 0;
+    });
+    if (!list.length) return closePop();
+    selIdx = 0;
+    pop.innerHTML = list.map(function(p,i){
+      return '<div data-id="'+p.id+'" class="'+(i===0?"sel":"")+'"><i style="background:'+p.accent+'"></i>'+
+             esc(p.name)+'<small>'+esc(p.tag)+'</small></div>';
+    }).join("");
+    popItems = list;
+    pop.classList.add("on");
+  }
+  function curToken(){
+    var v = ask.value, pos = ask.selectionStart, pre = v.slice(0,pos);
+    var m = /@([^\s@]*)$/.exec(pre);
+    return m ? m[1] : null;
+  }
+  ask.addEventListener("input", function(){
+    var t = curToken();
+    if (t === null) closePop(); else openPop(t);
+    var v = ask.value.match(/@([^\s@]+)\s/);
+    renderChips(v ? byName(v[1]) : null);
+  });
+  ask.addEventListener("keydown", function(e){
+    if (pop.classList.contains("on")){
+      if (e.key==="ArrowDown"||e.key==="ArrowUp"){
+        e.preventDefault();
+        selIdx = (selIdx + (e.key==="ArrowDown"?1:-1) + popItems.length) % popItems.length;
+        Array.prototype.forEach.call(pop.children,function(c,i){ c.classList.toggle("sel", i===selIdx); });
+        return;
+      }
+      if (e.key==="Tab"||e.key==="Enter"){ e.preventDefault(); pick(popItems[selIdx]); return; }
+      if (e.key==="Escape"){ closePop(); return; }
+    }
+    if (e.key==="Enter" && !e.shiftKey){ e.preventDefault(); send(); }
+  });
+  pop.addEventListener("click", function(e){
+    var d = e.target.closest("[data-id]");
+    if (d) pick(byId(d.getAttribute("data-id")));
+  });
+  function pick(p){
+    if (!p) return;
+    var v = ask.value, pos = ask.selectionStart, pre = v.slice(0,pos), post = v.slice(pos);
+    var head = pre.replace(/@([^\s@]*)$/, "@"+p.name+" ");
+    ask.value = head + post;
+    ask.selectionStart = ask.selectionEnd = head.length;
+    closePop(); ask.focus(); renderChips(p);
+  }
+
+  /* ---------- 意图路由（不 @ 时） ---------- */
+  /* 关键词表：只放"离开该领域就不太可能出现"的词。
+     曾经把「西夏」放进文旅表，结果「C30 送到西夏区」被路由到贺兰有灵——
+     地名/机构名往往跨领域复用，必须换成更专的组合词（西夏陵、西夏王陵）。 */
+  var KEY = {
+    helan: ["贺兰","宁夏","银川","行程","旅游","景点","沙坡头","西夏陵","西夏王陵","沙湖","水洞沟","文旅","带老人","两晚","一日游","研学"],
+    hengjian: ["财报","年报","核验","口径","研发费用","追溯","PDF","复核","金融","同比","引文","合并报表","单季","审计"],
+    cement: ["混凝土","泵送","砼","方量","骨料","标号","C30","C35","询价","水泥","建房","草稿","起订"],
+    researchos: ["文献","检索","证据","论文","科研","召回","引用","门禁","参考文献","向量","重排","溯源"]
+  };
+  /* 打分：命中词越长越具体，权重越高；单字/双字泛词只给 1 分 */
+  function score(p, text){
+    var s = 0, hit = [];
+    if (text.indexOf(p.name) >= 0){ s += 10; hit.push(p.name); }
+    (KEY[p.id]||[]).forEach(function(k){
+      if (text.indexOf(k) >= 0){ s += (k.length >= 3 ? 3 : 1); hit.push(k); }
+    });
+    return { s: s, hit: hit };
+  }
+  function route(text){
+    var best = null, bs = 0, why = "";
+    P.forEach(function(p){
+      var r = score(p, text);
+      if (r.s > bs){ bs = r.s; best = p; why = r.hit.slice(0,3).join("、"); }
+    });
+    return best ? {p:best, why:"命中关键词：" + why} : null;
+  }
+
+  /* ---------- 渲染 ---------- */
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  function push(role, html, who){
+    if (emptyState && emptyState.parentNode){ emptyState.remove(); emptyState = null; }
+    var d = document.createElement("div");
+    d.className = "msg";
+    d.innerHTML = '<div class="av '+(role==="u"?"u":"a")+'">'+(role==="u"?"你":"AI")+'</div>'+
+                  '<div class="body">'+(who?'<div class="who">'+who+'</div>':'')+
+                  '<div class="text">'+html+'</div></div>';
+    stream.appendChild(d); stream.scrollTop = stream.scrollHeight;
+    return d;
+  }
+  function metaRow(node, items){
+    var m = document.createElement("div"); m.className = "meta";
+    m.innerHTML = items.map(function(x){
+      return '<span class="'+(x.cls||"")+'">'+esc(x.t)+'</span>';
+    }).join("");
+    node.querySelector(".body").appendChild(m);
+    stream.scrollTop = stream.scrollHeight;
+  }
+  function trace(rows){
+    traceEl.innerHTML = rows.map(function(r){
+      return '<div class="step"><span class="k">'+esc(r[0])+'</span><span class="v '+(r[2]||"")+'">'+esc(r[1])+'</span></div>';
+    }).join("");
+  }
+
+  /* ---------- 发送 ---------- */
+  var busy = false;
+  /* 路由决策是纯函数（不碰 DOM），自检脚本直接调它验证“新项目不用改代码就能路由” */
+  function resolveTarget(raw){
+    var m = raw.match(/^@([^\s@]+)\s*/);
+    var target = null, text = raw, routeWhy = "";
+    if (m){
+      target = byName(m[1]);
+      if (target) text = raw.slice(m[0].length).trim();
+    }
+    if (!target){
+      var r = route(raw);
+      if (r){ target = r.p; routeWhy = r.why; }
+    }
+    return { target: target, text: text, routeWhy: routeWhy };
+  }
+  function send(){
+    if (busy) return;
+    var raw = ask.value.trim();
+    if (!raw) return;
+    var d = resolveTarget(raw), target = d.target, text = d.text, routeWhy = d.routeWhy;
+    if (!target){
+      trace([["状态","无法路由","warn"],["说明","没有识别到项目。请用 @ 指定，或在问题里带上领域词（行程 / 财报 / 询价 / 文献）。"],["候选",P.map(function(p){return p.name;}).join(" · ")]]);
+      return;
+    }
+    busy = true; $("sendBtn") && ($("sendBtn").disabled = true);
+    ask.value = ""; closePop(); renderChips(target);
+
+    push("u", esc(raw), '<span class="tag">你</span>');
+    var node = push("a", '<span class="typing">正在路由到「'+esc(target.name)+'」…</span>',
+      '<span class="tag" style="border-color:'+(target.accent||'#7c9cff')+'55;color:'+(target.accent||'#7c9cff')+'">'+esc(target.name)+'</span>'+
+      '<span class="tag">'+esc(target.tag||'—')+'</span>');
+    $("streamState").textContent = "请求中";
+
+    var t0 = performance.now();
+    callBackend(target, text).then(function(res){
+      var ms = Math.round(performance.now() - t0);
+      finish(node, target, res, ms, routeWhy, null, text);
+    }).catch(function(err){
+      var ms = Math.round(performance.now() - t0);
+      finish(node, target, demoAnswer(target, text), ms, routeWhy, String(err&&err.message||err), text);
+    });
+  }
+
+  /* 真后端优先：POST /api/chat；失败则回退演示数据（明确标注）。
+     回包字段名 answer / route / tool / latency_ms / evidence 是契约，不随前端改。 */
+  function callBackend(p, text){
+    return new Promise(function(resolve, reject){
+      if (typeof fetch !== "function" || location.protocol === "file:") {
+        return reject(new Error("file:// 无后端"));
+      }
+      /* 页面若由别的静态服务器托管，则直连注册表里登记的网关端口（网关已开 CORS）；同源则走相对路径 */
+      var base = "";
+      var gp = CFG.port ? String(CFG.port) : "";
+      if (gp && String(location.port||"") !== gp) base = location.protocol + "//" + location.hostname + ":" + gp;
+      var ctl = new AbortController();
+      var to = setTimeout(function(){ ctl.abort(); }, 60000);
+      fetch(base + "/api/chat", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({project:p.id, message:text, protocol:"mcp"}),
+        signal: ctl.signal
+      }).then(function(r){
+        clearTimeout(to);
+        if (!r.ok) throw new Error("HTTP "+r.status);
+        return r.json();
+      }).then(function(j){
+        if (!j || !j.answer) throw new Error("响应缺少 answer 字段");
+        resolve(j);
+      }).catch(function(e){ clearTimeout(to); reject(e); });
+    });
+  }
+
+  function demoAnswer(p, text){
+    var d = (p.demo||[]);
+    var best = null, bs = -1;
+    d.forEach(function(x){
+      var s = 0;
+      for (var i=0;i<text.length;i++){ if (x.q.indexOf(text[i]) >= 0) s += 1; }
+      if (s > bs){ bs = s; best = x; }
+    });
+    if (!best && d.length) best = d[0];
+    return best || { a:"该项目尚未配置示例。", tools:[], ms:0, evidence:"—" };
+  }
+
+  function finish(node, p, res, ms, routeWhy, fallbackReason, text){
+    var box = node.querySelector(".text");
+    box.className = "text";
+    box.innerHTML = esc(res.answer || res.a || "");
+    var items = [];
+    items.push({t:"工具：" + ((res.tools && res.tools.length) ? res.tools.join(" / ") : "未调用")});
+    items.push({t:"耗时：" + (res.ms != null ? res.ms : ms) + " ms"});
+    if (res.evidence) items.push({t:"证据：" + res.evidence, cls:"ev"});
+    if (fallbackReason) items.push({t:"演示数据（未连后端）", cls:"demo"});
+    metaRow(node, items);
+
+    trace([
+      ["路由", "@"+p.name+" → adapter:" + p.id + (routeWhy ? "（"+routeWhy+"）" : "（显式 @ 指定）"), "ok"],
+      ["协议", "MCP · 工具清单 " + (p.tools||[]).length + " 个；A2A · skill " + (p.skills||[]).length + " 个"],
+      ["工具", (res.tools && res.tools.length) ? res.tools.join(" → ") : "本次未派发工具（纯说明类回答）"],
+      ["耗时", (res.ms != null ? res.ms : ms) + " ms" + (res.ms != null ? "（服务端）" : "（端到端）")],
+      ["证据", res.evidence || "—", res.evidence ? "ok" : "none"],
+      ["后端", fallbackReason ? "未连接（"+fallbackReason+"），已回退演示数据" : "已连接 /api/chat",
+        fallbackReason ? "warn" : "ok"]
+    ]);
+    /* 地图/天气只在贺兰回答下挂载；拿不到地图就退文字，不留空容器 */
+    if (p.id === "helan" && text != null && typeof mountGeo === "function") mountGeo(box, text);
+    $("streamState").textContent = "完成 · " + p.name;
+    busy = false; $("sendBtn") && ($("sendBtn").disabled = false);
+  }
+
+  /* ---------- 地图 / 天气（展示层；数据来自贺兰 adapter / 服务端，前端零 key） ---------- */
+  /* 公开地标的 GCJ-02 近似坐标，用于地图没加载时的文字降级；标“待核”，不冒充精确坐标 */
+  var PLACES = {
+    "镇北堡": {name:"镇北堡西部影城", lat:38.636, lng:106.048},
+    "西夏陵": {name:"西夏陵", lat:38.464, lng:105.992},
+    "贺兰山": {name:"贺兰山岩画", lat:38.700, lng:105.960},
+    "沙湖":   {name:"沙湖", lat:38.705, lng:106.395},
+    "水洞沟": {name:"水洞沟", lat:38.385, lng:106.520},
+    "沙坡头": {name:"沙坡头", lat:37.470, lng:105.010},
+    "怀远":   {name:"怀远夜市", lat:38.490, lng:106.140},
+    "鼓楼":   {name:"银川鼓楼", lat:38.474, lng:106.273}
+  };
+  var CITY_HUB = {"银川":{lat:38.474,lng:106.273},"中卫":{lat:37.515,lng:105.190},"吴忠":{lat:37.986,lng:106.198},
+                  "石嘴山":{lat:38.983,lng:106.383},"固原":{lat:36.005,lng:106.243}};
+  function haversine(a, b){
+    var R = 6371, toR = Math.PI/180;
+    var dLat = (b.lat-a.lat)*toR, dLng = (b.lng-a.lng)*toR;
+    var h = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(a.lat*toR)*Math.cos(b.lat*toR)*Math.sin(dLng/2)*Math.sin(dLng/2);
+    return 2*R*Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  function geoContext(text){
+    text = text || "";
+    var city = "银川";
+    for (var c in CITY_HUB) if (text.indexOf(c) >= 0) { city = c; break; }
+    var places = [];
+    for (var k in PLACES) if (text.indexOf(k) >= 0) places.push(PLACES[k]);
+    return { city: city, hub: CITY_HUB[city], places: places };
+  }
+  /* 文字模式：纯函数，自检脚本直接调；无地图时输出全部可用信息，不留空框 */
+  function geoText(text){
+    var g = geoContext(text), rows = [];
+    var pts = g.places.length ? g.places : [PLACES["镇北堡"], PLACES["西夏陵"], PLACES["贺兰山"]];
+    pts.forEach(function(p){
+      rows.push(p.name + "（GCJ-02 " + p.lat + ", " + p.lng + "，待核）· 距" + g.city + "市中心直线 " + haversine(g.hub, p).toFixed(1) + " km");
+    });
+    return "地图未加载（" + (location.protocol === "file:" ? "file:// 打开时需用本地服务器" : "腾讯地图脚本未就绪") + "），已退文字模式。\n" + rows.join("\n");
+  }
+  function mountGeo(box, text){
+    var g = geoContext(text);
+    var el = document.createElement("div"); el.className = "geo";
+    el.innerHTML = '<h4>位置与天气 · '+esc(g.city)+'（GCJ-02 · 供应商：'+esc((CFG.map||{}).provider||"tencent")+'）</h4>'+
+                   '<div class="wx"></div><div class="geo-map"></div><div class="list"></div>';
+    box.appendChild(el);
+    /* 天气：永远带 数据时间 与 来源；拿不到就写“未配置”，不编温度 */
+    var wx = el.querySelector(".wx");
+    if (location.protocol === "file:" || typeof fetch !== "function"){
+      wx.innerHTML = '<span>天气：<b class="pending">未配置</b></span><span>数据时间：—</span><span>来源：—</span>';
+    } else {
+      wx.innerHTML = '<span>天气：<b class="pending">获取中</b></span><span>数据时间：—</span><span>来源：—</span>';
+      fetch("/api/weather?city=" + encodeURIComponent(g.city)).then(function(r){ return r.json(); }).then(function(j){
+        var r = j && j.result || {};
+        var f = (r.forecasts && r.forecasts[0]) || {};
+        var now = f.realtime || {};
+        wx.innerHTML = (j && j.status === "ok")
+          ? '<span>天气：<b>'+esc((now.weather||"—") + (now.temp!=null ? " "+now.temp+"℃" : ""))+'</b></span>'+
+            '<span>数据时间：'+esc(j.data_time||"—")+'</span><span>来源：'+esc(j.source||"—")+'</span>'
+          : '<span>天气：<b class="pending">'+esc((j&&j.status)||"待核")+'</b></span><span>数据时间：—</span><span>来源：'+esc((j&&j.source)||"—")+'</span>'+
+            (j&&j.note ? '<span class="pending">'+esc(j.note)+'</span>' : '');
+      }).catch(function(){
+        wx.innerHTML = '<span>天气：<b class="pending">待核</b></span><span>数据时间：—</span><span>来源：tencent-weather</span>';
+      });
+    }
+    /* 地图：容器默认无尺寸无底色；只有真正挂上 canvas 才加 .live，4s 内没 canvas 就撤掉并退文字 */
+    var mapEl = el.querySelector(".geo-map"), listEl = el.querySelector(".list");
+    var toText = function(){
+      mapEl.classList.remove("live"); mapEl.innerHTML = ""; mapEl.style.display = "none";
+      listEl.innerHTML = geoText(text).split("\n").map(function(l){ return "<div>"+esc(l)+"</div>"; }).join("");
+    };
+    var T = window.TMap;
+    if (!T || !T.Map || location.protocol === "file:") return toText();
+    try {
+      mapEl.classList.add("live");
+      var center = (g.places[0] || g.hub);
+      var map = new T.Map(mapEl, { center: new T.LatLng(center.lat, center.lng), zoom: 10, viewMode: "2D" });
+      if (T.MultiMarker) new T.MultiMarker({ map: map,
+        geometries: g.places.map(function(p, i){ return { id: "p"+i, position: new T.LatLng(p.lat, p.lng) }; }) });
+      listEl.innerHTML = g.places.map(function(p){
+        return "<div>"+esc(p.name)+"<small>GCJ-02 "+p.lat+", "+p.lng+"（待核）</small></div>";
+      }).join("") || "<div>在问题里带上地标名（如 镇北堡 / 西夏陵 / 沙湖）可定位到地图。</div>";
+    } catch (e) {
+      return toText();
+    }
+    setTimeout(function(){ if (!mapEl.querySelector("canvas")) toText(); }, 4000);
+  }
+
+  /* ---------- 健康探针（并行，共享一个截止时间：总耗时 ≈ budget，不是 N×budget） ---------- */
+  (function probes(){
+    var box = $("probes");
+    var budget = (CFG.probe_timeout_ms || 2500);
+    if ($("probeMs")) $("probeMs").textContent = String(budget/1000).replace(/\.0$/,"");
+    var deadline = performance.now() + budget;
+    var list = P.map(function(p){
+      var el = document.createElement("span");
+      el.className = "probe unk"; el.setAttribute("data-id", p.id);
+      el.innerHTML = '<i></i>'+esc(p.name)+' · 探测中';
+      box.appendChild(el);
+      return {p:p, el:el};
+    });
+    list.forEach(function(x){ probeOne(x.p, x.el, deadline); });
+  })();
+  function probeOne(p, el, deadline){
+    var unk = function(t){ el.className = "probe unk"; el.innerHTML = '<i></i>'+esc(p.name)+' · '+esc(t); };
+    if (!p.health || typeof fetch !== "function" || location.protocol === "file:") return unk("未知");
+    var remain = (deadline || (performance.now() + 2500)) - performance.now();
+    if (remain <= 0) return unk("未知（超时）");
+    var ctl = new AbortController();
+    var to = setTimeout(function(){ ctl.abort(); }, remain);
+    fetch(p.health, {mode:"cors", signal:ctl.signal}).then(function(r){
+      clearTimeout(to);
+      var on = r.ok;                       /* 只有 HTTP 2xx 才写“在线”；其余一律异常/未知 */
+      el.className = "probe " + (on?"on":"off");
+      el.innerHTML = '<i></i>'+esc(p.name)+' · '+(on?"在线":"异常 "+r.status);
+    }).catch(function(){
+      clearTimeout(to);
+      unk("未知（未连）");
+    });
+  }
+
+  /* 暴露给自检脚本（tools/test_hub_route.js）：路由、演示问答、地图文字降级都是纯函数，不依赖 DOM */
+  window.__HUB = { route: route, byName: byName, byId: byId, demoAnswer: demoAnswer, projects: P,
+                   resolveTarget: resolveTarget, geoText: geoText, haversine: haversine, config: CFG, probeOne: probeOne };
+
+  ask.focus();
+})();
+</script>
+</body>
+</html>
