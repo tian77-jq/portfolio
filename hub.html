@@ -550,6 +550,13 @@ footer a:hover{color:var(--text-2)}
     });
   }
 
+  /* 网关基址：同源走相对路径；页面由别的静态服务器托管时直连注册表登记的端口（网关已开 CORS） */
+  function hubBase(){
+    var gp = CFG.port ? String(CFG.port) : "";
+    if (gp && String(location.port||"") !== gp) return location.protocol + "//" + location.hostname + ":" + gp;
+    return "";
+  }
+
   /* 真后端优先：POST /api/chat；失败则回退演示数据（明确标注）。
      回包字段名 answer / route / tool / latency_ms / evidence 是契约，不随前端改。 */
   function callBackend(p, text){
@@ -557,10 +564,7 @@ footer a:hover{color:var(--text-2)}
       if (typeof fetch !== "function" || location.protocol === "file:") {
         return reject(new Error("file:// 无后端"));
       }
-      /* 页面若由别的静态服务器托管，则直连注册表里登记的网关端口（网关已开 CORS）；同源则走相对路径 */
-      var base = "";
-      var gp = CFG.port ? String(CFG.port) : "";
-      if (gp && String(location.port||"") !== gp) base = location.protocol + "//" + location.hostname + ":" + gp;
+      var base = hubBase();
       var ctl = new AbortController();
       var to = setTimeout(function(){ ctl.abort(); }, 60000);
       fetch(base + "/api/chat", {
@@ -717,20 +721,25 @@ footer a:hover{color:var(--text-2)}
     list.forEach(function(x){ probeOne(x.p, x.el, deadline); });
   })();
   function probeOne(p, el, deadline){
+    /* 诚实探针：问网关「这个项目的 adapter 是否已配置可启动」，而不是探测各项目自带的 A2A 端口
+       （网关实际走 MCP stdio，那些端口没监听；拿它判「离线」是假信号）。 */
     var unk = function(t){ el.className = "probe unk"; el.innerHTML = '<i></i>'+esc(p.name)+' · '+esc(t); };
-    if (!p.health || typeof fetch !== "function" || location.protocol === "file:") return unk("未知");
+    if (typeof fetch !== "function" || location.protocol === "file:") return unk("未知");
     var remain = (deadline || (performance.now() + 2500)) - performance.now();
     if (remain <= 0) return unk("未知（超时）");
     var ctl = new AbortController();
     var to = setTimeout(function(){ ctl.abort(); }, remain);
-    fetch(p.health, {mode:"cors", signal:ctl.signal}).then(function(r){
+    fetch(hubBase() + "/api/probe?project=" + encodeURIComponent(p.id), {signal:ctl.signal}).then(function(r){
       clearTimeout(to);
-      var on = r.ok;                       /* 只有 HTTP 2xx 才写“在线”；其余一律异常/未知 */
+      if (!r.ok) throw new Error("HTTP "+r.status);
+      return r.json();
+    }).then(function(j){
+      var on = !!j.ok;
       el.className = "probe " + (on?"on":"off");
-      el.innerHTML = '<i></i>'+esc(p.name)+' · '+(on?"在线":"异常 "+r.status);
+      el.innerHTML = '<i></i>'+esc(p.name)+' · '+esc(j.state || (on?"可调用":"缺失"));
     }).catch(function(){
       clearTimeout(to);
-      unk("未知（未连）");
+      unk("未知（网关未连）");
     });
   }
 

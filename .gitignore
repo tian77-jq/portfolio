@@ -15,3 +15,6 @@ node_modules/
 *.key
 *.pem
 id_rsa*
+
+# 本地凭据
+.token

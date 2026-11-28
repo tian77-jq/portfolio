@@ -123,7 +123,9 @@ RULES: dict[str, list[tuple[str, str, Any]]] = {
         (r"网关|放行|gateway", "researchos.gateway_invoke",
          lambda m, s: {"task": "medical_internal_reasoning", "classification": "TEAM_INTERNAL", "prompt": m[:200],
                        "local_provider": True}),
-        (r".*", "researchos.search_evidence", lambda m, s: {"domain": "literature"}),
+        # search_evidence 的语义是「查证据类型注册表」，不是全文检索；
+        # domain 只能取注册表里的合法值，消息里认不出就传空（返回覆盖表），不伪造 'literature'。
+        (r".*", "researchos.search_evidence", lambda m, s: _researchos_domain_args(m)),
     ],
     "helan": [
         (r"改|换|替换|增加|去掉|修订", "helan.revise_plan", lambda m, s: {"session_id": s, "message": m}),
@@ -132,6 +134,22 @@ RULES: dict[str, list[tuple[str, str, Any]]] = {
         (r".*", "helan.ask_culture", lambda m, s: {"message": m}),
     ],
 }
+
+
+_RESEARCHOS_DOMAINS = {
+    "cement_industry": re.compile(r"水泥|建材|砼|工业"),
+    "mathematical_modeling": re.compile(r"数学|建模|数模|优化模型"),
+    "medical_vision": re.compile(r"医疗|影像|CT|病灶|医学"),
+}
+
+
+def _researchos_domain_args(message: str) -> dict[str, Any]:
+    """projectos.search_evidence 只接受注册表内的 domain；认不出就传空，返回覆盖表。
+    绝不把不存在的 'literature' 塞进去（那会触发 UNKNOWN_DOMAIN）。"""
+    for domain, pat in _RESEARCHOS_DOMAINS.items():
+        if pat.search(message or ""):
+            return {"domain": domain}
+    return {}
 
 
 def _cement_args(message: str, session_id: str) -> dict[str, Any]:
@@ -364,6 +382,11 @@ def summarize(tool: str, data: Any) -> tuple[str, str]:
     if "task_reused" in d: notes.append("task_reused=%s" % d.get("task_reused"))
     if d.get("note"): notes.append("note=%s" % _short(d.get("note"), 160))
     if "evidence_types" in d and isinstance(d["evidence_types"], list): notes.append("evidence_types=%s" % _short(d["evidence_types"], 120))
+    # ResearchOS search_evidence：不传 domain 时返回的是覆盖表，不是检索结果
+    if "domains" in d and isinstance(d["domains"], list):
+        notes.append("可用域=%s" % _short(d["domains"], 160))
+    if "coverage" in d and isinstance(d["coverage"], dict):
+        notes.append("覆盖表=%d 个域" % len(d["coverage"]))
     if "canonical" in d: notes.append("canonical=%s allowed=%s" % (d.get("canonical"), d.get("allowed")))
     if "context" in d and isinstance(d["context"], dict) and isinstance(d["context"].get("facts"), dict):
         notes.append("facts=%d 个字段" % len(d["context"]["facts"]))
@@ -388,6 +411,9 @@ def summarize(tool: str, data: Any) -> tuple[str, str]:
         answer += "\n\n注：project_type / cement_usage 为网关默认值（消息里未给出），purchase_city / 面积从消息解析；请业务人员确认。"
     if tool == "researchos.gate_check":
         answer += "\n\ntest_evidence 未由宿主提供时 gate_check 如实返回未验证，这不是假通过。"
+    if tool == "researchos.search_evidence" and isinstance(d.get("coverage"), dict):
+        answer += ("\n\n说明：search_evidence 的语义是「查证据类型注册表」，返回每个域允许的证据类型，"
+                   "不是全文文献检索。这句话里没识别出具体域，所以返回全量覆盖表。")
     evidence = "adapter=true demo=false tool=%s keys=%s" % (tool, ",".join(keys) or "—")
     return answer, evidence
 
@@ -438,6 +464,25 @@ def handle_chat(body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
                  "evidence": evidence, "data": r["data"]}
 
 
+def probe_project(project_id: str, target: dict[str, Any]) -> dict[str, Any]:
+    """诚实探针：不假装项目「在线」，只回答「网关是否已配置可启动的 adapter」。
+    判定 = 已登记启动配置 + python 存在 + 入口（script 或 module 所在目录）存在。
+    真正能否跑通要在 /api/chat 里才见分晓，这里不做假阳性。"""
+    ad = ADAPTERS.get(project_id)
+    if not ad:
+        return {"ok": False, "state": "未登记", "detail": "网关没有该项目的 adapter 启动配置"}
+    python = ad.get("python")
+    if os.path.isabs(python) and not Path(python).is_file():
+        return {"ok": False, "state": "缺失", "detail": "python 不存在: %s" % python}
+    script = ad.get("script")
+    if script and not Path(script).is_file():
+        return {"ok": False, "state": "缺失", "detail": "入口脚本不存在: %s" % script}
+    cwd = ad.get("cwd")
+    if cwd and not Path(cwd).is_dir():
+        return {"ok": False, "state": "缺失", "detail": "工作目录不存在: %s" % cwd}
+    return {"ok": True, "state": "可调用", "detail": "adapter 已登记且入口存在（MCP stdio）"}
+
+
 # ---------------------------------------------------------------- 天气（服务端 key，仅环境变量；前端零 key）
 def handle_weather(city: str) -> dict[str, Any]:
     key = os.environ.get("TMAP_KEY")
@@ -478,8 +523,10 @@ class Handler(BaseHTTPRequestHandler):
         self._json(204, {})
 
     def _static(self, rel: str):
-        """静态托管：只放行 hub.html、顶层 *.html（产品页）和 data/*；server/ tools/ 等源码目录不对外。禁止越出目录。"""
-        allowed = rel == "hub.html" or rel.startswith("data/") or (rel.endswith(".html") and "/" not in rel)
+        """静态托管：放行 hub.html、顶层 *.html（产品页）、data/* 与 assets/*（样式与图片）；
+        server/ tools/ 等源码目录不对外。禁止越出目录。"""
+        allowed = (rel == "hub.html" or rel.startswith("data/") or rel.startswith("assets/")
+                   or (rel.endswith(".html") and "/" not in rel))
         if not allowed:
             return self._json(404, {"error": {"code": "NOT_FOUND", "path": rel}})
         base = ROOT.resolve()
@@ -490,8 +537,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(404, {"error": {"code": "NOT_FOUND", "path": rel}})
         ctype = {".html": "text/html; charset=utf-8", ".js": "application/javascript; charset=utf-8",
                  ".json": "application/json; charset=utf-8", ".css": "text/css; charset=utf-8",
-                 ".md": "text/markdown; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml"}.get(target.suffix.lower(),
-                                                                                                        "application/octet-stream")
+                 ".md": "text/markdown; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml",
+                 ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp",
+                 ".ico": "image/x-icon", ".woff2": "font/woff2"}.get(target.suffix.lower(),
+                                                                       "application/octet-stream")
         raw = target.read_bytes()
         self.send_response(200)
         self.send_header("Content-Type", ctype)
@@ -511,6 +560,14 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/weather":
             q = urllib.parse.parse_qs(u.query)
             return self._json(200, handle_weather((q.get("city") or ["银川"])[0]))
+        if u.path == "/api/probe":
+            q = urllib.parse.parse_qs(u.query)
+            pid = (q.get("project") or [""])[0]
+            reg = load_registry()
+            target = next((p for p in reg.get("projects") or [] if p.get("id") == pid), None)
+            if not target:
+                return self._json(404, {"error": {"code": "UNKNOWN_PROJECT", "project": pid}})
+            return self._json(200, {"project": pid, **probe_project(pid, target)})
         if not u.path.startswith("/api/"):
             return self._static(urllib.parse.unquote(u.path).lstrip("/"))
         return self._json(404, {"error": {"code": "NOT_FOUND", "path": u.path}})

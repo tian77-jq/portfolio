@@ -68,6 +68,44 @@ docker compose down        # 停止
 
 `miniserve.py` 对齐了原 nginx 配置的行为：关目录列表、HTML 不缓存、静态资源 7 天缓存、未知路径 404。
 
+## 工作台的真实后端（`/api/chat`）
+
+首页的静态展示不需要后端。**只有工作台 `hub.html` 里 `@项目名` 的对话需要**：它要真调四个项目的 adapter。
+
+四份代码不在一起，所以真实对话只能在**本机**跑——`server/hub_server.py` 用 MCP stdio 拉起各项目自己的 venv：
+
+| 项目 | 入口 | 需要的本机路径 |
+|---|---|---|
+| 贺兰有灵 | `D:\SilverCup-Agent\mcp-adapter\server.py` | `D:\SilverCup-Agent\.venv` |
+| 衡鉴 | `python -m finrisk.mcp_server` | `D:\Financial Agent\dev\finrisk\.venv` |
+| 砼智销 | `D:\Cement-SalesAgent\mcp\server.py` | `D:\Cement-SalesAgent\.venv` |
+| ResearchOS | `py -3.12 -m researchos.mcp_server` | `D:\AI-Knowledge-Base2` |
+
+启动（Windows 一键）：
+
+```bat
+start_hub.bat
+```
+
+或手动：
+
+```bash
+python server/hub_server.py --port 8250
+# 打开 http://127.0.0.1:8250/hub.html
+```
+
+**为什么线上 GitHub Pages 不能直接对话**：页面是 HTTPS 静态托管，浏览器不允许它访问你本机的 `127.0.0.1:8250`；而且四个 adapter 依赖本机各项目的 venv，云端没有这些进程。所以线上版在无后端时**回退演示数据并明确标注**，这是设计行为，不是故障。要在公网真跑，需要把网关和四个项目一起部署到有这些依赖的机器上（或做内网穿透），仅靠静态托管做不到。
+
+接口与诚实约定：
+
+| 端点 | 用途 |
+|---|---|
+| `GET /api/probe?project=<id>` | 诚实探针：只回答「adapter 是否已登记且入口存在」，不假装项目在线 |
+| `POST /api/chat` | `{project, message, protocol}` → `{answer, route, tool, latency_ms, evidence}` |
+| `GET /api/weather?city=` | 服务端持 key；未配置时返回 `status=未配置`，不编造天气 |
+
+`evidence` 里的 `adapter=true demo=false` 表示这一次是真实调用；`demo=true` 或 503 `ADAPTER_UNAVAILABLE` 表示没调通，前端据此回退并标注。
+
 ## 重新生成数据
 
 站点上的数字不是手写的。给定一个评测中心目录，脚本会重新编译：
